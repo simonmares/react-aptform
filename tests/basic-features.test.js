@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { FormValues } from '../src/index';
 
@@ -121,13 +121,11 @@ test('inputs can be dynamic', () => {
     return null;
   });
 
-  const wrapper = shallow(
+  const wrapper = mount(
     <FormValues inputsAreDynamic {...defaultProps} inputs={inputsConfig} render={renderMock} />
   );
 
-  const inputsConfigNoEmail = { ...inputsConfig };
-  delete inputsConfigNoEmail.password;
-
+  const inputsConfigNoEmail = { ...inputsConfig, password: undefined };
   const renderMock2 = jest.fn(({ inputs }) => {
     const { email, password } = inputs;
     expect(email).toBeDefined();

@@ -291,7 +291,6 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     const shouldReconfigure =
       inputsAreDynamic && !objutils.shallowEquals(nextProps.inputs, this.props.inputs);
     if (shouldReconfigure) {
-      console.log('shouldReconfigure');
       const initialValues = this.getAllFormValues();
       this.resetFormState(nextProps, initialValues);
     }
