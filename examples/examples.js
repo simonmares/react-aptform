@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { storiesOf, action } from '@kadira/storybook';
 
-import { FormStore, FormValues, ConfigureForms } from '../index';
+import { FormStore, FormValues, ConfigureForms } from '../src/index';
 import type { InputState } from '../apt-form-flow.d';
 import { isEmail } from '../validators';
 

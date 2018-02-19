@@ -4,7 +4,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
 
-import { FormValues } from '../index';
+import { FormValues } from '../src/index';
 import { defaultProps } from './helpers';
 
 jest.useFakeTimers();

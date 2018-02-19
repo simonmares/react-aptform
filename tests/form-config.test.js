@@ -3,7 +3,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import { FormValues, ConfigureForms } from '../index';
+import { FormValues, ConfigureForms } from '../src/index';
 import { defaultProps } from './helpers';
 
 import type { FormConfig } from '../apt-form-flow.d';

@@ -4,7 +4,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import sinon from 'sinon';
 
-import { FormValues, FormStore } from '../index';
+import { FormValues, FormStore } from '../src/index';
 import { defaultProps } from './helpers';
 
 describe('warnings', () => {
