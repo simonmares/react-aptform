@@ -6,7 +6,7 @@ import { shallow, mount } from 'enzyme';
 import { FormValues, ConfigureForms } from '../src/index';
 import { defaultProps } from './helpers';
 
-import type { FormConfig } from '../apt-form-flow.d';
+import type { FormConfig } from '../src/apt-form-flow.d';
 
 test('FormValues defaults to config from context if provided', () => {
   const globalConfig: FormConfig = {

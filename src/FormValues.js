@@ -215,7 +215,8 @@ const isObject = (key, value) => value instanceof Object;
 
 export class FormValues extends React.Component<LocalProps, LocalState> {
   static defaultProps: *;
-  typingTimerId: ?number;
+
+  typingTimerId: *;
   props: LocalProps;
   state: LocalState;
 
@@ -287,7 +288,10 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
 
   componentWillReceiveProps(nextProps: LocalProps) {
     const { inputsAreDynamic } = this.props;
-    if (inputsAreDynamic && !objutils.shallowEquals(nextProps.inputs, this.props.inputs)) {
+    const shouldReconfigure =
+      inputsAreDynamic && !objutils.shallowEquals(nextProps.inputs, this.props.inputs);
+    if (shouldReconfigure) {
+      console.log('shouldReconfigure');
       const initialValues = this.getAllFormValues();
       this.resetFormState(nextProps, initialValues);
     }
@@ -333,7 +337,8 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
 
     const onOk = () => {
       this.setState({ submitting: false });
-      this.resetFormState();
+      // NoteReview: what values it should be reseted => new test
+      this.resetFormState(this.props, this.props.initialValues);
     };
 
     const onErr = errs => {
@@ -503,8 +508,10 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     // value key.
     // First it tries to find it in its props, then in context (from ConfigureForms) and
     // finally in defaultConfig. This is because using ConfigureForms is optional.
-    const propConfig: FormConfig = this.props.config || {};
-    const contextConfig: FormConfig = this.context.aptFormConfig || {};
+
+    // NoteReview
+    const propConfig: FormConfig = this.props.config || defaultConfig;
+    const contextConfig: FormConfig = this.context.aptFormConfig || defaultConfig;
     return nonNilOrDefault(
       propConfig[key],
       nonNilOrDefault(contextConfig[key], defaultConfig[key])
@@ -739,7 +746,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     return inputState;
   }
 
-  resetFormState(props: * = this.props, initialValues: * = this.props.initialValues) {
+  resetFormState(props: LocalProps, initialValues) {
     this.clearAllTimers();
     const initialState = this.getInitialState(props, initialValues);
     this.setFormState(initialState);

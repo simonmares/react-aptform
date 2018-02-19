@@ -180,7 +180,7 @@ describe('validates props on development', () => {
       // Using it as a function should resolve with TypeError
       expect(() => {
         shallow(<FormValues {...invalidProps} />);
-      }).toThrow(expect.stringMatching(/render is not a function/));
+      }).toThrow();
       // Using missing prop is logged to console
       expect(console.error).toBeCalledWith(
         expect.stringMatching(/The prop `render` is marked as required in `FormValues`/)
@@ -192,7 +192,7 @@ describe('validates props on development', () => {
       // Using it as an object should resolve with TypeError
       expect(() => {
         shallow(<FormValues {...invalidProps} />);
-      }).toThrow(expect.stringMatching(/TypeError: Cannot convert undefined or null to object/));
+      }).toThrow();
       // Using missing prop is logged to console
       expect(console.error).toBeCalledWith(
         expect.stringMatching(/The prop `inputs` is marked as required in `FormValues`/)

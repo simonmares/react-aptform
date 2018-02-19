@@ -1,4 +1,4 @@
-import * as unit from './validators';
+import * as unit from '../src/validators';
 
 test('maxLength(0)', () => {
   const validate = unit.maxLength(0);

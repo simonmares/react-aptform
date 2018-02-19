@@ -6,8 +6,8 @@ import * as React from 'react';
 import { storiesOf, action } from '@kadira/storybook';
 
 import { FormStore, FormValues, ConfigureForms } from '../src/index';
-import type { InputState } from '../apt-form-flow.d';
-import { isEmail } from '../validators';
+import type { InputState } from '../src/apt-form-flow.d';
+import { isEmail } from '../src/validators';
 
 const yesNo = bool => <span>{bool ? 'TRUE' : 'NO'}</span>;
 const yesNoUndef = maybeBool => {
