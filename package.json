@@ -3,12 +3,19 @@
 	"version": "1.0.0",
 	"description": "Practical forms for react",
 	"main": "dest/index.js",
-	"author": "Šimon Mareš <simon.mares@protonmail.com>",
+	"author": {
+		"name": "Šimon Mareš",
+		"email": "simon.mares@protonmail.com"
+	},
 	"license": "MIT",
 	"scripts": {
 		"test": "jest",
 		"prepublish": "npm run build",
-		"build": "babel src -d dest --presets stage-3,env,react"
+		"build": "babel src -d dest --presets stage-3,env,react",
+		"format": "whys-scripts format",
+		"lint": "whys-scripts lint-react",
+		"flow": "flow",
+		"check": "npm run format && npm run lint && npm run flow && npm run test"
 	},
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
@@ -25,12 +32,23 @@
 		"sinon": "^4.3.0"
 	},
 	"babel": {
-		"presets": ["stage-3", "env", "react"]
+		"presets": [
+			"stage-3",
+			"env",
+			"react"
+		]
 	},
 	"jest": {
-		"setupFiles": ["<rootDir>/jest/env-setup.js"]
+		"setupFiles": [
+			"<rootDir>/jest/env-setup.js"
+		]
 	},
 	"dependencies": {
 		"validator": "^9.4.1"
+	},
+	"whys-scripts": {
+		"src": [
+			"src/**/*.js"
+		]
 	}
 }
