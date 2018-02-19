@@ -1,0 +1,26 @@
+{
+	"name": "react-aptform",
+	"version": "1.0.0",
+	"description": "Practical forms for react",
+	"main": "index.js",
+	"author": "Šimon Mareš <simon.mares@protonmail.com>",
+	"license": "MIT",
+	"scripts": {
+		"test": "jest"
+	},
+	"devDependencies": {
+		"babel-cli": "^6.26.0",
+		"babel-core": "^6.26.0",
+		"babel-jest": "^22.2.2",
+		"babel-preset-env": "^1.6.1",
+		"babel-preset-react": "^6.24.1",
+		"jest": "^22.3.0",
+		"react": "^16.2.0"
+	},
+	"babel": {
+		"presets": [
+			"env",
+			"react"
+		]
+	}
+}
