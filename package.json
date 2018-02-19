@@ -30,7 +30,8 @@
 		"jest": "^22.3.0",
 		"react": "^16.2.0",
 		"react-dom": "^16.2.0",
-		"sinon": "^4.3.0"
+		"sinon": "^4.3.0",
+		"whys-scripts": "^1.1.0"
 	},
 	"babel": {
 		"presets": [
