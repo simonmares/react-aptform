@@ -15,7 +15,9 @@
 		"format": "whys-scripts format",
 		"lint": "whys-scripts lint-react",
 		"flow": "flow",
-		"check": "npm run format && npm run lint && npm run flow && npm run test"
+		"check": "npm run format && npm run lint && npm run flow && npm run test",
+		"storybook": "start-storybook -p 6006",
+		"build-storybook": "build-storybook"
 	},
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
@@ -31,26 +33,22 @@
 		"react": "^16.2.0",
 		"react-dom": "^16.2.0",
 		"sinon": "^4.3.0",
-		"whys-scripts": "^1.1.0"
+		"whys-scripts": "^1.1.0",
+		"@storybook/react": "^3.3.13",
+		"@storybook/addon-actions": "^3.3.13",
+		"@storybook/addon-links": "^3.3.13",
+		"@storybook/addons": "^3.3.13"
 	},
 	"babel": {
-		"presets": [
-			"stage-3",
-			"env",
-			"react"
-		]
+		"presets": ["stage-3", "env", "react"]
 	},
 	"jest": {
-		"setupFiles": [
-			"<rootDir>/jest/env-setup.js"
-		]
+		"setupFiles": ["<rootDir>/jest/env-setup.js"]
 	},
 	"dependencies": {
 		"validator": "^9.4.1"
 	},
 	"whys-scripts": {
-		"src": [
-			"src/**/*.js"
-		]
+		"src": ["src/**/*.js"]
 	}
 }
