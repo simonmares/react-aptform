@@ -3,7 +3,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 import * as React from 'react';
-import { storiesOf, action } from '@kadira/storybook';
+import { storiesOf, action } from '@storybook/react';
 
 import { FormStore, FormValues, ConfigureForms } from '../src/index';
 import type { InputState } from '../src/apt-form-flow.d';
@@ -38,7 +38,7 @@ const CustomInput = ({ formId, ...passProps }) => {
 };
 
 type DebugStateInputP = {|
-  inputState: InputState,
+  inputState: InputState<*>,
 
   // input props
   ...Object,
@@ -81,7 +81,7 @@ const BasicExample = () => (
   <div>
     <FormValues
       config={{
-        typingTimeout: 500,
+        typeTimeout: 500,
       }}
       initialValues={{
         name: 'Timo',
@@ -101,7 +101,6 @@ const BasicExample = () => (
           <form onBlur={form.onBlur} onFocus={form.onFocus}>
             <div>hasChanged(): {yesNo(form.hasChanged())}</div>
             <div>isValid(): {yesNo(form.isValid())}</div>
-
             <DebugStateInput
               type="text"
               name={name.name}
@@ -133,12 +132,12 @@ const BasicExample = () => (
   </div>
 );
 
-const isEmailNaive = value => value.match('[A-Z]+@[A-Z]+.[A-Z]+');
+const isEmailNaive = (value) => !!value.match('[A-Z]+@[A-Z]+.[A-Z]+');
 const WithValidations = () => (
   <div>
     <FormValues
       config={{
-        typingTimeout: 500,
+        typeTimeout: 500,
       }}
       initialValues={{ emailInitial: 'not@valid' }}
       inputs={{
@@ -199,7 +198,7 @@ const WithLotInputs = () => {
     <div>
       <FormValues
         config={{
-          typingTimeout: 500,
+          typeTimeout: 500,
         }}
         onSubmit={action('onSubmit')}
         inputs={generateALOTInputs()}
@@ -248,6 +247,7 @@ const WithSyncToStore = () => {
       action('loginForm')(loginForm);
       action('signupForm')(signupForm);
     };
+
     return (
       <div>
         <strong>{signupFormId}</strong>
@@ -296,7 +296,7 @@ const WithSyncToStore = () => {
 const WithAllInputTypes = () => (
   <FormValues
     config={{
-      typingTimeout: 500,
+      typeTimeout: 500,
     }}
     initialValues={{
       name: 'John Villa',

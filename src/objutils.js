@@ -34,7 +34,7 @@ export function objValues(obj: *) {
   return keys.map(k => obj[k]);
 }
 
-export function filterObj(obj: *, filterFunc: *) {
+export function filterObj<T: Object>(obj: T, filterFunc: *): $Shape<T> {
   const filteredObj = {};
   for (const key of Object.keys(obj)) {
     const value = obj[key];

@@ -21,10 +21,11 @@ export type PassProps = {
   required: boolean,
 };
 
-export type InputState = {|
-  name: string,
+export type InputState<TInputNames> = {
+  name: TInputNames,
   onChange: EventHandler,
   value: InputValue,
+  required: boolean,
 
   // if input config has provided 'validations', all must have pass for the current value
   valid: ValidationState,
@@ -63,7 +64,7 @@ export type InputState = {|
   // returns true iff had initial value and current value differs from the inital value
   hasChanged: () => boolean,
   getPassProps: () => PassProps,
-|};
+};
 
 export type FormState = {|
   isValid(): boolean,

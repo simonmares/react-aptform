@@ -4,8 +4,6 @@ import React from 'react';
 
 export const defaultProps = {
   inputs: {},
-  onSubmit: () => ({
-    then: () => {},
-  }),
+  onSubmit: () => {},
   render: jest.fn(() => <div />),
 };

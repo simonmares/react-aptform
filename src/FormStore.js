@@ -7,7 +7,7 @@ import * as objutils from './objutils';
 
 import type { InputState, InputValue } from './apt-form-flow.d';
 
-type InputStatesMap = { [string]: InputState };
+type InputStatesMap = { [string]: InputState<string> };
 type FormDataMap = { [string]: InputValue };
 
 type getAllFormsT = () => { [string]: FormDataMap };

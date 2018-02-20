@@ -5,10 +5,10 @@ import PropTypes from 'prop-types';
 
 import type { FormConfig } from './apt-form-flow.d';
 
-type LocalProps = {|
+type LocalProps = {
   ...FormConfig,
   children: any,
-|};
+};
 
 class ConfigureForms extends React.Component<LocalProps, void> {
   static defaultProps: *;

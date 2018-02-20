@@ -14,12 +14,14 @@ import type {
 
 import * as objutils from './objutils';
 
+type TInputNames = string;
+
 type InputConfig<TInputNames> = {|
-  validations?: { [key: string]: validationFunc<TInputNames> },
+  validations?: { [key: TInputNames]: validationFunc<TInputNames> },
   required?: boolean,
   // => getError
-  errorText?: (input: InputState) => ?string,
-  getErrorFromMap?: (input: InputState) => { [string]: boolean },
+  errorText?: (input: InputState<TInputNames>) => ?string,
+  getErrorFromMap?: (input: InputState<TInputNames>) => { [string]: boolean },
 |};
 
 // Stub type for need of this file
@@ -30,14 +32,12 @@ type InputEvent = {
 
 type NotifyFn = Function;
 type EventHandler = (e: Event) => void;
+type AnyInputValue = any;
 
 type InputMap<TKeys, TValues> = { [TKeys]: TValues };
-type FormValuesMap<TKeys> = InputMap<TKeys, string>;
+type FormValuesMap<TKeys> = InputMap<TKeys, AnyInputValue>;
 
-type validationFunc<TInputNames> = (
-  value: InputValue,
-  formValues: FormValuesMap<TInputNames>
-) => boolean;
+type validationFunc<TInputNames> = (value: any, formValues: FormValuesMap<TInputNames>) => boolean;
 
 type FormPassProps = {|
   onFocus: EventHandler,
@@ -45,15 +45,15 @@ type FormPassProps = {|
   onSubmit: NotifyFn,
 |};
 
-export type RenderProps<TInputNames> = {|
-  inputs: InputMap<TInputNames, InputState>,
+type RenderProps<TInputNames> = {|
+  inputs: InputMap<TInputNames, InputState<TInputNames>>,
   form: {|
     ...FormState,
     ...FormPassProps,
     submitting: boolean,
-    changeInput: (name: TInputNames, value: InputValue) => void,
-    blurInput: (name: TInputNames) => void,
-    focusInput: (name: TInputNames) => void,
+    changeInput: (name: string, value: InputValue) => void,
+    blurInput: (name: string) => void,
+    focusInput: (name: string) => void,
     getPassProps: () => FormPassProps,
     // NOTE_REVIEW: onChange should be per input, because controlled inputs
     // must have onChange
@@ -62,20 +62,20 @@ export type RenderProps<TInputNames> = {|
   |},
 |};
 
-type LocalState = {|
-  inputStates: { [TInputNames]: InputState },
+type LocalState<TInputNames> = {|
+  inputStates: { [TInputNames]: InputState<TInputNames> },
   submitting: boolean,
 |};
 
-type LocalProps = {|
-  id: string,
+type LocalProps<TInputNames> = {
+  id?: string,
   syncToStore?: boolean,
   inputsAreDynamic?: boolean,
 
   // config override prop object?
-  config: $Shape<FormConfig>,
+  config: FormConfig,
 
-  inputs: { [TInputNames]: InputConfig<TInputNames> },
+  inputs: { [TInputNames]: InputConfig<TInputNames> | null },
   // Not required, fallback through defaultProps
   initialValues?: FormValuesMap<TInputNames>,
 
@@ -83,13 +83,10 @@ type LocalProps = {|
   render: (props: RenderProps<TInputNames>) => React.Element<any>,
 
   // NOTE_REVIEW: type of promise
-  onSubmit?: (values: FormValuesMap<TInputNames>) => Promise<*>,
+  onSubmit?: (values: FormValuesMap<TInputNames>) => void,
   // NOTE_REVIEW: usefulness?
   onChange?: (name: string, value: any) => void,
-|};
-
-// How to get the typeof from props.inputs
-type TInputNames = string;
+};
 
 const NO_ERROR_TEXT = '';
 const DEFAULT_VALUE = '';
@@ -177,12 +174,13 @@ const inputValueMethods = {
   },
 };
 
-function getInputErrorText(
-  inputState,
+function getInputErrorText<TInputNames>(
+  inputState: InputState<TInputNames>,
   inputConfig,
   opts: { failFast: boolean, defaultText: string }
 ): string {
   if (inputConfig.errorText) {
+    // $FlowFixMe
     return inputConfig.errorText(inputState) || '';
   } else if (inputConfig.getErrorFromMap) {
     const errorsMap = inputConfig.getErrorFromMap(inputState);
@@ -213,12 +211,22 @@ const defaultConfig: FormConfig = {
 
 const isObject = (key, value) => value instanceof Object;
 
-export class FormValues extends React.Component<LocalProps, LocalState> {
-  static defaultProps: *;
+export class FormValues<TInputNames: string> extends React.Component<
+  LocalProps<TInputNames>,
+  LocalState<TInputNames>
+> {
+  static defaultProps = {
+    config: defaultConfig,
+  };
+
+  static contextTypes = {
+    registerForm: PropTypes.func,
+    aptFormConfig: PropTypes.object,
+  };
 
   typingTimerId: *;
-  props: LocalProps;
-  state: LocalState;
+  props: LocalProps<TInputNames>;
+  state: LocalState<TInputNames>;
 
   context: {
     aptFormConfig: $Shape<FormConfig>,
@@ -243,10 +251,10 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
   onFocusInput: *;
   onBlurInput: *;
 
-  syncForm: ({ [TInputNames]: InputState }) => void;
+  syncForm: ({ [TInputNames]: InputState<TInputNames> }) => void;
   unregisterForm: *;
 
-  constructor(props: LocalProps) {
+  constructor(props: LocalProps<TInputNames>) {
     super(props);
 
     // bind event handlers
@@ -286,7 +294,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     }
   }
 
-  componentWillReceiveProps(nextProps: LocalProps) {
+  componentWillReceiveProps(nextProps: LocalProps<TInputNames>) {
     const { inputsAreDynamic } = this.props;
     const shouldReconfigure =
       inputsAreDynamic && !objutils.shallowEquals(nextProps.inputs, this.props.inputs);
@@ -308,7 +316,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     }
   }
 
-  getInitialState(props: LocalProps, initialValues: ?FormValuesMap<TInputNames>) {
+  getInitialState(props: LocalProps<TInputNames>, initialValues: ?FormValuesMap<TInputNames>) {
     const validInputNames = Object.keys(objutils.filterObj(props.inputs, isObject));
     return {
       inputStates: this.createInputStateMap(validInputNames, initialValues),
@@ -428,7 +436,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     const target = e.target;
     const changedValue = getInputValue(target);
     if (changedValue !== undefined && changedValue !== null) {
-      const inputName = target.name;
+      const inputName = ((target.name: any): TInputNames);
       this.changeInputValue(inputName, changedValue);
     }
   }
@@ -445,7 +453,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     };
   }
 
-  getInputState(inputName: string): InputState {
+  getInputState(inputName: TInputNames): InputState<TInputNames> {
     // NOTE_REVIEW: when can be undefined for given inputName?
     const inputState = this.state.inputStates[inputName];
     if (inputState) {
@@ -456,7 +464,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     return this.createInputState({ name: inputName });
   }
 
-  getInputConfig(inputName: string): InputConfig<TInputNames> {
+  getInputConfig(inputName: TInputNames): InputConfig<TInputNames> {
     const config = this.props.inputs[inputName];
     if (!config) {
       if (IS_DEV) {
@@ -523,7 +531,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
   }
 
   // NOTE_REVIEW: should return promise? or be similar as native setState?
-  setFormState(state: $Shape<LocalState>, onDone: *) {
+  setFormState(state: $Shape<LocalState<TInputNames>>, onDone: *) {
     this.setState(state, onDone);
 
     if (this.props.syncToStore) {
@@ -531,7 +539,10 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     }
   }
 
-  setInputState(inputName: string, props: $Shape<InputState>): Promise<typeof undefined> {
+  setInputState(
+    inputName: TInputNames,
+    props: $Shape<InputState<TInputNames>>
+  ): Promise<typeof undefined> {
     const { inputStates } = this.state;
 
     const prevState = inputStates[inputName];
@@ -574,7 +585,10 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     }
   }
 
-  validateInput(input: InputState, failFast: boolean = false): [boolean, ValidationErrs] {
+  validateInput(
+    input: InputState<TInputNames>,
+    failFast: boolean = false
+  ): [boolean, ValidationErrs] {
     const inputConfig = this.getInputConfig(input.name);
     const validations = inputConfig && inputConfig.validations;
 
@@ -607,7 +621,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     return [isValid, valErrs];
   }
 
-  updateInputValidationState(inputName: string): Promise<*> {
+  updateInputValidationState(inputName: TInputNames): Promise<*> {
     const failFast = this.getFormConfigVal('failFast');
 
     const onValidated = () => {
@@ -690,16 +704,14 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     for (const inputName of inputNameList) {
       // RULE_INTIAL_VALUE_MUST_BE_STR
       const value = (initialValues && initialValues[inputName]) || '';
-      const props = { value, name: inputName };
+      const props: $Shape<InputState<TInputNames>> = { value, name: inputName };
       const inputValue = this.createInputState(props);
       inputStates[inputName] = inputValue;
     }
     return inputStates;
   }
 
-  updateInputState(fromProps: $Shape<InputState>) {}
-
-  createInputState(fromProps: $Shape<InputState>): InputState {
+  createInputState(fromProps: $Shape<InputState<TInputNames>>): InputState<TInputNames> {
     const initialValues = this.props.initialValues || {};
     const onFormChange = this.onChange;
     const inputName = fromProps.name;
@@ -708,7 +720,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     const required = inputConfig.required || false;
 
     const initial = initialValues[inputName];
-    const inputState: $Shape<InputState> = {
+    const inputState: $Shape<InputState<TInputNames>> = {
       name: fromProps.name,
 
       // nullable props
@@ -745,7 +757,7 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
     return inputState;
   }
 
-  resetFormState(props: LocalProps, initialValues) {
+  resetFormState(props: LocalProps<TInputNames>, initialValues) {
     this.clearAllTimers();
     const initialState = this.getInitialState(props, initialValues);
     this.setFormState(initialState);
@@ -774,13 +786,19 @@ export class FormValues extends React.Component<LocalProps, LocalState> {
 }
 
 if (IS_DEV) {
-  FormValues.prototype.validateProps = function(props: LocalProps) {
+  FormValues.prototype.validateProps = function(props: LocalProps<*>) {
     const submitOrSync = props.onSubmit || props.syncToStore;
     if (!submitOrSync) {
       warnUser('You either have to provide onSubmit prop or syncToStore.');
     }
     if (props.syncToStore && !props.id) {
       warnUser('You provided syncToStore but not id prop.');
+    }
+    if (!props.inputs) {
+      warnUser('Prop inputs is missing');
+    }
+    if (!props.render) {
+      warnUser('Prop render is missing');
     }
     if (props.children) {
       warnUser('FormValues does not accept children prop.');
@@ -790,17 +808,3 @@ if (IS_DEV) {
     }
   };
 }
-
-FormValues.propTypes = {
-  render: PropTypes.func.isRequired,
-  inputs: PropTypes.object.isRequired,
-};
-
-FormValues.defaultProps = {
-  config: {},
-};
-
-FormValues.contextTypes = {
-  registerForm: PropTypes.func,
-  aptFormConfig: PropTypes.object,
-};
