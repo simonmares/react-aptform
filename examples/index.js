@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { FormStore, FormValues, ConfigureForms } from '../src/index';
+import { FormStore, FormValues, ConfigureForm } from '../src/index';
 import type { InputState } from '../src/apt-form-flow.d';
 import { isEmail } from '../src/validators';
 
@@ -421,29 +421,25 @@ const WithConfigureForms = ({ action }: *) => () => {
         <ul>
           <li>no config => should show msgInvalid from ConfigureForms prop</li>
         </ul>
-        <FormValues
-          onSubmit={action('onSubmit')}
-          inputs={{ email: { validations: { isEmail } } }}
-          render={({ inputs, form }) => {
-            const { email } = inputs;
-            return (
-              <form {...form.getPassProps()}>
-                <DebugStateInput type="password" {...email.getPassProps()} inputState={email} />
-              </form>
-            );
-          }}
-        />
+        <ConfigureForm failFast typeTimeout={1500} msgInvalid={'Not valid (ConfigureForm)!'}>
+          <FormValues
+            onSubmit={action('onSubmit')}
+            inputs={{ email: { validations: { isEmail } } }}
+            render={({ inputs, form }) => {
+              const { email } = inputs;
+              return (
+                <form {...form.getPassProps()}>
+                  <DebugStateInput type="password" {...email.getPassProps()} inputState={email} />
+                </form>
+              );
+            }}
+          />
+        </ConfigureForm>
       </div>
     );
   };
 
-  return (
-    <div>
-      <ConfigureForms failFast typeTimeout={1500} msgInvalid={'Not valid (ConfigureForms)!'}>
-        {render()}
-      </ConfigureForms>
-    </div>
-  );
+  return <div>{render()}</div>;
 };
 
 const WithDynamicInputs = ({ action }: *) => () => {

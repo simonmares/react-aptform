@@ -1,1 +1,6 @@
 # Implementation
+
+## config prop as an object
+
+what: ...
+why: Deep objects as props are ugly, but 20 props are uglier. I aimed for DX. If some form is behaving unexpectly, I can check single prop config and what is passed in...

@@ -221,7 +221,6 @@ class FormValues<TInputNames: string> extends React.Component<
 
   static contextTypes = {
     registerForm: PropTypes.func,
-    aptFormConfig: PropTypes.object,
   };
 
   typingTimerId: *;
@@ -229,7 +228,6 @@ class FormValues<TInputNames: string> extends React.Component<
   state: LocalState<TInputNames>;
 
   context: {
-    aptFormConfig: $Shape<FormConfig>,
     registerForm?: Function,
   };
 
@@ -518,11 +516,7 @@ class FormValues<TInputNames: string> extends React.Component<
 
     // NoteReview
     const propConfig: FormConfig = this.props.config || defaultConfig;
-    const contextConfig: FormConfig = this.context.aptFormConfig || defaultConfig;
-    return nonNilOrDefault(
-      propConfig[key],
-      nonNilOrDefault(contextConfig[key], defaultConfig[key])
-    );
+    return nonNilOrDefault(propConfig[key], defaultConfig[key]);
   }
 
   getAllFormValues() {

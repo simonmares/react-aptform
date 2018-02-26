@@ -1,32 +1,33 @@
 // @flow
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { preconfigure } from '../src/index';
+import { preconfigure, FormValues, ConfigureForm } from '../src/index';
 
 import { defaultProps } from './helpers';
 
 import type { FormConfig } from '../src/apt-form-flow.d';
 
-test('....', () => {
-  const defaultConfig: FormConfig = {
+test('it fallbacks to all preconfigured values', () => {
+  // Desc: no config prop was passed, so it should fallback to all the values
+  // provided below.
+
+  const preconfig: FormConfig = {
     typeTimeout: 1234,
     failFast: true,
     msgInvalid: 'Test: Invalid input.',
   };
 
-  const FormValues = preconfigure(defaultConfig);
-  const renderMock = jest.fn(() => null);
+  const FormValuesConfigured = preconfigure(preconfig);
 
   let inst;
   mount(
-    <FormValues
+    <FormValuesConfigured
       componentRef={ref => {
         inst = ref;
       }}
       {...defaultProps}
-      render={renderMock}
     />
   );
 
@@ -37,91 +38,90 @@ test('....', () => {
   expect(inst.getFormConfigVal('typeTimeout')).toEqual(1234);
   expect(inst.getFormConfigVal('failFast')).toEqual(true);
   expect(inst.getFormConfigVal('msgInvalid')).toEqual('Test: Invalid input.');
-  expect(renderMock).toHaveBeenCalled();
 });
 
-// test('FormValues defaults to config from context if provided', () => {
-//   const globalConfig: FormConfig = {
-//     typeTimeout: 1234,
-//     failFast: true,
-//     msgInvalid: 'Test: Invalid input.',
-//   };
+test('FormValues fallbacks to default props', () => {
+  // Desc: no values were passed to preconfigure so it does do anything effectively (but
+  // does not break default props config either).
 
-//   const renderMock = jest.fn(() => null);
-//   const wrapper = shallow(<FormValues {...defaultProps} render={renderMock} />, {
-//     context: {
-//       aptFormConfig: globalConfig,
-//     },
-//   });
+  const FormValuesConfigured = preconfigure();
 
-//   const inst = wrapper.instance();
-//   expect(inst.getFormConfigVal('typeTimeout')).toEqual(1234);
-//   expect(inst.getFormConfigVal('failFast')).toEqual(true);
-//   expect(inst.getFormConfigVal('msgInvalid')).toEqual('Test: Invalid input.');
-//   expect(renderMock).toHaveBeenCalled();
-// });
+  let inst;
+  mount(
+    <FormValuesConfigured
+      componentRef={ref => {
+        inst = ref;
+      }}
+      {...defaultProps}
+    />
+  );
 
-// const defaultConfig = {
-//   typeTimeout: 650,
-//   failFast: false,
-//   msgInvalid: 'This input is invalid.',
-// };
+  if (!inst) {
+    throw new Error('Expected inst to be defined by componentRef.'); // for flow mostly
+  }
 
-// test('FormValues fallbacks to default props', () => {
-//   const renderMock = jest.fn(() => null);
-//   const wrapper = shallow(<FormValues {...defaultProps} render={renderMock} />);
-//   const inst = wrapper.instance();
-//   expect(inst.getFormConfigVal('typeTimeout')).toEqual(defaultConfig.typeTimeout);
-//   expect(inst.getFormConfigVal('failFast')).toEqual(defaultConfig.failFast);
-//   expect(inst.getFormConfigVal('msgInvalid')).toEqual(defaultConfig.msgInvalid);
-//   expect(renderMock).toHaveBeenCalled();
-// });
+  const defaultConfig = FormValues.defaultProps.config;
+  // Note: test what is default for test clarity
+  expect(defaultConfig).toEqual({
+    typeTimeout: 650,
+    failFast: false,
+    msgInvalid: 'This input is invalid.',
+  });
 
-// test('FormValues default props can be overriden by passing config prop', () => {
-//   const renderMock = jest.fn(() => null);
+  expect(inst.getFormConfigVal('typeTimeout')).toEqual(650);
+  expect(inst.getFormConfigVal('failFast')).toEqual(false);
+  expect(inst.getFormConfigVal('msgInvalid')).toEqual('This input is invalid.');
+});
 
-//   const wrapper = shallow(
-//     <FormValues {...defaultProps} render={renderMock} config={{ typeTimeout: 333 }} />
-//   );
-//   const inst = wrapper.instance();
-//   // Overriden
-//   // Its works for every keys in the same way, so we don't have to test all of them
-//   expect(inst.getFormConfigVal('typeTimeout')).toEqual(333);
-//   // Kept same
-//   expect(inst.getFormConfigVal('failFast')).toEqual(defaultConfig.failFast);
-//   expect(inst.getFormConfigVal('msgInvalid')).toEqual(defaultConfig.msgInvalid);
-//   expect(renderMock).toHaveBeenCalled();
-// });
+test('default props config can be overriden by passing config prop', () => {
+  const wrapper = mount(<FormValues {...defaultProps} config={{ typeTimeout: 333 }} />);
 
-// test('FormValues config prop has precedence over global config', () => {
-//   const renderMock = jest.fn(() => null);
+  const inst = wrapper.instance();
+  // const { config: finalConfig } = inst.props;
 
-//   const context = {
-//     aptFormConfig: {
-//       typeTimeout: 444,
-//     },
-//   };
+  // Note: works same for any key, so test just one:
+  expect(inst.getFormConfigVal('typeTimeout')).toEqual(333);
 
-//   const wrapper = shallow(
-//     <FormValues {...defaultProps} render={renderMock} config={{ typeTimeout: 555 }} />,
-//     { context }
-//   );
-//   const inst = wrapper.instance();
-//   expect(inst.getFormConfigVal('typeTimeout')).toEqual(555);
-// });
+  // these fields were not intacted:
+  const defaultConfig = FormValues.defaultProps.config;
+  expect(inst.getFormConfigVal('failFast')).toEqual(defaultConfig.failFast);
+  expect(inst.getFormConfigVal('msgInvalid')).toEqual(defaultConfig.msgInvalid);
+});
 
-// test('FormValues integreted with ConfigureForms', () => {
-//   const renderMock = jest.fn(() => null);
+test('FormValues config prop has precedence over global config', () => {
+  const FormValuesConfigured = preconfigure({ typeTimeout: 444 });
 
-//   const configureWrapper = mount(
-//     <ConfigureForms typeTimeout={666} failFast msgInvalid={'test (global config): Not valid.'}>
-//       <FormValues {...defaultProps} render={renderMock} />
-//     </ConfigureForms>
-//   );
-//   const wrapper = configureWrapper.children();
-//   const inst = wrapper.instance();
+  let inst;
+  mount(
+    <FormValuesConfigured
+      {...defaultProps}
+      componentRef={ref => {
+        inst = ref;
+      }}
+      config={{ typeTimeout: 555 }}
+    />
+  );
 
-//   expect(inst.getFormConfigVal('typeTimeout')).toEqual(666);
-//   expect(inst.getFormConfigVal('failFast')).toEqual(true);
-//   expect(inst.getFormConfigVal('msgInvalid')).toEqual('test (global config): Not valid.');
-// });
+  if (!inst) {
+    throw new Error('Expected inst to be defined by componentRef.'); // for flow mostly
+  }
+
+  expect(inst.getFormConfigVal('typeTimeout')).toEqual(555);
+});
+
+test('FormValues use with ConfigureForm', () => {
+  const configureWrapper = mount(
+    <ConfigureForm typeTimeout={666} failFast msgInvalid={'test (global config): Not valid.'}>
+      <FormValues {...defaultProps} config={{ typeTimeout: 1234 }} />
+    </ConfigureForm>
+  );
+
+  const wrapper = configureWrapper.children();
+  const inst = wrapper.instance();
+
+  // specific
+  expect(inst.getFormConfigVal('typeTimeout')).toEqual(1234);
+  // ...
+  expect(inst.getFormConfigVal('failFast')).toEqual(true);
+  expect(inst.getFormConfigVal('msgInvalid')).toEqual('test (global config): Not valid.');
+});
