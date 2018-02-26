@@ -14,7 +14,7 @@ import type {
 
 import * as objutils from './objutils';
 
-type TInputNames = string;
+// type TInputNames = string;
 
 type InputConfig<TInputNames> = {|
   validations?: { [key: TInputNames]: validationFunc<TInputNames> },
@@ -67,13 +67,13 @@ type LocalState<TInputNames> = {|
   submitting: boolean,
 |};
 
-type LocalProps<TInputNames> = {
+export type LocalProps<TInputNames> = {
   id?: string,
   syncToStore?: boolean,
   inputsAreDynamic?: boolean,
 
   // config override prop object?
-  config: FormConfig,
+  config?: FormConfig,
 
   inputs: { [TInputNames]: InputConfig<TInputNames> | null },
   // Not required, fallback through defaultProps
@@ -211,7 +211,7 @@ const defaultConfig: FormConfig = {
 
 const isObject = (key, value) => value instanceof Object;
 
-export class FormValues<TInputNames: string> extends React.Component<
+class FormValues<TInputNames: string> extends React.Component<
   LocalProps<TInputNames>,
   LocalState<TInputNames>
 > {
@@ -808,3 +808,5 @@ if (IS_DEV) {
     }
   };
 }
+
+export default FormValues;

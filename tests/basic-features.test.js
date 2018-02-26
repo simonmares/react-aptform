@@ -180,8 +180,8 @@ describe('validates props on development', () => {
         shallow(<FormValues {...invalidProps} />);
       }).toThrow();
       // Using missing prop is logged to console
-      expect(console.error).toBeCalledWith(
-        expect.stringMatching(/The prop `render` is marked as required in `FormValues`/)
+      expect(console.warn).toBeCalledWith(
+        expect.stringMatching(/Prop render is missing/)
       );
     }
     {
@@ -192,8 +192,8 @@ describe('validates props on development', () => {
         shallow(<FormValues {...invalidProps} />);
       }).toThrow();
       // Using missing prop is logged to console
-      expect(console.error).toBeCalledWith(
-        expect.stringMatching(/The prop `inputs` is marked as required in `FormValues`/)
+      expect(console.warn).toBeCalledWith(
+        expect.stringMatching(/Prop inputs is missing/)
       );
     }
   });
