@@ -1,3 +1,4 @@
 dest
 package-lock.json
 .todos.json
+storybook-static

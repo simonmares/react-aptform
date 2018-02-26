@@ -1,15 +1,13 @@
 // @flow
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import * as React from 'react';
-import { storiesOf, action } from '@storybook/react';
 
 import { FormStore, FormValues, ConfigureForms } from '../src/index';
 import type { InputState } from '../src/apt-form-flow.d';
 import { isEmail } from '../src/validators';
 
-const yesNo = bool => <span>{bool ? 'TRUE' : 'NO'}</span>;
+const isEmailNaive = value => !!value.match('[A-Z]+@[A-Z]+.[A-Z]+');
+const yesNo = bool => <span>{bool ? 'yes' : 'no'}</span>;
 const yesNoUndef = maybeBool => {
   if (maybeBool === undefined) {
     return <span>?</span>;
@@ -77,7 +75,7 @@ class DebugStateInput extends React.Component<DebugStateInputP> {
   }
 }
 
-const BasicExample = () => (
+const BasicExample = ({ action }: *) => () => (
   <div>
     <FormValues
       config={{
@@ -132,8 +130,7 @@ const BasicExample = () => (
   </div>
 );
 
-const isEmailNaive = (value) => !!value.match('[A-Z]+@[A-Z]+.[A-Z]+');
-const WithValidations = () => (
+const WithValidations = ({ action }: *) => () => (
   <div>
     <FormValues
       config={{
@@ -185,7 +182,7 @@ const WithValidations = () => (
   </div>
 );
 
-const WithLotInputs = () => {
+const WithLotInputs = ({ action }: *) => () => {
   const generateALOTInputs = () => {
     const inputs = {};
     // eslint-disable-next-line
@@ -233,7 +230,7 @@ const WithLotInputs = () => {
   );
 };
 
-const WithSyncToStore = () => {
+const WithSyncToStore = ({ action }: *) => () => {
   const render = ({ getAllForms, getForm }) => {
     const loginFormId = 'loginForm';
     const signupFormId = 'signupForm';
@@ -293,7 +290,7 @@ const WithSyncToStore = () => {
   return <FormStore render={render} />;
 };
 
-const WithAllInputTypes = () => (
+const WithAllInputTypes = ({ action }: *) => () => (
   <FormValues
     config={{
       typeTimeout: 500,
@@ -368,7 +365,7 @@ const WithAllInputTypes = () => (
   />
 );
 
-const WithConfigureForms = () => {
+const WithConfigureForms = ({ action }: *) => () => {
   const render = () => {
     return (
       <div>
@@ -449,7 +446,7 @@ const WithConfigureForms = () => {
   );
 };
 
-const WithDynamicInputs = () => {
+const WithDynamicInputs = ({ action }: *) => () => {
   class DynamicInputs extends React.Component<any, *> {
     onFormRender: *;
 
@@ -524,7 +521,7 @@ const WithDynamicInputs = () => {
   return <DynamicInputs />;
 };
 
-const GistDocsExample = () => (
+const GistDocsExample = ({ action }: *) => () => (
   <FormValues
     initialValues={{
       name: 'Eliana Rendón',
@@ -558,12 +555,13 @@ const GistDocsExample = () => (
   />
 );
 
-storiesOf('FormValues', module)
-  .add('Basic with debug', BasicExample)
-  .add('With validations', WithValidations)
-  .add('With 100 inputs', WithLotInputs)
-  .add('With sync to store', WithSyncToStore)
-  .add('With ConfigureForms config', WithConfigureForms)
-  .add('With dynamic inputs', WithDynamicInputs)
-  .add('Gist docs example', GistDocsExample)
-  .add('All supported input types', WithAllInputTypes);
+export {
+  BasicExample,
+  WithValidations,
+  WithLotInputs,
+  WithSyncToStore,
+  WithConfigureForms,
+  WithDynamicInputs,
+  GistDocsExample,
+  WithAllInputTypes,
+};
