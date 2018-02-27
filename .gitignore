@@ -2,3 +2,4 @@ dest
 package-lock.json
 .todos.json
 storybook-static
+yarn-error.log

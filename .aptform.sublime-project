@@ -3,7 +3,7 @@
 	[
 		{
 			"path": ".",
-			"folder_exclude_patterns": ["dest"]
+			"folder_exclude_patterns": ["dest", "storybook-static"]
 		}
 	]
 }

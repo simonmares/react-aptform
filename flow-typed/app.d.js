@@ -7,3 +7,4 @@ declare var describe: *;
 declare var beforeEach: *;
 declare var afterEach: *;
 declare var jest: *;
+declare var Intl: *;

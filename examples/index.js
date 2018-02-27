@@ -2,78 +2,12 @@
 
 import * as React from 'react';
 
-import { FormStore, FormValues, ConfigureForm } from '../src/index';
-import type { InputState } from '../src/apt-form-flow.d';
-import { isEmail } from '../src/validators';
+// project
+import { FormStore, FormValues, preconfigure } from '../src/index';
 
-const isEmailNaive = value => !!value.match('[A-Z]+@[A-Z]+.[A-Z]+');
-const yesNo = bool => <span>{bool ? 'yes' : 'no'}</span>;
-const yesNoUndef = maybeBool => {
-  if (maybeBool === undefined) {
-    return <span>?</span>;
-  }
-
-  return yesNo(maybeBool);
-};
-
-function TestCase({ title, desc, children }) {
-  return (
-    <div>
-      <h2>{title}</h2>
-      <p style={{ color: '#A9A9A9' }}>{desc}</p>
-      {children}
-    </div>
-  );
-}
-
-const CustomInput = ({ formId, ...passProps }) => {
-  const id = `${formId}${passProps.name}`;
-  return (
-    <div>
-      <label htmlFor={id}>{passProps.name}</label>: <input id={id} {...passProps} />
-    </div>
-  );
-};
-
-type DebugStateInputP = {|
-  inputState: InputState<*>,
-
-  // input props
-  ...Object,
-|};
-
-class DebugStateInput extends React.Component<DebugStateInputP> {
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.props.inputState !== nextProps.inputState;
-  }
-
-  render() {
-    const { inputState, ...passProps } = this.props;
-    return (
-      <div>
-        <div>
-          <strong>{passProps.name}</strong>
-        </div>
-        <div>.valid: {yesNoUndef(inputState.valid)}</div>
-
-        <div>.focused: {yesNo(inputState.focused)}</div>
-        <div>.touched: {yesNo(inputState.touched)}</div>
-        <div>.pristine: {yesNo(inputState.pristine)}</div>
-        <div>.changing: {yesNo(inputState.changing)}</div>
-
-        <div>.hasError(): {yesNo(inputState.hasError())}</div>
-        <div>.showError(): {yesNo(inputState.showError())}</div>
-        <div>.showSuccess(): {yesNo(inputState.showSuccess())}</div>
-        <div>.hasChanged(): {yesNo(inputState.hasChanged())}</div>
-
-        <div>.errorText: {inputState.errorText}</div>
-        <div>
-          <input {...passProps} />
-        </div>
-      </div>
-    );
-  }
-}
+// examples
+import { yesNo, PrettyPrintObject, TestCase, DebugStateInput } from './helper-ui';
+import { isEmailNaive } from './helper-utils';
 
 const BasicExample = ({ action }: *) => () => (
   <div>
@@ -245,6 +179,15 @@ const WithSyncToStore = ({ action }: *) => () => {
       action('signupForm')(signupForm);
     };
 
+    const CustomInput = ({ formId, ...passProps }) => {
+      const id = `${formId}${passProps.name}`;
+      return (
+        <div>
+          <label htmlFor={id}>{passProps.name}</label>: <input id={id} {...passProps} />
+        </div>
+      );
+    };
+
     return (
       <div>
         <strong>{signupFormId}</strong>
@@ -366,19 +309,26 @@ const WithAllInputTypes = ({ action }: *) => () => (
 );
 
 const WithConfigureForms = ({ action }: *) => () => {
+  const config = { failFast: true, typeTimeout: 1000, msgInvalid: 'Not valid (ConfigureForm)!' };
+  const FormValuesConfigured = preconfigure(config);
+
   const render = () => {
     return (
       <div>
+        <div>
+          <strong>preconfigured with:</strong>
+          <PrettyPrintObject value={config} />
+        </div>
         <strong>Form#1</strong>
         <ul>
           <li>config.msgInvalid='Make it better!' => should override default error text</li>
-          <li>config.typeTimeout=50 => showError() should return true quickly</li>
+          <li>config.typeTimeout=250 => showError() should return true quickly</li>
         </ul>
-        <FormValues
+        <FormValuesConfigured
           onSubmit={action('onSubmit')}
           inputs={{
             email: {
-              validations: { isEmail },
+              validations: { isEmail: isEmailNaive },
             },
           }}
           config={{ msgInvalid: 'Make it better!', typeTimeout: 250 }}
@@ -396,12 +346,12 @@ const WithConfigureForms = ({ action }: *) => () => {
           <li>config.failFast=False => should show all errors</li>
           <li>config.msgInvalid='Should not happen.' => should be ignored</li>
         </ul>
-        <FormValues
+        <FormValuesConfigured
           config={{ failFast: false, msgInvalid: 'Should not happen.' }}
           onSubmit={action('onSubmit')}
           inputs={{
             email: {
-              validations: { is100: v => v === 100, isEmail },
+              validations: { is100: v => v === 100, isEmail: isEmailNaive },
               getErrorFromMap: i => ({
                 'invalid email': i.clientErrors.isEmail,
                 'not 100 percent': i.clientErrors.is100,
@@ -421,20 +371,18 @@ const WithConfigureForms = ({ action }: *) => () => {
         <ul>
           <li>no config => should show msgInvalid from ConfigureForms prop</li>
         </ul>
-        <ConfigureForm failFast typeTimeout={1500} msgInvalid={'Not valid (ConfigureForm)!'}>
-          <FormValues
-            onSubmit={action('onSubmit')}
-            inputs={{ email: { validations: { isEmail } } }}
-            render={({ inputs, form }) => {
-              const { email } = inputs;
-              return (
-                <form {...form.getPassProps()}>
-                  <DebugStateInput type="password" {...email.getPassProps()} inputState={email} />
-                </form>
-              );
-            }}
-          />
-        </ConfigureForm>
+        <FormValuesConfigured
+          onSubmit={action('onSubmit')}
+          inputs={{ email: { validations: { isEmail: isEmailNaive } } }}
+          render={({ inputs, form }) => {
+            const { email } = inputs;
+            return (
+              <form {...form.getPassProps()}>
+                <DebugStateInput type="password" {...email.getPassProps()} inputState={email} />
+              </form>
+            );
+          }}
+        />
       </div>
     );
   };
@@ -550,6 +498,15 @@ const GistDocsExample = ({ action }: *) => () => (
     }}
   />
 );
+
+BasicExample.displayName = 'Basic with debug';
+WithValidations.displayName = 'With validations';
+WithLotInputs.displayName = 'With 100 inputs';
+WithSyncToStore.displayName = 'With sync to store';
+WithConfigureForms.displayName = 'With ConfigureForms config';
+WithDynamicInputs.displayName = 'With dynamic inputs';
+GistDocsExample.displayName = 'Gist docs example';
+WithAllInputTypes.displayName = 'All supported input types';
 
 export {
   BasicExample,

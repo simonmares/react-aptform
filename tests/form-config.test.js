@@ -3,7 +3,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { preconfigure, FormValues, ConfigureForm } from '../src/index';
+import { preconfigure, FormValues } from '../src/index';
 
 import { defaultProps } from './helpers';
 
@@ -109,19 +109,33 @@ test('FormValues config prop has precedence over global config', () => {
   expect(inst.getFormConfigVal('typeTimeout')).toEqual(555);
 });
 
-test('FormValues use with ConfigureForm', () => {
-  const configureWrapper = mount(
-    <ConfigureForm typeTimeout={666} failFast msgInvalid={'test (global config): Not valid.'}>
-      <FormValues {...defaultProps} config={{ typeTimeout: 1234 }} />
-    </ConfigureForm>
+test('all cases', () => {
+  const FormValuesConfigured = preconfigure({ typeTimeout: 444, failFast: true });
+
+  let inst;
+  mount(
+    <FormValuesConfigured
+      {...defaultProps}
+      componentRef={ref => {
+        inst = ref;
+      }}
+      config={{ typeTimeout: 555 }}
+    />
   );
 
-  const wrapper = configureWrapper.children();
-  const inst = wrapper.instance();
+  if (!inst) {
+    throw new Error('Expected inst to be defined by componentRef.'); // for flow mostly
+  }
 
-  // specific
-  expect(inst.getFormConfigVal('typeTimeout')).toEqual(1234);
-  // ...
+  const defaultConfig = FormValues.defaultProps.config;
+
+  // from specific config
+  expect(inst.getFormConfigVal('typeTimeout')).toEqual(555);
+  expect(inst.getFormConfigVal('typeTimeout')).not.toEqual(defaultConfig.typeTimeout);
+  // from the preconfiguration
   expect(inst.getFormConfigVal('failFast')).toEqual(true);
-  expect(inst.getFormConfigVal('msgInvalid')).toEqual('test (global config): Not valid.');
+  expect(inst.getFormConfigVal('failFast')).not.toEqual(defaultConfig.failFast);
+  // from the defaultProps
+  expect(inst.getFormConfigVal('msgInvalid')).toEqual('This input is invalid.');
+  expect(inst.getFormConfigVal('msgInvalid')).toEqual(defaultConfig.msgInvalid);
 });
