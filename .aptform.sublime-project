@@ -2,8 +2,12 @@
 	"folders":
 	[
 		{
-			"path": ".",
-			"folder_exclude_patterns": ["dest", "storybook-static"]
+			"folder_exclude_patterns":
+			[
+				"lib",
+				"storybook-static"
+			],
+			"path": "."
 		}
 	]
 }

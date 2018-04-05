@@ -3,11 +3,21 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { preconfigure, FormValues } from '../src/index';
+import { preconfigure, Aptform } from '../src/index';
 
 import { defaultProps } from './helpers';
 
-import type { FormConfig } from '../src/apt-form-flow.d';
+import type { FormConfig } from '../src/types.d';
+
+const defaultConfig = {
+  typeTimeout: 650,
+  asyncTimeout: 500,
+  failFast: false,
+  resetOnSubmit: true,
+  msgInvalid: 'This input is invalid.',
+  msgFormInvalid: 'Form has errors.',
+  msgUnknownError: 'Unknown error ocurred.',
+};
 
 test('it fallbacks to all preconfigured values', () => {
   // Desc: no config prop was passed, so it should fallback to all the values
@@ -15,15 +25,17 @@ test('it fallbacks to all preconfigured values', () => {
 
   const preconfig: FormConfig = {
     typeTimeout: 1234,
+    asyncTimeout: 432,
     failFast: true,
+    resetOnSubmit: false,
     msgInvalid: 'Test: Invalid input.',
   };
 
-  const FormValuesConfigured = preconfigure(preconfig);
+  const AptformConfigured = preconfigure(preconfig);
 
   let inst;
   mount(
-    <FormValuesConfigured
+    <AptformConfigured
       componentRef={ref => {
         inst = ref;
       }}
@@ -36,19 +48,21 @@ test('it fallbacks to all preconfigured values', () => {
   }
 
   expect(inst.getFormConfigVal('typeTimeout')).toEqual(1234);
+  expect(inst.getFormConfigVal('asyncTimeout')).toEqual(432);
   expect(inst.getFormConfigVal('failFast')).toEqual(true);
+  expect(inst.getFormConfigVal('resetOnSubmit')).toEqual(false);
   expect(inst.getFormConfigVal('msgInvalid')).toEqual('Test: Invalid input.');
 });
 
-test('FormValues fallbacks to default props', () => {
+test('Aptform fallbacks to default props', () => {
   // Desc: no values were passed to preconfigure so it does do anything effectively (but
   // does not break default props config either).
 
-  const FormValuesConfigured = preconfigure();
+  const AptformConfigured = preconfigure();
 
   let inst;
   mount(
-    <FormValuesConfigured
+    <AptformConfigured
       componentRef={ref => {
         inst = ref;
       }}
@@ -60,21 +74,14 @@ test('FormValues fallbacks to default props', () => {
     throw new Error('Expected inst to be defined by componentRef.'); // for flow mostly
   }
 
-  const defaultConfig = FormValues.defaultProps.config;
-  // Note: test what is default for test clarity
-  expect(defaultConfig).toEqual({
-    typeTimeout: 650,
-    failFast: false,
-    msgInvalid: 'This input is invalid.',
-  });
-
-  expect(inst.getFormConfigVal('typeTimeout')).toEqual(650);
-  expect(inst.getFormConfigVal('failFast')).toEqual(false);
-  expect(inst.getFormConfigVal('msgInvalid')).toEqual('This input is invalid.');
+  for (const key of Object.keys(defaultConfig)) {
+    const val = defaultConfig[key];
+    expect(inst.getFormConfigVal(key)).toEqual(val);
+  }
 });
 
 test('default props config can be overriden by passing config prop', () => {
-  const wrapper = mount(<FormValues {...defaultProps} config={{ typeTimeout: 333 }} />);
+  const wrapper = mount(<Aptform {...defaultProps} config={{ typeTimeout: 333 }} />);
 
   const inst = wrapper.instance();
   // const { config: finalConfig } = inst.props;
@@ -83,17 +90,16 @@ test('default props config can be overriden by passing config prop', () => {
   expect(inst.getFormConfigVal('typeTimeout')).toEqual(333);
 
   // these fields were not intacted:
-  const defaultConfig = FormValues.defaultProps.config;
   expect(inst.getFormConfigVal('failFast')).toEqual(defaultConfig.failFast);
   expect(inst.getFormConfigVal('msgInvalid')).toEqual(defaultConfig.msgInvalid);
 });
 
-test('FormValues config prop has precedence over global config', () => {
-  const FormValuesConfigured = preconfigure({ typeTimeout: 444 });
+test('Aptform config prop has precedence over global config', () => {
+  const AptformConfigured = preconfigure({ typeTimeout: 444 });
 
   let inst;
   mount(
-    <FormValuesConfigured
+    <AptformConfigured
       {...defaultProps}
       componentRef={ref => {
         inst = ref;
@@ -110,11 +116,11 @@ test('FormValues config prop has precedence over global config', () => {
 });
 
 test('all cases', () => {
-  const FormValuesConfigured = preconfigure({ typeTimeout: 444, failFast: true });
+  const AptformConfigured = preconfigure({ typeTimeout: 444, failFast: true });
 
   let inst;
   mount(
-    <FormValuesConfigured
+    <AptformConfigured
       {...defaultProps}
       componentRef={ref => {
         inst = ref;
@@ -126,8 +132,6 @@ test('all cases', () => {
   if (!inst) {
     throw new Error('Expected inst to be defined by componentRef.'); // for flow mostly
   }
-
-  const defaultConfig = FormValues.defaultProps.config;
 
   // from specific config
   expect(inst.getFormConfigVal('typeTimeout')).toEqual(555);

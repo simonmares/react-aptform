@@ -2,54 +2,59 @@
 	"name": "react-aptform",
 	"version": "1.0.0",
 	"description": "Practical forms for react",
-	"main": "dest/index.js",
+	"main": "dist/index.js",
+	"files": [
+		"dist"
+	],
 	"author": {
 		"name": "Šimon Mareš",
 		"email": "simon.mares@protonmail.com"
 	},
 	"license": "MIT",
 	"scripts": {
-		"test": "jest",
-		"prepublish": "npm run build",
-		"build": "babel src -d dest",
+		"prepublishOnly": "npm run build",
+		"prepare": "npm run check:all",
+		"build": "whys-scripts bundle-react-lib",
 		"format": "whys-scripts format",
-		"lint": "whys-scripts lint-react",
 		"flow": "flow",
-		"check": "npm run format && npm run lint && npm run flow && npm run test",
+		"test": "whys-scripts test-react",
+		"lint": "whys-scripts lint-react",
+		"check:all": "npx whys-scripts format-check && npm run lint && npx flow && npm run test",
 		"storybook": "start-storybook -p 6006",
 		"build-storybook": "build-storybook"
 	},
 	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-core": "^6.26.0",
-		"babel-jest": "^22.2.2",
-		"babel-preset-env": "^1.6.1",
-		"babel-preset-react": "^6.24.1",
-		"babel-preset-stage-3": "^6.24.1",
+		"@storybook/addon-actions": "^3.3.13",
+		"@storybook/addon-links": "^3.3.13",
+		"@storybook/addons": "^3.3.13",
+		"@storybook/react": "^3.3.13",
 		"enzyme": "^3.3.0",
 		"enzyme-adapter-react-16": "^1.1.1",
-		"flow-bin": "^0.66.0",
-		"jest": "^22.3.0",
+		"flow-bin": "^0.71.0",
 		"react": "^16.2.0",
 		"react-dom": "^16.2.0",
 		"sinon": "^4.3.0",
-		"whys-scripts": "^1.1.0",
-		"@storybook/react": "^3.3.13",
-		"@storybook/addon-actions": "^3.3.13",
-		"@storybook/addon-links": "^3.3.13",
-		"@storybook/addons": "^3.3.13"
+		"whys-scripts": "^1.3.1"
 	},
-	"babel": {
-		"presets": ["stage-3", "env", "react"],
-		"plugins": ["transform-class-properties"]
+	"peerDependencies": {
+		"react": "^16"
 	},
 	"jest": {
-		"setupFiles": ["<rootDir>/jest/env-setup.js"]
+		"setupFiles": [
+			"<rootDir>/jest/env-setup.js"
+		]
 	},
 	"dependencies": {
 		"validator": "^9.4.1"
 	},
 	"whys-scripts": {
-		"src": ["src/**/*.js"]
+		"src": [
+			"src/**/*.js",
+			"examples/**/*.js"
+		],
+		"tests": [
+			"tests/**/*.test.js"
+		],
+		"mainSource": "src/index.js"
 	}
 }

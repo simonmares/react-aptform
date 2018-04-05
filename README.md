@@ -66,7 +66,7 @@ Notes:
 - you can set form handlers automatically too with `{...form.getPassProps()}`
 
 ```
-  <FormValues
+  <Aptform
     initialValues={{
       name: 'Eliana Rendón',
       email: 'eliana@example.com',

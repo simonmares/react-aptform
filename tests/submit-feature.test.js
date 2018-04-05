@@ -3,7 +3,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { FormValues } from '../src/index';
+import { Aptform } from '../src/index';
 
 import { defaultProps } from './helpers';
 
@@ -23,11 +23,11 @@ describe('form.onSubmit', () => {
       const e = createEvent();
       form.onSubmit(e);
       expect(e.preventDefault).toBeCalled();
-      return null;
+      return 'mock';
     });
 
     const onSubmitMock = jest.fn();
-    shallow(<FormValues {...defaultProps} render={renderMock} onSubmit={onSubmitMock} />);
+    shallow(<Aptform {...defaultProps} render={renderMock} onSubmit={onSubmitMock} />);
 
     expect(renderMock).toHaveBeenCalled();
     expect(onSubmitMock).toHaveBeenCalled();
@@ -39,14 +39,14 @@ describe('form.onSubmit', () => {
     const renderMock = jest.fn(({ form }) => {
       const e = createEvent();
       form.onSubmit(e);
-      return null;
+      return 'mock';
     });
 
     const props = { ...defaultProps };
     delete props.onSubmit;
 
     expect(() => {
-      shallow(<FormValues {...props} render={renderMock} />);
+      shallow(<Aptform {...props} render={renderMock} />);
     }).not.toThrow();
 
     expect(renderMock).toHaveBeenCalled();

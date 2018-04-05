@@ -1,0 +1,32 @@
+body {
+  font-family: sans-serif;
+  font-weight: normal;
+  font-size: 18px;
+}
+
+h1,
+h2 {
+  font-weight: normal;
+}
+
+h1 {
+  font-size: 1.9rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+input, button {
+  line-height: 1.2rem;
+  margin: 4px 4px;
+  padding: 0.2px 4px;
+}
+
+button {
+  padding: 2px 10px;
+}
+
+p {
+  margin: .2rem 0 .4rem;
+}

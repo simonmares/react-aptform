@@ -29,9 +29,19 @@ export function findObj(obj: *, findFunc: *) {
   return undefined;
 }
 
-export function objValues(obj: *) {
+export function objValues(obj: *): Array<*> {
   const keys = Object.keys(obj);
   return keys.map(k => obj[k]);
+}
+
+export function objValuesByKeys(obj: *, keys: *) {
+  return keys.map(k => obj[k]);
+}
+
+// Returns object values filtered by filterFunc.
+export function filterObjValues(obj: *, filterFunc: *): Array<*> {
+  const keys = Object.keys(obj);
+  return keys.filter(k => filterFunc(obj[k])).map(k => obj[k]);
 }
 
 export function filterObj<T: Object>(obj: T, filterFunc: *): $Shape<T> {

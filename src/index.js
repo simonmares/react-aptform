@@ -2,23 +2,23 @@
 
 import * as React from 'react';
 
-import FormValues from './FormValues';
-import FormStore from './FormStore';
+import Aptform from './Aptform';
 
-import type { FormConfig } from './apt-form-flow.d';
-import type { LocalProps } from './FormValues';
+import type { FormConfig } from './types.d';
 
 export function preconfigure(
   preConfig: $Shape<FormConfig>
-): React.ComponentType<LocalProps<*> & { componentRef?: any }> {
+): React.ComponentType<React.ElementConfig<typeof Aptform> & { componentRef?: any }> {
   // Note: componentRef is only for tests
-  return class FormValuesConfigured extends React.Component<LocalProps<*> & { componentRef: any }> {
+  return class AptformConfigured extends React.Component<
+    React.ElementConfig<typeof Aptform> & { componentRef: any }
+  > {
     render() {
       const { config, componentRef } = this.props;
       const mergedConfig = { ...preConfig, ...config };
-      return <FormValues ref={componentRef} {...this.props} config={mergedConfig} />;
+      return <Aptform ref={componentRef} {...this.props} config={mergedConfig} />;
     }
   };
 }
 
-export { FormStore, FormValues };
+export { Aptform };

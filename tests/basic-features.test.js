@@ -1,15 +1,15 @@
 // @flow
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { FormValues } from '../src/index';
+import { Aptform } from '../src/index';
 
 import { defaultProps } from './helpers';
 
 test('renders what returns `render` prop', () => {
   const renderMock = jest.fn(() => <div />);
-  const wrapper = shallow(<FormValues {...defaultProps} render={renderMock} />);
+  const wrapper = shallow(<Aptform {...defaultProps} render={renderMock} />);
   expect(renderMock).toHaveBeenCalled();
   expect(wrapper.equals(<div />)).toBe(true);
 });
@@ -28,15 +28,18 @@ test('`render` prop receives `form` prop', () => {
     expect(form.submitting).toBe(false);
     return null;
   });
-  shallow(<FormValues {...defaultProps} render={renderMock} />);
+  shallow(<Aptform {...defaultProps} render={renderMock} />);
 });
 
 test('`render` prop receives `inputs` prop', () => {
-  // This tests also inputs default state.
-
   const inputsConfig = {
     name: {},
     email: {},
+  };
+
+  const initialValues = {
+    name: '',
+    email: '',
   };
 
   const renderMock = jest.fn(({ inputs }) => {
@@ -50,7 +53,7 @@ test('`render` prop receives `inputs` prop', () => {
     expect(inputEmail.clientErrors).toEqual({});
 
     // boolean
-    expect(inputEmail.valid).toEqual(undefined);
+    expect(inputEmail.valid).toEqual(true);
     expect(inputEmail.touched).toEqual(false);
     expect(inputEmail.focused).toEqual(false);
     expect(inputEmail.pristine).toEqual(true);
@@ -68,10 +71,18 @@ test('`render` prop receives `inputs` prop', () => {
 
     return null;
   });
-  shallow(<FormValues {...defaultProps} inputs={inputsConfig} render={renderMock} />);
+  shallow(
+    <Aptform
+      {...defaultProps}
+      initialValues={initialValues}
+      inputs={inputsConfig}
+      render={renderMock}
+    />
+  );
 });
 
-test('inputs have initial values if provided', () => {
+// NotePrototype(simon): initialValues are required atm
+test.skip('inputs have initial values if provided', () => {
   const inputsConfig = {
     name: {},
     email: {},
@@ -100,39 +111,13 @@ test('inputs have initial values if provided', () => {
   });
 
   shallow(
-    <FormValues
+    <Aptform
       {...defaultProps}
       inputs={inputsConfig}
       initialValues={initialValues}
       render={renderMock}
     />
   );
-});
-
-test('inputs can be dynamic', () => {
-  // When setting inputsAreDynamic prop, it should pass `inputs` to `render` with
-  // reflecting actual inputs.
-  const inputsConfig = { email: {}, password: {} };
-
-  const renderMock = jest.fn(({ inputs }) => {
-    const { email, password } = inputs;
-    expect(email.name).toEqual('email');
-    expect(password.name).toEqual('password');
-    return null;
-  });
-
-  const wrapper = mount(
-    <FormValues inputsAreDynamic {...defaultProps} inputs={inputsConfig} render={renderMock} />
-  );
-
-  const inputsConfigNoEmail = { ...inputsConfig, password: undefined };
-  const renderMock2 = jest.fn(({ inputs }) => {
-    const { email, password } = inputs;
-    expect(email).toBeDefined();
-    expect(password).toBeUndefined();
-    return null;
-  });
-  wrapper.setProps({ inputs: inputsConfigNoEmail, render: renderMock2 });
 });
 
 describe('validates props on development', () => {
@@ -148,53 +133,32 @@ describe('validates props on development', () => {
     global.console.error.mockRestore();
   });
 
-  test('validates `onSubmit` or `syncToStore` props must be passed', () => {
-    const invalidProps = {
-      ...defaultProps,
-    };
-    delete invalidProps.syncToStore;
-    delete invalidProps.onSubmit;
-
-    shallow(<FormValues {...invalidProps} />);
-    expect(console.warn).toBeCalledWith('You either have to provide onSubmit prop or syncToStore.');
-  });
-
   test('warn `children` prop passed', () => {
     const props = { ...defaultProps };
-    shallow(<FormValues {...props}>No way!</FormValues>);
-    expect(console.warn).toBeCalledWith('FormValues does not accept children prop.');
+    shallow(<Aptform {...props}>No way!</Aptform>);
+    expect(console.warn).toBeCalledWith('Aptform does not accept children prop.');
   });
 
-  test('warn `errorText` and `getErrorFromMap` props passed together', () => {
-    const props = { ...defaultProps };
-    shallow(<FormValues {...props} errorText={() => {}} getErrorFromMap={() => {}} />);
-    expect(console.warn).toBeCalledWith('You should provide either errorText or getErrorFromMap.');
+  test('required prop `render` is passed', () => {
+    const invalidProps = { ...defaultProps };
+    delete invalidProps.render;
+    // Using it as a function should resolve with TypeError
+    expect(() => {
+      shallow(<Aptform {...invalidProps} />);
+    }).toThrow();
+    // Using missing prop is logged to console
+    expect(console.warn).toBeCalledWith(expect.stringMatching(/Prop render is missing./));
   });
 
-  test('validates required props are passed', () => {
-    {
-      const invalidProps = { ...defaultProps };
-      delete invalidProps.render;
-      // Using it as a function should resolve with TypeError
-      expect(() => {
-        shallow(<FormValues {...invalidProps} />);
-      }).toThrow();
-      // Using missing prop is logged to console
-      expect(console.warn).toBeCalledWith(
-        expect.stringMatching(/Prop render is missing/)
-      );
-    }
-    {
-      const invalidProps = { ...defaultProps };
-      delete invalidProps.inputs;
-      // Using it as an object should resolve with TypeError
-      expect(() => {
-        shallow(<FormValues {...invalidProps} />);
-      }).toThrow();
-      // Using missing prop is logged to console
-      expect(console.warn).toBeCalledWith(
-        expect.stringMatching(/Prop inputs is missing/)
-      );
-    }
+  // NoteReview(simon): atm initialValues are required only
+  test.skip('validates required prop `inputs` is passed', () => {
+    const invalidProps = { ...defaultProps };
+    delete invalidProps.inputs;
+    // Using it as an object should resolve with TypeError
+    expect(() => {
+      shallow(<Aptform {...invalidProps} />);
+    }).toThrow();
+    // Using missing prop is logged to console
+    expect(console.warn).toBeCalledWith(expect.stringMatching(/Prop inputs is missing./));
   });
 });

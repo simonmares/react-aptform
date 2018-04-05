@@ -1,10 +1,14 @@
 [ignore]
+<PROJECT_ROOT>/lib/.*
+
+# used in some transitive dependency, random error
+<PROJECT_ROOT>/node_modules/radium
 
 [include]
 
 [libs]
-./flow-typed/npm
-./flow-typed/app.d.js
+<PROJECT_ROOT>/flow-typed/npm
+<PROJECT_ROOT>/flow-typed/app.d.js
 
 [lints]
 

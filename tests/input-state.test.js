@@ -4,7 +4,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
 
-import { FormValues } from '../src/index';
+import { Aptform } from '../src/index';
 import { defaultProps } from './helpers';
 
 jest.useFakeTimers();
@@ -15,7 +15,7 @@ test('All state transition', async () => {
     form: {},
   };
 
-  const renderFormValues = jest.fn(({ form, inputs }) => {
+  const renderAptform = jest.fn(({ form, inputs }) => {
     receivedProps.inputs = inputs;
     receivedProps.form = form;
     return null;
@@ -33,10 +33,11 @@ test('All state transition', async () => {
 
   const renderMain = jest.fn(props => {
     return (
-      <FormValues
+      <Aptform
         config={testFormConfig}
         {...defaultProps}
-        render={renderFormValues}
+        render={renderAptform}
+        initialValues={{ email: '' }}
         inputs={{
           email: {
             validations: { isJoe: val => /joe/.test(val), isEmail: val => /[.+@.+]/.test(val) },
@@ -47,10 +48,10 @@ test('All state transition', async () => {
     );
   });
 
-  const setInputStateSpy = sinon.spy(FormValues.prototype, 'setInputState');
+  const setInputStateSpy = sinon.spy(Aptform.prototype, 'setInputState');
   const wrapper = shallow(renderMain());
 
-  expect(renderFormValues).toHaveBeenCalled();
+  expect(renderAptform).toHaveBeenCalled();
 
   // Test default input state
   {
@@ -59,8 +60,8 @@ test('All state transition', async () => {
     expect(email.value).toEqual('');
     // Assert not changing
     expect(email.changing).toEqual(false);
-    // Assert validity is unknown
-    expect(email.valid).toEqual(undefined);
+    // Assert value is considered valid by default
+    expect(email.valid).toEqual(true);
     // Assert not changed yet
     expect(email.pristine).toEqual(true);
     // Assert not touched yet

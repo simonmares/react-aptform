@@ -1,0 +1,7 @@
+- form is invalid iff any input has error
+- input is valid iff is not validating and has no error
+- input is not validated async unless it has been changed (pristine prop)
+- initial values are expected to be valid unless sync validation fails
+- submit error: form API and state (`submitFailed`, `submitErrorText`), component prop `errorTextMap`
+- getErrorText and errorTextMap API changed
+- 68889b1 Remove dynamic inputs feature
