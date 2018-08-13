@@ -20,8 +20,7 @@
 		"test": "whys-scripts test-react",
 		"lint": "whys-scripts lint-react",
 		"check:all": "npx whys-scripts format-check && npm run lint && npx flow && npm run test",
-		"storybook": "start-storybook -p 6006",
-		"build-storybook": "build-storybook"
+		"storybook": "npx whys-scripts run-storybook"
 	},
 	"devDependencies": {
 		"@storybook/addon-actions": "^3.3.13",
