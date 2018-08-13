@@ -1,7 +1,5 @@
-body {
-  font-family: sans-serif;
-  font-weight: normal;
-  font-size: 18px;
+html {
+  font-family: 'sans-serif';
 }
 
 h1,
@@ -27,6 +25,37 @@ button {
   padding: 2px 10px;
 }
 
-p {
-  margin: .2rem 0 .4rem;
+/* example UI */
+
+/* example description */
+header {
+  font-size: 11pt;
 }
+
+section {
+  margin-bottom: 1em;
+}
+
+/* example body */
+article {
+  margin-top: 1em;
+}
+
+
+article {
+  padding: .2em .4em;
+}
+
+/* component description */
+p {
+  color: #A9A9A9;
+  margin: 0 0 1rem;
+  /* margin: 0 0 1em 0; */
+  padding: 0.2em 0.4em;
+}
+
+/* example help */
+article p {
+  background-color: #f8f8f8;
+}
+

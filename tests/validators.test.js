@@ -1,3 +1,5 @@
+// @flow
+
 import * as unit from '../src/validators';
 
 test('maxLength(0)', () => {

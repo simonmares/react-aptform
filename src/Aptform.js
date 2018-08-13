@@ -65,6 +65,10 @@ const inputValueMethods = {
     return !!this._serverErrors;
   },
 
+  // canHaveError() {
+  //   return this.valid !== true;
+  // },
+
   hasError() {
     return this.valid === false;
   },
@@ -437,14 +441,53 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   getFormState(): FormState {
+    // NotePrototype(simon): just quick code to design API, refactor!
+
     const isValid = () => {
+      const { formValidations } = this.props;
+
+      const isFormValid = formValidations
+        ? ({ validations, priorValid, inputName }) => {
+            const inputValues = this.getAllFormValues();
+            // NotePrototype(simon): consider building partial state upfront and set it to
+            // react in batch.
+            for (const inputName of Object.keys(validations)) {
+              const validators = validations[inputName];
+              const clientErrors = objutils.mapObjVals(
+                validators,
+                validator => !validator(inputValues)
+              );
+
+              const newErrors = objutils.filterObjValues(clientErrors, v => v === true);
+              const hasNewErrors = newErrors.length > 0;
+              const isValid = !hasNewErrors && priorValid;
+              if (!isValid) {
+                return false;
+              }
+            }
+
+            return true;
+          }
+        : null;
+
       for (const inputName of Object.keys(this.state.inputStates)) {
         const input = this.state.inputStates[inputName];
         // NoteReview(simon): why validate synchronously? Why didnt I use the the property on the input state?
 
-        // const [isValid] = this.validateInputSync(input, true);
-        if (input.hasError()) {
+        const [isValid] = this.validateInputSync(input, true);
+        if (!isValid) {
           return false;
+        }
+
+        if (formValidations && typeof isFormValid === 'function') {
+          const formValid = isFormValid({
+            validations: formValidations,
+            priorValid: isValid,
+            inputName,
+          });
+          if (!formValid) {
+            return false;
+          }
         }
       }
       return true;
@@ -844,6 +887,7 @@ class Aptform<TInputNames: string> extends React.Component<
     inputState.showError = inputValueMethods.showError.bind(inputState);
     inputState.showSuccess = inputValueMethods.showSuccess.bind(inputState);
     inputState.hasError = inputValueMethods.hasError.bind(inputState);
+    // inputState.canHaveError = inputValueMethods.canHaveError.bind(inputState);
 
     // NOTE_REVIEW: I only like isValid
     inputState.isValid = inputValueMethods.isValid.bind(inputState);

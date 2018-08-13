@@ -197,33 +197,39 @@ export const ConfigureForms = ({ action }: *) => {
   const render = () => {
     return (
       <div>
-        <div>
-          <strong>preconfigured with:</strong>
-          <PrettyPrintObject value={config} />
-        </div>
-        <strong>Form#1</strong>
-        <ul>
-          <li>config.msgInvalid='Make it better!' => should override default error text</li>
-          <li>config.typeTimeout=250 => showError() should return true quickly</li>
-        </ul>
-        <AptformConfigured
-          onSubmit={action('onSubmit')}
-          initialValues={{ email: '' }}
-          inputs={{
-            email: {
-              validations: { isEmail },
-            },
-          }}
-          config={{ msgInvalid: 'Make it better!', typeTimeout: 250 }}
-          render={({ inputs, form }) => {
-            const { email } = inputs;
-            return (
-              <form {...form.getPassProps()}>
-                <DebugStateInput type="text" {...email.getPassProps()} inputState={email} />
-              </form>
-            );
-          }}
-        />
+        <h1>Configured</h1>
+
+        <article>
+          <section>
+            <div>
+              <strong>preconfigured with:</strong>
+              <PrettyPrintObject value={config} />
+            </div>
+            <strong>Form#1</strong>
+            <ul>
+              <li>config.msgInvalid='Make it better!' => should override default error text</li>
+              <li>config.typeTimeout=250 => showError() should return true quickly</li>
+            </ul>
+            <AptformConfigured
+              onSubmit={action('onSubmit')}
+              initialValues={{ email: '' }}
+              inputs={{
+                email: {
+                  validations: { isEmail },
+                },
+              }}
+              config={{ msgInvalid: 'Make it better!', typeTimeout: 250 }}
+              render={({ inputs, form }) => {
+                const { email } = inputs;
+                return (
+                  <form {...form.getPassProps()}>
+                    <DebugStateInput type="text" {...email.getPassProps()} inputState={email} />
+                  </form>
+                );
+              }}
+            />
+          </section>
+        </article>
         <strong>Form#2</strong>
         <ul>
           <li>config.failFast=False => should show all errors</li>

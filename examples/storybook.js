@@ -1,5 +1,7 @@
 // @flow
 
+import './storybook.css';
+
 import basic from './basic';
 import submitting from './submitting';
 import validation from './validation';

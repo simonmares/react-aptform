@@ -75,7 +75,7 @@ test('All state transition', async () => {
 
   const { changeInput } = receivedProps.form;
 
-  const forInputStateRerender = async () => {
+  const rerenderInputState = async () => {
     await setInputStateSpy.returnValues.pop();
     wrapper.update();
   };
@@ -101,7 +101,7 @@ test('All state transition', async () => {
   }
 
   waitForValidation();
-  await forInputStateRerender();
+  await rerenderInputState();
 
   // Test validation result
   {
@@ -119,7 +119,7 @@ test('All state transition', async () => {
   }
 
   changeInput('email', 'joe');
-  await forInputStateRerender();
+  await rerenderInputState();
 
   // Test updated value after validation
   {
@@ -148,7 +148,7 @@ test('All state transition', async () => {
   }
 
   changeInput('email', 'joe@example.com');
-  await forInputStateRerender();
+  await rerenderInputState();
   waitForValidation();
 
   // Test validation has different results

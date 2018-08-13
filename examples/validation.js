@@ -259,9 +259,56 @@ export const FullFormValidationExample = ({ action }: *) => {
   );
 };
 
+export const RequiredEmptyExample = ({ action }: *) => {
+  return (
+    <div>
+      <exampleUI.ExampleInfo
+        title="Required fields not filled initially"
+        desc={`
+          Form is invalid if required fields (both) are not filled.
+        `}
+      />
+      <Aptform
+        initialValues={{
+          password: '',
+          passwordAgain: '',
+        }}
+        inputs={{
+          password: {
+            required: true,
+          },
+          passwordAgain: {
+            required: true,
+          },
+        }}
+        render={({ inputs, form }) => {
+          const { password, passwordAgain } = inputs;
+          return (
+            <form {...form.getPassProps()}>
+              <div>
+                Password: <input type="text" {...password.getPassProps()} />
+                {password.showError() && password.errorText}
+              </div>
+              <div>
+                Password again: <input type="text" {...passwordAgain.getPassProps()} />
+                {passwordAgain.showError() && passwordAgain.errorText}
+              </div>
+              <button type="submit" disabled={!form.isValid() || form.submitting}>
+                Submit
+              </button>
+              {form.isValid() ? '' : 'Form is not valid.'}
+            </form>
+          );
+        }}
+      />
+    </div>
+  );
+};
+
 export default {
   'Async validation': AsyncValidationExample,
   'With validations': WithValidations,
   'Sync validation': SyncValidationExample,
   'Form-wide validation': FullFormValidationExample,
+  'Required empty': RequiredEmptyExample,
 };
