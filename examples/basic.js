@@ -9,7 +9,7 @@ import { Aptform, preconfigure } from '../src/index';
 import { yesNo, PrettyPrintObject, DebugStateInput } from './helper-ui';
 import { isEmailNaive as isEmail } from './helper-validators';
 
-export const BasicExample = ({ action }: *) => () => (
+export const BasicExample = ({ action }: *) => (
   <div>
     <Aptform
       config={{
@@ -67,7 +67,7 @@ export const BasicExample = ({ action }: *) => () => (
   </div>
 );
 
-export const WithLotInputs = ({ action }: *) => () => {
+export const WithLotInputs = ({ action }: *) => {
   const generateInputs = amount => {
     const inputs = {};
     // eslint-disable-next-line
@@ -115,7 +115,7 @@ export const WithLotInputs = ({ action }: *) => () => {
   );
 };
 
-export const AllInputTypes = ({ action }: *) => () => (
+export const AllInputTypes = ({ action }: *) => (
   <Aptform
     config={{
       typeTimeout: 500,
@@ -190,7 +190,7 @@ export const AllInputTypes = ({ action }: *) => () => (
   />
 );
 
-export const ConfigureForms = ({ action }: *) => () => {
+export const ConfigureForms = ({ action }: *) => {
   const config = { failFast: true, typeTimeout: 1000, msgInvalid: 'Not valid (ConfigureForm)!' };
   const AptformConfigured = preconfigure(config);
 
@@ -351,7 +351,7 @@ export const ConfigureForms = ({ action }: *) => () => {
 //   return <DynamicInputs />;
 // };
 
-export const GistDocsExample = ({ action }: *) => () => (
+export const GistDocsExample = ({ action }: *) => (
   <Aptform
     initialValues={{
       name: 'Eliana Rendón',

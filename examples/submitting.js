@@ -9,7 +9,7 @@ import { Aptform } from '../src/index';
 import * as exampleUI from './helper-ui';
 // import { isEmailNaive } from './helper-validators';
 
-export const SubmittingWithErrorsExample = ({ action }: *) => () => (
+export const SubmittingWithErrorsExample = ({ action }: *) => (
   <Aptform
     initialValues={{
       name: 'Eliana Rendón',
@@ -52,7 +52,7 @@ export const SubmittingWithErrorsExample = ({ action }: *) => () => (
   />
 );
 
-export const SubmittingNonFieldErrorExample = ({ action }: *) => () => (
+export const SubmittingNonFieldErrorExample = ({ action }: *) => (
   <Aptform
     initialValues={{
       username: 'eliana',
@@ -95,7 +95,7 @@ export const SubmittingNonFieldErrorExample = ({ action }: *) => () => (
   />
 );
 
-export const SubmittingExample = ({ action }: *) => () => {
+export const SubmittingExample = ({ action }: *) => {
   const initialValues = {
     name: 'Eliana Rendón',
   };
@@ -163,7 +163,7 @@ export const SubmittingExample = ({ action }: *) => () => {
   );
 };
 
-export const SubmittingRejectedExample = ({ action }: *) => () => {
+export const SubmittingRejectedExample = ({ action }: *) => {
   const commonProps = {
     initialValues: {
       name: 'Eliana Rendón',

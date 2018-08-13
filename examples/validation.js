@@ -10,7 +10,7 @@ import { yesNo, TestCase, DebugStateInput } from './helper-ui';
 import { isEmailNaive as isEmail } from './helper-validators';
 import * as exampleUI from './helper-ui';
 
-export const AsyncValidationExample = ({ action }: *) => () => {
+export const AsyncValidationExample = ({ action }: *) => {
   const alreadyExists = value => {
     return new Promise(resolve => {
       setTimeout(() => {
@@ -67,7 +67,7 @@ export const AsyncValidationExample = ({ action }: *) => () => {
   );
 };
 
-export const WithValidations = ({ action }: *) => () => (
+export const WithValidations = ({ action }: *) => (
   <div>
     <Aptform
       config={{
@@ -147,7 +147,7 @@ export const WithValidations = ({ action }: *) => () => (
   </div>
 );
 
-export const SyncValidationExample = ({ action }: *) => () => {
+export const SyncValidationExample = ({ action }: *) => {
   return (
     <div>
       <exampleUI.ExampleVariantInfo
@@ -195,7 +195,7 @@ export const SyncValidationExample = ({ action }: *) => () => {
   );
 };
 
-export const FullFormValidationExample = ({ action }: *) => () => {
+export const FullFormValidationExample = ({ action }: *) => {
   const arePasswordsSame = values => {
     if (values.password === '' || values.passwordAgain === '') {
       return true;
