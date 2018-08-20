@@ -22,7 +22,7 @@ test('All state transition', async () => {
   });
 
   const testFormConfig = {
-    typeTimeout: 0,
+    typeTimeout: 50,
     msgInvalid: '(test) This input is invalid.',
   };
 
@@ -98,14 +98,21 @@ test('All state transition', async () => {
     // Assert do not show validation result
     expect(email.showSuccess()).toEqual(false);
     expect(email.showError()).toEqual(false);
+    expect(email.isValidating()).toEqual(true);
   }
 
+  // update immediate changes
+  await rerenderInputState();
+  // wait for typing timeout
   waitForValidation();
+  // update "changing" state
   await rerenderInputState();
 
   // Test validation result
   {
     const { email } = receivedProps.inputs;
+    // should not be in validating mode anymore
+    expect(email.isValidating()).toEqual(false);
     // Assert after typeTimeout the input is not considered to be changing
     expect(email.changing).toEqual(false);
     // Assert validation result is updated in the input state
@@ -121,11 +128,10 @@ test('All state transition', async () => {
   changeInput('email', 'joe');
   await rerenderInputState();
 
-  // Test updated value after validation
+  // Test is in validating mode
   {
     const { email } = receivedProps.inputs;
-    // Assert input validity is unset
-    expect(email.valid).toEqual(undefined);
+    expect(email.isValidating()).toEqual(true);
   }
 
   waitForValidation();
@@ -137,6 +143,7 @@ test('All state transition', async () => {
     expect(email.changing).toEqual(false);
     // Assert input is still not valid
     expect(email.valid).toEqual(false);
+    expect(email.isValidating()).toEqual(false);
 
     // Assert validation isJoe is marked as succeeded
     expect(email.clientErrors.isJoe).toEqual(false);

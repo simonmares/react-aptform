@@ -53,7 +53,14 @@ const warnUser = msg => {
 
 const inputValueMethods = {
   showError() {
-    return (!this.changing || !this.focused) && this.valid === false;
+    // do not show while its changing
+    if (this.changing) {
+      return false;
+    }
+    // if (!this.focused) {
+    //   return false;
+    // }
+    return this.valid === false;
   },
 
   showSuccess() {
@@ -99,7 +106,7 @@ const inputValueMethods = {
   },
 
   isValidating() {
-    return this.valid === undefined;
+    return this.changing;
   },
 };
 
@@ -776,7 +783,6 @@ class Aptform<TInputNames: string> extends React.Component<
     }
 
     const syncValidated = this.setInputState(inputName, {
-      changing: false,
       valid,
       clientErrors,
     });
@@ -801,22 +807,19 @@ class Aptform<TInputNames: string> extends React.Component<
 
   changeInputValue(inputName: TInputNames, value: InputValue) {
     const props = {
-      value,
+      // constants
       changing: true,
+      pristine: false,
+      // dynamic
+      value,
+      // reset
       valid: undefined,
       errorText: '',
-      pristine: false,
       touched: true,
       _serverErrors: undefined,
     };
 
-    this.setInputState(inputName, props);
-
-    if (this.typingTimerId) {
-      clearTimeout(this.typingTimerId);
-    }
-    const onFinishedTyping = () => {
-      this.setInputState(inputName, { changing: false });
+    this.setInputState(inputName, props).then(() => {
       const updatedPromise = this.runInputValidation(inputName);
       const { onChange } = this.props;
       if (onChange) {
@@ -824,9 +827,15 @@ class Aptform<TInputNames: string> extends React.Component<
           onChange(inputName, value);
         });
       }
-    };
-    const typeTimeout = this.getFormConfigVal('typeTimeout');
-    this.typingTimerId = setTimeout(onFinishedTyping, typeTimeout);
+      if (this.typingTimerId) {
+        clearTimeout(this.typingTimerId);
+      }
+      const onFinishedTyping = () => {
+        this.setInputState(inputName, { changing: false });
+      };
+      const typeTimeout = this.getFormConfigVal('typeTimeout');
+      this.typingTimerId = setTimeout(onFinishedTyping, typeTimeout);
+    });
   }
 
   isFormValid() {
