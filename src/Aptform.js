@@ -548,13 +548,10 @@ class Aptform<TInputNames: string> extends React.Component<
     return submitErrorText;
   }
 
-  // NOTE_REVIEW: should return promise? or be similar as native setState?
-  setFormState(state: $Shape<LocalState<TInputNames>>, onDone: *) {
-    this.setState(state, onDone);
-
-    // if (this.props.syncToStore) {
-    //   this.syncInputStates();
-    // }
+  setFormState(state: $Shape<LocalState<TInputNames>>): Promise<typeof undefined> {
+    return new Promise(resolve => {
+      this.setState(state, resolve);
+    });
   }
 
   setInputState(
@@ -570,31 +567,15 @@ class Aptform<TInputNames: string> extends React.Component<
     };
     const updatedInput = this.createInputState(newState);
 
-    // if (this.props.syncToStore) {
-    //   this.syncInputStates();
-    // }
-
     return new Promise(resolve => {
-      this.setFormState(
-        {
-          inputStates: {
-            ...inputStates,
-            [inputName]: updatedInput,
-          },
+      this.setFormState({
+        inputStates: {
+          ...inputStates,
+          [inputName]: updatedInput,
         },
-        resolve
-      );
+      }).then(resolve);
     });
   }
-
-  // NOTE_REVIEW: unnecessary because of onBlur syncs
-  // syncInputStates() {
-  //   const delayed = () => {
-  //     this.syncForm(this.state.inputStates);
-  //   };
-
-  //   setTimeout(delayed, 50);
-  // }
 
   updateAllInputsValidationState() {
     const { inputStates } = this.state;
