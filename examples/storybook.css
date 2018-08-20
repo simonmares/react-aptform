@@ -27,35 +27,40 @@ button {
 
 /* example UI */
 
-/* example description */
 header {
   font-size: 11pt;
+  padding: 0.4em;
+  border-bottom: 4px solid #f8f8f8b3;
 }
 
+/* divides multiple subexamples */
 section {
   margin-bottom: 1em;
+  outline: 1px dotted #e4e4e4;
 }
 
 /* example body */
 article {
   margin-top: 1em;
+  padding: 0.2em 0;
 }
 
-
-article {
-  padding: .2em .4em;
-}
-
-/* component description */
+/* description */
 p {
-  color: #A9A9A9;
   margin: 0 0 1rem;
-  /* margin: 0 0 1em 0; */
   padding: 0.2em 0.4em;
 }
 
-/* example help */
+/* subexample description */
 article p {
-  background-color: #f8f8f8;
+  background-color: #f8f8f8b3;
 }
 
+.help {
+  color: #797878;
+  background-color: unset;
+}
+
+.help:before {
+  content: "INFO: ";
+}
