@@ -37,9 +37,7 @@
 			"<rootDir>/jest/env-setup.js"
 		]
 	},
-	"dependencies": {
-		"validator": "^9.4.1"
-	},
+	"dependencies": {},
 	"whys-scripts": {
 		"src": [
 			"src/**/*.js",
