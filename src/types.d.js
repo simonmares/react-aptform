@@ -142,8 +142,8 @@ export type LocalProps<TInputNames> = {
   // config override prop object?
   config?: FormConfig,
 
-  inputs?: { [TInputNames]: InputConfig<TInputNames> | null },
-  initialValues: FormValuesMap<TInputNames>,
+  inputs: { [TInputNames]: InputConfig<TInputNames> | null },
+  initialValues?: FormValuesMap<TInputNames>,
 
   // can return anything
   render: (props: RenderProps<TInputNames>) => React.Node,

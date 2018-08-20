@@ -183,8 +183,8 @@ class Aptform<TInputNames: string> extends React.Component<
     }
   }
 
-  getInitialState(props: LocalProps<TInputNames>, initialValues: InitialValues<TInputNames>) {
-    const inputNames = Object.keys(props.initialValues);
+  getInitialState(props: LocalProps<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
+    const inputNames = Object.keys(props.inputs);
     return {
       inputStates: this.createInputStateMap(inputNames, initialValues),
       submitting: false,
@@ -842,7 +842,7 @@ class Aptform<TInputNames: string> extends React.Component<
 
   createInputStateMap(
     inputNameList: Array<TInputNames>,
-    initialValues: InitialValues<TInputNames>
+    initialValues: ?InitialValues<TInputNames>
   ) {
     const inputStates = {};
     for (const inputName of inputNameList) {
@@ -903,7 +903,7 @@ class Aptform<TInputNames: string> extends React.Component<
     return inputState;
   }
 
-  resetFormState(props: LocalProps<TInputNames>, initialValues: InitialValues<TInputNames>) {
+  resetFormState(props: LocalProps<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
     this.clearAllTimers();
     const initialState = this.getInitialState(props, initialValues);
     this.setFormState(initialState);
@@ -947,13 +947,6 @@ if (process.env.NODE_ENV !== 'production') {
     }
     if (!props.render) {
       warnUser('Prop render is missing.');
-    }
-    if (props.inputs) {
-      for (const key of Object.keys(props.inputs)) {
-        if (props.initialValues[key] === undefined) {
-          warnUser(`Missing initialValues[${key}].`);
-        }
-      }
     }
     if ('children' in props) {
       warnUser('Aptform does not accept children prop.');

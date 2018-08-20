@@ -16,16 +16,11 @@ export const BasicExample = ({ action }: *) => (
         typeTimeout: 500,
         resetOnSubmit: true,
       }}
-      initialValues={{
-        name: 'Timo',
-        password: '',
-        email: '',
-        phone: '',
-      }}
       inputs={{
-        password: {
-          required: true,
-        },
+        name: { required: false },
+        password: { required: true },
+        email: { required: false },
+        phone: { required: false },
       }}
       onSubmit={action('onSubmit')}
       render={({ inputs, form }) => {
@@ -72,7 +67,7 @@ export const WithLotInputs = ({ action }: *) => {
     const inputs = {};
     // eslint-disable-next-line
     for (let i = 0; i < amount; i++) {
-      inputs[`field${i}`] = '';
+      inputs[`field${i}`] = { required: false };
     }
     return inputs;
   };
@@ -83,7 +78,7 @@ export const WithLotInputs = ({ action }: *) => {
           typeTimeout: 500,
         }}
         onSubmit={action('onSubmit')}
-        initialValues={generateInputs(100)}
+        inputs={generateInputs(100)}
         render={({ inputs, form }) => {
           const renderInput = input => (
             <DebugStateInput
