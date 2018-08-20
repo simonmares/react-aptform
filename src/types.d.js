@@ -17,11 +17,15 @@ export type FormConfig = {|
   asyncTimeout?: number,
   failFast?: boolean,
   resetOnSubmit?: boolean,
+  // messages
   msgInvalid?: string,
   msgFormInvalid?: string,
   msgUnknownError?: string,
   // NotePrototype(simon): use this in code
   msgRequired?: string,
+
+  // custom
+  joinChar?: string,
 
   // NoteReview(simon): I think its better to enforce explicitly passing whole object,
   // instead of partials... lets see usage

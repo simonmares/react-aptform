@@ -115,6 +115,7 @@ const defaultConfig: FormConfig = {
   asyncTimeout: 500,
   failFast: false,
   resetOnSubmit: true,
+  joinChar: ', ',
   msgInvalid: 'This input is invalid.',
   msgFormInvalid: 'Form has errors.',
   msgUnknownError: 'Unknown error ocurred.',
@@ -251,8 +252,8 @@ class Aptform<TInputNames: string> extends React.Component<
         return opts.defaultText;
       }
       // Return all errors concatenated
-      // NOTE_REVIEW: join with?
-      return errorTexts.join(', ');
+      const joinChar = this.getFormConfigVal('joinChar');
+      return errorTexts.join(joinChar);
     }
 
     return opts.defaultText;
