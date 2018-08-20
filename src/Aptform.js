@@ -57,9 +57,6 @@ const inputValueMethods = {
     if (this.changing) {
       return false;
     }
-    // if (!this.focused) {
-    //   return false;
-    // }
     return this.valid === false;
   },
 
@@ -72,10 +69,6 @@ const inputValueMethods = {
     return !!this._serverErrors;
   },
 
-  // canHaveError() {
-  //   return this.valid !== true;
-  // },
-
   hasError() {
     return this.valid === false;
   },
@@ -85,7 +78,6 @@ const inputValueMethods = {
       if (initialValue) {
         return this.value !== initialValue;
       }
-      // NoteReview(simon): DEFAULT_VALUE is probably incorrect
       return !this.pristine && this.value !== DEFAULT_VALUE;
     };
   },
@@ -127,8 +119,17 @@ const defaultConfig: FormConfig = {
   },
 };
 
-// NoteReview(simon): not sure why its recommended to bind
 const onErrorDefault = console.error.bind(console);
+
+//
+// Docs
+//
+
+// RuleIntialValueMustBeStr:
+// if you initially pass undefined or null as the value prop, the component starts
+// life as an "uncontrolled" component. Once you interact with the component,
+// we set a value and react changes it to a "controlled" component, and issues the warning.
+// https://github.com/twisty/formsy-react-components/issues/66
 
 class Aptform<TInputNames: string> extends React.Component<
   LocalProps<TInputNames>,
@@ -143,11 +144,6 @@ class Aptform<TInputNames: string> extends React.Component<
   // In prototype if on development
   validateProps: *;
 
-  // RULE_INTIAL_VALUE_MUST_BE_STR:
-  // if you initially pass undefined or null as the value prop, the component starts
-  // life as an "uncontrolled" component. Once you interact with the component,
-  // we set a value and react changes it to a "controlled" component, and issues the warning.
-  // https://github.com/twisty/formsy-react-components/issues/66
   onUnhandledRejection: *;
 
   onSubmit: *;
@@ -240,7 +236,7 @@ class Aptform<TInputNames: string> extends React.Component<
 
       // Return first error if configured so
       if (opts.failFast) {
-        // NoteReview(simon): review empty values...
+        // NoteReview: can sortedCodes be empty array?
         const sortedCodes = this.getSortedValidationCodes(inputConfig);
         const firstError = arrutils.sortByArray(allErrorCodes, sortedCodes)[0];
         const errorText = errorsMap[(firstError: string)];
@@ -290,7 +286,7 @@ class Aptform<TInputNames: string> extends React.Component<
       const msgInvalid = this.getFormConfigVal('msgInvalid');
       const failFast = this.getFormConfigVal('failFast');
 
-      // NOTE_REVIEW: optimize for more objects (unlikely to have 10s of objects)
+      // NoteReview: consider to optimize for more objects (unlikely to have 10s of objects)
       // its better to use single API. Do not set state in the loop.
       // Its okay for now. setState is batched and in most cases the errors will have 2-3 keys.
       for (const inputName of Object.keys(errors)) {
@@ -310,9 +306,7 @@ class Aptform<TInputNames: string> extends React.Component<
     };
 
     const onErr = reason => {
-      // NoteReview(simon): call error callback prop
       this.setState({ submitting: false });
-
       this.onUnhandledRejection(reason);
     };
 
@@ -327,7 +321,7 @@ class Aptform<TInputNames: string> extends React.Component<
       } else {
         const resetOnSubmit = this.getFormConfigVal('resetOnSubmit');
         if (resetOnSubmit) {
-          // NoteReview: initialValues are not required now, so there might be a bug
+          // NoteReview: initialValues are not required, so there might be a bug or weird behavior
           this.resetFormState(this.props, this.props.initialValues);
         }
       }
@@ -410,13 +404,13 @@ class Aptform<TInputNames: string> extends React.Component<
 
   onValidationThrown(error: Error, validation: string, input: InputState<*>) {
     // NoteReview(simon): didWarn per validation
-    const msg = `validating ${validation} for input name=${input.name} value=${input.value}`;
+    const msg = `validating ${validation} for input name=${input.name} value=${input.value} threw`;
     const onError = this.props.onError || onErrorDefault;
     onError(error, msg);
   }
 
   getInputState(inputName: TInputNames): InputState<TInputNames> {
-    // NOTE_REVIEW: when can be undefined for given inputName?
+    // NoteReview: when can be undefined for given inputName?
     const inputState = this.state.inputStates[inputName];
     if (inputState) {
       return inputState;
@@ -480,7 +474,7 @@ class Aptform<TInputNames: string> extends React.Component<
 
       for (const inputName of Object.keys(this.state.inputStates)) {
         const input = this.state.inputStates[inputName];
-        // NoteReview(simon): why validate synchronously? Why didnt I use the the property on the input state?
+        // NoteReview(simon): why revalidate synchronously? Why didnt I use the valid property on the input state?
 
         const [isValid] = this.validateInputSync(input, true);
         if (!isValid) {
@@ -837,7 +831,7 @@ class Aptform<TInputNames: string> extends React.Component<
   ) {
     const inputStates = {};
     for (const inputName of inputNameList) {
-      // RULE_INTIAL_VALUE_MUST_BE_STR
+      // RuleIntialValueMustBeStr
       const value = (initialValues && initialValues[inputName]) || '';
       // by default, input is valid unless its in state of validating or has an error
       const valid = true;
@@ -878,9 +872,8 @@ class Aptform<TInputNames: string> extends React.Component<
     inputState.showError = inputValueMethods.showError.bind(inputState);
     inputState.showSuccess = inputValueMethods.showSuccess.bind(inputState);
     inputState.hasError = inputValueMethods.hasError.bind(inputState);
-    // inputState.canHaveError = inputValueMethods.canHaveError.bind(inputState);
 
-    // NOTE_REVIEW: I only like isValid
+    // NoteReview: reconsider API
     inputState.isValid = inputValueMethods.isValid.bind(inputState);
     inputState.isValidating = inputValueMethods.isValidating.bind(inputState);
     inputState.hasChanged = inputValueMethods.hasChanged(initial).bind(inputState);
