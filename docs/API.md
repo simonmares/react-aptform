@@ -1,35 +1,16 @@
 ## Aptform props
 
-### required
+### props
 
 | Prop |  Type | Description |
 | -------------- | ------ | --------------- |
-| render       | Function | Function that is delegated to render the actual form and inputs. It receives an object of shape `RenderProps`. |
-| inputs       | Object | Map of **input name** to input configuration object (shape of `InputConfig`). The value must be always an object, set an empty one if config for the input is unnecessary. Otherwise the input won't be available in arguments of the `render` prop function.  |
-
-
-### optional
-
-| Prop |  Type | Description |
-| -------------- | ------ | --------------- |
+| **render**       | Function | Function that is delegated to render the actual form and inputs. It receives an object of shape `RenderProps`. |
+| **inputs**       | Object | Map of **input name** to input configuration object (shape of `InputConfig`). The value must be always an object, set an empty one if config for the input is unnecessary. Otherwise the input won't be available in arguments of the `render` prop function.  |
 | config     | Object | Config for this form. Object properties are same as `ConfigureForms` props. |
 | initialValues     | Object | Map of input names to input initial value. |
-| onSubmit     | Function | Function to call when submitting is triggered. It receives a mapping of input name to input value. |
+| onSubmit     | Function | Function to call when submitting is triggered. It receives an object mapping of input name to input value. |
 
-
-### mutually exclusive
-
-| Props |  Reason |
-| -------------- | ------ | --------------- |
-| `onSubmit` and `syncToStore`     | It makes sense to only submit a single form setting `onSubmit` callback or to submit more forms via `FormStore` (using `syncToStore`). |
-
-
-### required together
-
-| Props | Reason |
-| -------------- | ------ | --------------- |
-| `id` and  `syncToStore`  | You will be able to retrieve the form values from `FormStore` with the given `id`.  |
-
+Only `render` and `inputs` are required as they are unique per form.
 
 ## RenderProps shape
 
@@ -55,7 +36,7 @@ However it doesn't work with react components for `radio` or `checkbox`. You hav
 
 ## RenderInputState props
 
-Common react props:
+**Common fields**:
 
 | Property |  Type | Description |
 | -------------- | ------ | --------------- |
@@ -64,11 +45,14 @@ Common react props:
 | onChange     | Function | The input handler for `change` event.  |
 | required     | boolean | Convenient prop to set required attribute.  |
 
-Custom library props:
+You can get an object of only these props by calling `RenderInputState.getPassProps()`.
+
+**Custom fields**:
 
 | Property |  Type | Description |
 | -------------- | ------ | --------------- |
 | showError     | Function | NOTE_REVIEW  |
-| getPassProps     | Function | Convenient function that returns "Common react props".  |
-| clientErrors     | Object | Mapping of validation name to whether it failed. `true` means the input value is invalid for given validation.  |
+| showSuccess     | Function | NOTE_REVIEW  |
+| getPassProps     | Function | Convenient function that returns "Common fields".  |
+| clientErrors     | Object | Mapping of validation name to whether it failed. `true` means the input value *does have* an error for given validation.  |
 | hasChanged     | Function | Returns `true` if the input has changed, otherwise `false`.  |
