@@ -282,9 +282,81 @@ export const SubmittingRejectedExample = ({ action }: *) => {
   );
 };
 
+export const ResetWithNewData = ({ action }: *) => {
+  const commonProps = {
+    initialValues: {
+      name: 'Eliana',
+      surname: '',
+      displayName: '',
+    },
+    inputs: {
+      name: { required: true },
+      surname: { required: false },
+      displayName: { required: false },
+    },
+    onSubmit: values => {
+      action('onSubmit')('Submitting values: ', values);
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const { surname, name } = values;
+          let displayName = surname ? `${name} ${surname}` : name;
+          resolve({
+            data: {
+              name,
+              surname,
+              displayName,
+            },
+          });
+        }, 500);
+      });
+    },
+  };
+
+  const example = (
+    <Aptform
+      {...commonProps}
+      render={({ inputs, form }) => {
+        const { name, surname, displayName } = inputs;
+        return (
+          <form {...form.getPassProps()}>
+            <div>
+              Name: <input type="text" {...name.getPassProps()} />
+            </div>
+            <div>
+              Surname: <input type="text" {...surname.getPassProps()} />
+            </div>
+
+            <div>
+              Display name: <input type="text" {...displayName.getPassProps()} />
+            </div>
+
+            <button type="submit" disabled={form.submitting}>
+              {form.submitting ? 'Submitting...' : 'Update'}
+            </button>
+            <span>{form.isValid() ? '' : 'Please fill all fields'}</span>
+            {form.submitFailed ? form.submitErrorText : ''}
+          </form>
+        );
+      }}
+    />
+  );
+
+  return (
+    <React.Fragment>
+      <h1>Reset data from submit result</h1>
+      <article>
+          <p>Server returns new data that are applied as new values of the form.</p>
+          <p className="help">Write </p>
+          {example}
+      </article>
+    </React.Fragment>
+  );
+};
+
 export default {
   'submitting state': SubmittingExample,
   'w/ field errors': SubmittingWithErrorsExample,
   'w/ nonfield error': SubmittingNonFieldErrorExample,
   'w/ form rejected': SubmittingRejectedExample,
+  'w/ reset with result': ResetWithNewData,
 };
