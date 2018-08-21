@@ -107,6 +107,7 @@ const defaultConfig: FormConfig = {
   asyncTimeout: 500,
   failFast: false,
   resetOnSubmit: true,
+  initialValid: false,
   joinChar: ', ',
   msgInvalid: 'This input is invalid.',
   msgFormInvalid: 'Form has errors.',
@@ -402,7 +403,11 @@ class Aptform<TInputNames: string> extends React.Component<
     this.setState({ submitFailed: true, submitErrorText });
   }
 
-  onValidationThrown(error: Error, validation: string, input: InputState<*>) {
+  onValidationThrown(
+    error: Error,
+    validation: string,
+    input: { name: TInputNames, value: InputValue }
+  ) {
     // NoteReview(simon): didWarn per validation
     const msg = `validating ${validation} for input name=${input.name} value=${input.value} threw`;
     const onError = this.props.onError || onErrorDefault;
@@ -474,10 +479,7 @@ class Aptform<TInputNames: string> extends React.Component<
 
       for (const inputName of Object.keys(this.state.inputStates)) {
         const input = this.state.inputStates[inputName];
-        // NoteReview(simon): why revalidate synchronously? Why didnt I use the valid property on the input state?
-
-        const [isValid] = this.validateInputSync(input, true);
-        if (!isValid) {
+        if (input.valid === false) {
           return false;
         }
 
@@ -606,15 +608,15 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   validateInputSync(
-    input: InputState<TInputNames>,
-    failFast: boolean = false
+    inputValue: InputValue,
+    inputName: TInputNames,
+    opts: { failFast: boolean } = { failFast: false }
   ): [boolean, ValidationErrs, ValidationMapping<TInputNames>] {
-    const inputConfig = this.getInputConfig(input.name);
-    const { value } = input;
+    const inputConfig = this.getInputConfig(inputName);
     const validationErrors = {};
     const asyncValidations = {};
 
-    const isEmpty = valueEmpty(value);
+    const isEmpty = valueEmpty(inputValue);
     if (inputConfig.required && isEmpty) {
       return [false, { required: true }, asyncValidations];
     } else if (isEmpty) {
@@ -628,9 +630,9 @@ class Aptform<TInputNames: string> extends React.Component<
         const validateFunc = validations[valKey];
         let validationResult;
         try {
-          validationResult = validateFunc(value);
+          validationResult = validateFunc(inputValue);
         } catch (e) {
-          this.onValidationThrown(e, valKey, input);
+          this.onValidationThrown(e, valKey, { name: inputName, value: inputValue });
           continue;
         }
         // ignore async validations as this method is synchronous
@@ -641,7 +643,7 @@ class Aptform<TInputNames: string> extends React.Component<
         // NoteReview(simon): this shoul be changed to isSomething is valid then true not the opossite
         const hasError = !validationResult;
         validationErrors[valKey] = hasError;
-        if (hasError && failFast) {
+        if (hasError && opts.failFast) {
           return [false, validationErrors, asyncValidations];
         }
         if (hasError) {
@@ -734,14 +736,18 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   runInputValidation(inputName: TInputNames): Promise<*> {
-    const failFast = this.getFormConfigVal('failFast');
+    const failFast = this.getFormConfigVal('failFast') || false;
 
     const onValidated = () => {
       this._updateErrorText(inputName);
     };
 
     const inputState = this.getInputState(inputName);
-    const [isValid, clientErrors, asyncValidations] = this.validateInputSync(inputState, failFast);
+    const [isValid, clientErrors, asyncValidations] = this.validateInputSync(
+      inputState.value,
+      inputName,
+      { failFast }
+    );
     let valid = isValid;
 
     // validate asynchronously iff client validations pass
@@ -829,12 +835,21 @@ class Aptform<TInputNames: string> extends React.Component<
     inputNameList: Array<TInputNames>,
     initialValues: ?InitialValues<TInputNames>
   ) {
+    const initialValid = this.getFormConfigVal('initialValid');
     const inputStates = {};
     for (const inputName of inputNameList) {
       // RuleIntialValueMustBeStr
       const value = (initialValues && initialValues[inputName]) || '';
       // by default, input is valid unless its in state of validating or has an error
-      const valid = true;
+
+      let valid;
+      if (initialValid) {
+        valid = true;
+      } else {
+        const [isValid] = this.validateInputSync(value, inputName);
+        valid = isValid;
+      }
+
       const props: $Shape<InputState<TInputNames>> = { value, valid, name: inputName };
       const inputValue = this.createInputState(props);
       inputStates[inputName] = inputValue;

@@ -60,15 +60,15 @@ test('All state transition', async () => {
     expect(email.value).toEqual('');
     // Assert not changing
     expect(email.changing).toEqual(false);
-    // Assert value is considered valid by default
-    expect(email.valid).toEqual(true);
+    // Assert value is not valid
+    expect(email.valid).toEqual(false);
     // Assert not changed yet
     expect(email.pristine).toEqual(true);
     // Assert not touched yet
     expect(email.touched).toEqual(false);
     // Assert do not show validation result
     expect(email.showSuccess()).toEqual(false);
-    expect(email.showError()).toEqual(false);
+    expect(email.showError()).toEqual(true);
     // Assert no client errors exist yet
     expect(email.clientErrors).toEqual({});
   }

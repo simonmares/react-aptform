@@ -17,6 +17,7 @@ export type FormConfig = {|
   asyncTimeout?: number,
   failFast?: boolean,
   resetOnSubmit?: boolean,
+  initialValid?: boolean,
   // messages
   msgInvalid?: string,
   msgFormInvalid?: string,
