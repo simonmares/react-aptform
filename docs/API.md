@@ -72,6 +72,7 @@ You can get an object of these props by calling `RenderInputState.getPassProps()
 | Property |  Type | Description |
 | -------------- | ------ | --------------- |
 | getPassProps     | Function | Convenient function that returns "Common fields".  |
+| errorText     | string | Message containing one or more errors of the input. |
 | showError     | Function | Returns true if the validation framework decides an error should be visible to user. The decision is based on configuration of the form.  |
 | showSuccess     | Function | See showError, returns true only if input is valid and should be visible to user.  |
 | hasChanged     | Function | Returns `true` if the input has changed, otherwise `false`.  |
