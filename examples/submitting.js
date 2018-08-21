@@ -5,10 +5,6 @@ import * as React from 'react';
 // project
 import { Aptform } from '../src/index';
 
-// examples
-import * as exampleUI from './helper-ui';
-// import { isEmailNaive } from './helper-validators';
-
 export const SubmittingWithErrorsExample = ({ action }: *) => {
   const example = (
     <Aptform

@@ -6,9 +6,8 @@ import * as React from 'react';
 import { Aptform } from '../src/index';
 
 // examples
-import { yesNo, TestCase, DebugStateInput } from './helper-ui';
+import { yesNo, DebugStateInput } from './helper-ui';
 import { isEmailNaive as isEmail } from './helper-validators';
-import * as exampleUI from './helper-ui';
 
 export const AsyncValidationExample = ({ action }: *) => {
   const alreadyExists = value => {
@@ -151,7 +150,7 @@ export const SortedValidations = ({ action }: *) => {
               inputState={superNumber}
               {...superNumber.getPassProps()}
             />
-            <button onClick={form.onSubmit}>Submit</button>
+            <button onClick={form.onSubmit} disabled={!form.isValid()}>Submit</button>
           </form>
         );
       }}

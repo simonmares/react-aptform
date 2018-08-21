@@ -66,50 +66,6 @@ export const yesNoUndef = (maybeBool: ?boolean) => {
   return <span>?</span>;
 };
 
-type TestCaseProps = { title: string, desc: string, children: React.Node };
-export function TestCase({ title, desc, children }: TestCaseProps) {
-  return (
-    <div>
-      <h2>{title}</h2>
-      <div style={{ color: '#A9A9A9' }}>{desc}</div>
-      {children}
-    </div>
-  );
-}
-
-// class FormattedText extends React.Component<*, *> {
-//   render() {
-//     const lines = this.props.text.split('\n');
-//     return lines.map(l => <div>{l}</div>);
-//   }
-// }
-
-// export function ExampleVariantDeliminer() {
-//   return <hr style={{ margin: '1em 0 0', borderColor: '#ffe7f4' }} />;
-// }
-
-// export function ExampleVariantInfo(props: { title: string, desc: string }) {
-//   return (
-//     <div>
-//       <h2>{props.title}</h2>
-//       <div style={{ color: '#A9A9A9' }}>
-//         <FormattedText text={props.desc} />
-//       </div>
-//     </div>
-//   );
-// }
-
-// export function ExampleInfo(props: { title: string, desc: string }) {
-//   return (
-//     <div>
-//       <h1>{props.title}</h1>
-//       <div style={{ color: '#A9A9A9', margin: '0 0 1rem' }}>
-//         <FormattedText text={props.desc} />
-//       </div>
-//     </div>
-//   );
-// }
-
 type DebugStateInputP = {|
   inputState: InputState<*>,
 
