@@ -923,6 +923,36 @@ if (process.env.NODE_ENV !== 'production') {
     if ('children' in props) {
       warnUser('Aptform does not accept children prop.');
     }
+
+    //
+    // Checking for initialValues vs inputs mismatches
+    //
+
+    const initialKeys = new Set(Object.keys(props.initialValues || {}));
+    const inputKeys = new Set(Object.keys(props.inputs));
+
+    function isSuperset(set, subset) {
+      for (var elem of subset) {
+        if (!set.has(elem)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (!isSuperset(inputKeys, initialKeys)) {
+      function difference(setA, setB) {
+        var _difference = new Set(setA);
+        for (var elem of setB) {
+          _difference.delete(elem);
+        }
+        return _difference;
+      }
+
+      warnUser('Prop `initialValues` contains keys missing in `inputs`.');
+      const extraKeys = Array.from(difference(initialKeys, inputKeys)).join(', ');
+      warnUser(`Extra keys in initialValues: ${extraKeys}`);
+    }
   };
 }
 
