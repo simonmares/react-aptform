@@ -19,3 +19,4 @@ Deep objects as props are ugly, but having a lot of props is worse, I think. I a
 - `preconfigure` as a helper to create pre-configured `Aptform` components
 - submit error feature (todo: how to handle error text for the form/submit error)
 - `formValidations`: should be only sync, async is a way edge case. also errors are still scoped to inputs, not to whole form. 
+- **submit result reset**: if promise resolves with object that contains key data, it resets the form with initial data merged with that data (result from API probably), Q: how to deal with `resetOnSubmit` config

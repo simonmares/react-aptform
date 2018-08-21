@@ -318,17 +318,29 @@ class Aptform<TInputNames: string> extends React.Component<
     const onOk = (result: ?Object) => {
       this.setState({ submitting: false, submitFailed: false, submitErrorText: '' });
 
-      if (result && result.errors) {
-        handleErrors(result.errors);
-      } else if (result && result.submitError) {
-        const submitErrorText = this.getSubmitErrorText(result.submitError);
-        this.setState({ submitFailed: true, submitErrorText });
-      } else {
+      if (!result) {
         const resetOnSubmit = this.getFormConfigVal('resetOnSubmit');
         if (resetOnSubmit) {
-          // NoteReview: initialValues are not required, so there might be a bug or weird behavior
           this.resetFormState(this.props, this.props.initialValues);
         }
+        return;
+      }
+
+      if (result.data) {
+        const resetData = { ...this.props.initialValues, ...result.data };
+        this.resetFormState(this.props, resetData);
+        return;
+      }
+
+      if (result.errors) {
+        handleErrors(result.errors);
+        return;
+      }
+
+      if (result.submitError) {
+        const submitErrorText = this.getSubmitErrorText(result.submitError);
+        this.setState({ submitFailed: true, submitErrorText });
+        return;
       }
     };
 
@@ -352,8 +364,7 @@ class Aptform<TInputNames: string> extends React.Component<
       touched: true,
     };
 
-    this.setInputState(inputName, changes).then(() => {
-    });
+    this.setInputState(inputName, changes);
   }
 
   onFocus(e: EventType) {
