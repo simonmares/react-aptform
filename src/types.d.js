@@ -86,6 +86,7 @@ export type InputState<TInputNames> = {
 
 export type FormState = {|
   isValid(): boolean,
+  isSubmitting(): boolean,
   hasChanged(): boolean,
   // whole form is valid
   // valid: ValidationState,

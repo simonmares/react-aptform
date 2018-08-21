@@ -887,6 +887,7 @@ class Aptform<TInputNames: string> extends React.Component<
       // form state getters
       isValid: this.isFormValid,
       hasChanged: this.hasFormChanged,
+      isSubmitting: () => submitting,
 
       // Event handlers
       onSubmit: this.onSubmit,
