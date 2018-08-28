@@ -38,7 +38,9 @@
 			"<rootDir>/jest/env-setup.js"
 		]
 	},
-	"dependencies": {},
+	"dependencies": {
+		"react-testing-library": "^5.0.0"
+	},
 	"whys-scripts": {
 		"src": [
 			"src/**/*.js",
