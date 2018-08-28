@@ -925,9 +925,6 @@ if (process.env.NODE_ENV !== 'production') {
     if (!props.onSubmit) {
       warnUser('You have to provide onSubmit prop.');
     }
-    if (!props.initialValues) {
-      warnUser('Prop initialValues is missing.');
-    }
     if (!props.render) {
       warnUser('Prop render is missing.');
     }
