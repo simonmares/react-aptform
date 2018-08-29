@@ -119,15 +119,9 @@ Notes:
 
 ## Limitations
 
-### React native
-
-While it can be used with react native, the library doesn't aim for it. You can use
-https://github.com/jaredpalmer/formik for more fluent usage.
-
-### Nested fields
-
-Library doesn't work with nested fields at all, you can try
-https://github.com/jaredpalmer/formik or https://github.com/final-form/react-final-form for this use case.
+- Typescript support (use Formik)
+- React native support (use Formik)
+- Nested fields (use Formik or `react-final-form`)
 
 ## Alternatives
 
