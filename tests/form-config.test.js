@@ -1,7 +1,7 @@
 // @flow
 
-import React from 'react';
-import { mount } from 'enzyme';
+import * as React from 'react';
+import { render } from 'react-testing-library';
 
 import { preconfigure, Aptform } from '../src/index';
 
@@ -34,7 +34,7 @@ test('it fallbacks to all preconfigured values', () => {
   const AptformConfigured = preconfigure(preconfig);
 
   let inst;
-  mount(
+  render(
     <AptformConfigured
       componentRef={ref => {
         inst = ref;
@@ -61,7 +61,7 @@ test('Aptform fallbacks to default props', () => {
   const AptformConfigured = preconfigure();
 
   let inst;
-  mount(
+  render(
     <AptformConfigured
       componentRef={ref => {
         inst = ref;
@@ -81,10 +81,14 @@ test('Aptform fallbacks to default props', () => {
 });
 
 test('default props config can be overriden by passing config prop', () => {
-  const wrapper = mount(<Aptform {...defaultProps} config={{ typeTimeout: 333 }} />);
+  const ref = React.createRef();
+  render(<Aptform ref={ref} {...defaultProps} config={{ typeTimeout: 333 }} />);
 
-  const inst = wrapper.instance();
-  // const { config: finalConfig } = inst.props;
+  const inst = ref.current;
+  expect(inst).toBeDefined();
+  if (!inst) {
+    return;
+  }
 
   // Note: works same for any key, so test just one:
   expect(inst.getFormConfigVal('typeTimeout')).toEqual(333);
@@ -98,7 +102,7 @@ test('Aptform config prop has precedence over global config', () => {
   const AptformConfigured = preconfigure({ typeTimeout: 444 });
 
   let inst;
-  mount(
+  render(
     <AptformConfigured
       {...defaultProps}
       componentRef={ref => {
@@ -119,7 +123,7 @@ test('all cases', () => {
   const AptformConfigured = preconfigure({ typeTimeout: 444, failFast: true });
 
   let inst;
-  mount(
+  render(
     <AptformConfigured
       {...defaultProps}
       componentRef={ref => {

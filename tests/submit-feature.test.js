@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from 'react-testing-library';
 
 import { Aptform } from '../src/index';
 
@@ -27,7 +27,7 @@ describe('form.onSubmit', () => {
     });
 
     const onSubmitMock = jest.fn();
-    shallow(<Aptform {...defaultProps} render={renderMock} onSubmit={onSubmitMock} />);
+    render(<Aptform {...defaultProps} render={renderMock} onSubmit={onSubmitMock} />);
 
     expect(renderMock).toHaveBeenCalled();
     expect(onSubmitMock).toHaveBeenCalled();
@@ -46,7 +46,7 @@ describe('form.onSubmit', () => {
     delete props.onSubmit;
 
     expect(() => {
-      shallow(<Aptform {...props} render={renderMock} />);
+      render(<Aptform {...props} render={renderMock} />);
     }).not.toThrow();
 
     expect(renderMock).toHaveBeenCalled();

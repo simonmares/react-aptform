@@ -1,8 +1,7 @@
 // @flow
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import sinon from 'sinon';
+import * as React from 'react';
+import { render, waitForElement } from 'react-testing-library';
 
 import { Aptform } from '../src/index';
 
@@ -31,7 +30,7 @@ describe('initial state', () => {
       initialValues: { email: '', password: '' },
     });
 
-    shallow(<Aptform {...props} />);
+    render(<Aptform {...props} />);
     expect(renderMock).toHaveBeenCalled();
     expect(results.formValid).toBe(false);
   });
@@ -50,20 +49,13 @@ describe('initial state', () => {
       initialValues: { email: 'hello@example.com', password: 'fdisojpaofdsj' },
     });
 
-    shallow(<Aptform {...props} />);
+    render(<Aptform {...props} />);
     expect(renderMock).toHaveBeenCalled();
     expect(results.formValid).toBe(true);
   });
 });
 
 describe('form-wide validation', () => {
-  const waitForValidation = formConfig => {
-    // Wait to onFinishedTyping be called
-    jest.runTimersToTime(formConfig.typeTimeout);
-  };
-
-  jest.useFakeTimers();
-
   const arePasswordsSame = values => {
     if (values.password === '' || values.passwordAgain === '') {
       return true;
@@ -82,9 +74,8 @@ describe('form-wide validation', () => {
     let results = {};
 
     const renderMock = jest.fn(({ form }) => {
-      results.formValid = form.isValid();
       results.changeInput = form.changeInput;
-      return 'mock';
+      return form.isValid() ? 'form_is_valid' : 'form_is_not_valid';
     });
 
     const reactEl = (
@@ -113,25 +104,18 @@ describe('form-wide validation', () => {
       />
     );
 
-    const setInputStateSpy = sinon.spy(Aptform.prototype, 'setInputState');
-    const wrapper = shallow(reactEl);
+    const { getByText, container } = render(reactEl);
     expect(renderMock).toHaveBeenCalled();
-    // initial values are invalid
-    expect(results.formValid).toBe(false);
 
+    // initial values are invalid
+    expect(container.textContent).toBe('form_is_not_valid');
+
+    // fix input
     results.changeInput('password', 'ahojky23!');
     results.changeInput('passwordAgain', 'ahojky23!');
 
-    const rerenderInputState = async () => {
-      const setStatePromise = setInputStateSpy.returnValues.pop();
-      await setStatePromise;
-      wrapper.update();
-    };
-
-    waitForValidation(testFormConfig);
-    await rerenderInputState();
-
     // form-wide validation is valid now
-    expect(results.formValid).toBe(true);
+    await waitForElement(() => getByText('form_is_valid'));
+    expect(container.textContent).toBe('form_is_valid');
   });
 });
