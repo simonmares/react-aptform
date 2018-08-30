@@ -97,7 +97,7 @@ const inputValueMethods = {
   },
 
   isValidating() {
-    return this.changing;
+    return this.valid === undefined && this.changing;
   },
 };
 
@@ -135,8 +135,9 @@ class Aptform<TInputNames: string> extends React.Component<
   LocalProps<TInputNames>,
   LocalState<TInputNames>
 > {
-  typingTimerId: *;
-  asyncTimerId: *;
+  typingTimer: *;
+  asyncTimer: *;
+  validateTimer: *;
 
   props: LocalProps<TInputNames>;
   state: LocalState<TInputNames>;
@@ -667,7 +668,7 @@ class Aptform<TInputNames: string> extends React.Component<
   _runAsyncValidation({ inputName, inputState, asyncValidations }: *, onValidated: Function) {
     const onValidateAsyncReady = () => {
       // reset timer if exists (debounce)
-      this.asyncTimerId && clearTimeout(this.asyncTimerId);
+      this.asyncTimer && clearTimeout(this.asyncTimer);
 
       this.setInputState(inputName, {
         valid: undefined,
@@ -707,7 +708,7 @@ class Aptform<TInputNames: string> extends React.Component<
     };
 
     const asyncTimeout = this.getFormConfigVal('asyncTimeout');
-    this.asyncTimerId = setTimeout(onValidateAsyncReady, asyncTimeout);
+    this.asyncTimer = setTimeout(onValidateAsyncReady, asyncTimeout);
   }
 
   _runFormValidation({ validations, priorValid, inputName }: *) {
@@ -778,8 +779,9 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   clearAllTimers() {
-    this.typingTimerId && clearTimeout(this.typingTimerId);
-    this.asyncTimerId && clearTimeout(this.asyncTimerId);
+    this.typingTimer && clearTimeout(this.typingTimer);
+    this.asyncTimer && clearTimeout(this.asyncTimer);
+    this.validateTimer && clearTimeout(this.validateTimer);
   }
 
   changeInputValue(inputName: TInputNames, value: InputValue) {
@@ -790,28 +792,39 @@ class Aptform<TInputNames: string> extends React.Component<
       // dynamic
       value,
       // reset
-      valid: undefined,
-      errorText: '',
+      // valid: undefined,
       touched: true,
-      _serverErrors: undefined,
     };
 
     this.setInputState(inputName, props).then(() => {
-      const updatedPromise = this.runInputValidation(inputName);
-      const { onChange } = this.props;
-      if (onChange) {
-        updatedPromise.then(() => {
-          onChange(inputName, value);
+      const onDelayed = () => {
+        this.setInputState(inputName, {
+          valid: undefined,
+          errorText: '',
+          _serverErrors: undefined,
         });
-      }
-      if (this.typingTimerId) {
-        clearTimeout(this.typingTimerId);
-      }
-      const onFinishedTyping = () => {
-        this.setInputState(inputName, { changing: false });
+
+        const updatedPromise = this.runInputValidation(inputName);
+        const { onChange } = this.props;
+        if (onChange) {
+          updatedPromise.then(() => {
+            onChange(inputName, value);
+          });
+        }
+        if (this.typingTimer) {
+          clearTimeout(this.typingTimer);
+        }
+        const onFinishedTyping = () => {
+          this.setInputState(inputName, { changing: false });
+        };
+        const typeTimeout = this.getFormConfigVal('typeTimeout');
+        this.typingTimer = setTimeout(onFinishedTyping, typeTimeout);
       };
-      const typeTimeout = this.getFormConfigVal('typeTimeout');
-      this.typingTimerId = setTimeout(onFinishedTyping, typeTimeout);
+
+      if (this.validateTimer) {
+        clearTimeout(this.validateTimer);
+      }
+      this.validateTimer = setTimeout(onDelayed, 50);
     });
   }
 

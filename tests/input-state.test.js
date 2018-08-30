@@ -25,7 +25,17 @@ test('All state transition', async () => {
       return 'email__valid';
     }
     if (email.value === 'joe') {
-      return email.isValidating() ? 'email__value__joe' : 'email__value__joe__validated';
+      if (email.isValidating()) {
+        return 'email__value__joe__validating';
+      }
+      if (email.clientErrors.isJoe === false) {
+        return 'email__value__is__joe__valid';
+      }
+      if (email.changing) {
+        return 'email__value__joe__changing';
+      }
+
+      return '?';
     }
     if (email.clientErrors.isEmail) {
       return 'email__error__is_not_email';
@@ -86,7 +96,7 @@ test('All state transition', async () => {
     // Assert value is changing
     expect(email.changing).toEqual(true);
     // Assert validity is unknown
-    expect(email.valid).toEqual(undefined);
+    // expect(email.valid).toEqual(undefined);
     // Assert email has been changed
     expect(email.pristine).toEqual(false);
     // Assert input has been activated
@@ -94,7 +104,7 @@ test('All state transition', async () => {
     // Assert do not show validation result
     expect(email.showSuccess()).toEqual(false);
     expect(email.showError()).toEqual(false);
-    expect(email.isValidating()).toEqual(true);
+    // expect(email.isValidating()).toEqual(true);
   }
 
   await waitForElement(() => getByText('email__error__is_not_email'));
@@ -104,13 +114,12 @@ test('All state transition', async () => {
     const { email } = receivedProps.inputs;
     // should not be in validating mode anymore
 
-    // NotePrototype(simon): fix/document
-    // expect(email.isValidating()).toEqual(false);
+    expect(email.isValidating()).toEqual(false);
 
     // Assert after typeTimeout the input is not considered to be changing
 
-    // NotePrototype(simon): fix/document
-    // expect(email.changing).toEqual(false);
+    // validating finished, but can be still considered chaning based on typeTimeout config
+    expect(email.changing).toEqual(true);
 
     // Assert validation result is updated in the input state
     expect(email.valid).toEqual(false);
@@ -123,14 +132,15 @@ test('All state transition', async () => {
   }
 
   changeInput('email', 'joe');
-  await waitForElement(() => getByText('email__value__joe'));
+  // await waitForElement(() => getByText('email__value__joe__validating'));
 
-  // Test is in validating mode
-  {
-    const { email } = receivedProps.inputs;
-    expect(email.isValidating()).toEqual(true);
-  }
-  await waitForElement(() => getByText('email__value__joe__validated'));
+  // // Test is in validating mode
+  // {
+  //   const { email } = receivedProps.inputs;
+  //   expect(email.isValidating()).toEqual(true);
+  // }
+
+  await waitForElement(() => getByText('email__value__is__joe__valid'));
 
   // Test validation of 2 rules has different results
   {
@@ -158,8 +168,7 @@ test('All state transition', async () => {
     const { email } = receivedProps.inputs;
 
     // Assert updated
-    // NotePrototype(simon): fix/document
-    // expect(email.changing).toEqual(false);
+    expect(email.changing).toEqual(false);
 
     // Assert input is now valid
     expect(email.valid).toEqual(true);

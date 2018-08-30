@@ -15,6 +15,12 @@ function mergeWithDefaultProps(props) {
   return finalProps;
 }
 
+const waitForMiliSeconds = async time => {
+  return new Promise(resolve => {
+    setTimeout(resolve, time);
+  });
+};
+
 describe('initial state', () => {
   test('required and empty => not valid', () => {
     let results = {};
@@ -112,6 +118,9 @@ describe('form-wide validation', () => {
 
     // fix input
     results.changeInput('password', 'ahojky23!');
+
+    await waitForMiliSeconds(50);
+
     results.changeInput('passwordAgain', 'ahojky23!');
 
     // form-wide validation is valid now

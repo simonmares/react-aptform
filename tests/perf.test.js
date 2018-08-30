@@ -17,6 +17,8 @@ function createPerfContainer(amount) {
     initialValues[name] = `input value #${i}`;
   }
 
+  const onSubmit = () => Promise.resolve();
+
   class PerfContainer extends React.Component<{ render: (*, *) => React.Node }, *> {
     renderTimes = 0;
 
@@ -24,6 +26,7 @@ function createPerfContainer(amount) {
       return (
         <Aptform
           inputs={inputs}
+          onSubmit={onSubmit}
           render={renderProps => {
             this.renderTimes += 1;
             return this.props.render(renderProps, this.renderTimes);
@@ -52,7 +55,7 @@ describe('no custom rendering', () => {
     const endTime = new Date();
 
     const spentTime = endTime.getTime() - startTime.getTime();
-    expect(spentTime).toBeLessThanOrEqual(80);
+    expect(spentTime).toBeLessThanOrEqual(50);
   });
 
   test('rerendering', async () => {
