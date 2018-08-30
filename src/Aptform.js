@@ -366,6 +366,9 @@ class Aptform<TInputNames: string> extends React.Component<
     };
 
     this.setInputState(inputName, changes);
+    if (this.shouldValidate('onBlur')) {
+      this.runInputValidation(inputName);
+    }
   }
 
   onFocus(e: EventType) {
