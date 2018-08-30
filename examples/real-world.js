@@ -12,7 +12,7 @@ import { Formik } from 'formik';
 // project
 import { Aptform } from '../src/index';
 
-function MaterialUIBasic() {
+function MaterialUIBasic({ action }: *) {
   function TextFieldInput({ label, inputState }) {
     return (
       <TextField
@@ -27,13 +27,14 @@ function MaterialUIBasic() {
 
   const example = (
     <Aptform
+      config={{ resetOnSubmit: false }}
       initialValues={{
         name: 'Eliana Rendón',
         email: 'eliana@example.com',
       }}
       onSubmit={values => {
-        console.log('Name value: ', values.name);
-        console.log('Email value: ', values.email);
+        action('onSubmit')(values);
+        return Promise.resolve();
       }}
       inputs={{
         name: { required: true },
@@ -45,6 +46,7 @@ function MaterialUIBasic() {
           <form onBlur={form.onBlur} onFocus={form.onFocus} onSubmit={form.onSubmit}>
             <TextFieldInput label="Name" inputState={name} />
             <TextFieldInput label="E-mail" inputState={email} />
+            <div style={{ margin: 25 }} />
             <Button type="submit" variant="contained" color="primary" disabled={!form.isValid()}>
               Submit
             </Button>
