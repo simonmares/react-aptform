@@ -316,16 +316,8 @@ class Aptform<TInputNames: string> extends React.Component<
       this.onUnhandledRejection(reason);
     };
 
-    const onOk = (result: ?Object) => {
+    const onOk = (result = {}) => {
       this.setState({ submitting: false, submitFailed: false, submitErrorText: '' });
-
-      if (!result) {
-        const resetOnSubmit = this.getFormConfigVal('resetOnSubmit');
-        if (resetOnSubmit) {
-          this.resetFormState(this.props, this.props.initialValues);
-        }
-        return;
-      }
 
       if (result.data) {
         const resetData = { ...this.props.initialValues, ...result.data };
@@ -333,16 +325,20 @@ class Aptform<TInputNames: string> extends React.Component<
         return;
       }
 
-      if (result.errors) {
-        handleErrors(result.errors);
+      if (result.errors || result.submitError) {
+        const submitErrorText = this.getSubmitErrorText(result.submitError === true ? undefined : result.submitError);
+        this.setState({ submitFailed: true, submitErrorText });
+        if (result.errors) {
+          handleErrors(result.errors);
+        }
         return;
       }
 
-      if (result.submitError) {
-        const submitErrorText = this.getSubmitErrorText(result.submitError);
-        this.setState({ submitFailed: true, submitErrorText });
-        return;
+      const resetOnSubmit = this.getFormConfigVal('resetOnSubmit');
+      if (resetOnSubmit) {
+        this.resetFormState(this.props, this.props.initialValues);
       }
+      return;
     };
 
     submitPromise.then(onOk, onErr);
@@ -413,7 +409,7 @@ class Aptform<TInputNames: string> extends React.Component<
   onUnhandledRejection(reason: *) {
     const onError = this.props.onError || onErrorDefault;
     onError(reason, 'promise rejection');
-    const submitErrorText = this.getSubmitErrorText('unknownError');
+    const submitErrorText = this.getSubmitErrorText();
     this.setState({ submitFailed: true, submitErrorText });
   }
 
@@ -529,7 +525,7 @@ class Aptform<TInputNames: string> extends React.Component<
     return objutils.mapObjVals(this.state.inputStates, is => is.value);
   }
 
-  getSubmitErrorText(errorCode: string): string {
+  getSubmitErrorText(errorCode: string = 'unknownError'): string {
     const { errorTextMap } = this.props;
     const submitErrorText = (errorTextMap && errorTextMap[errorCode]) || '';
     if (submitErrorText === '') {

@@ -55,7 +55,7 @@ describe('no custom rendering', () => {
     const endTime = new Date();
 
     const spentTime = endTime.getTime() - startTime.getTime();
-    expect(spentTime).toBeLessThanOrEqual(50);
+    expect(spentTime).toBeLessThanOrEqual(60);
   });
 
   test('rerendering', async () => {

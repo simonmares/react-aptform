@@ -116,6 +116,58 @@ export const SubmittingNonFieldErrorExample = ({ action }: *) => {
   );
 };
 
+export const SubmittingUnkownErrorExample = ({ action }: *) => {
+  const example = (
+    <Aptform
+      initialValues={{
+        username: 'eliana',
+      }}
+      onSubmit={values => {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            if (values.username === 'eliana') {
+              resolve({ submitError: true });
+            } else {
+              resolve();
+            }
+          }, 750);
+        });
+      }}
+      inputs={{
+        username: {
+          required: true,
+        },
+      }}
+      render={({ inputs, form }) => {
+        const { username } = inputs;
+        return (
+          <form {...form.getPassProps()}>
+            <div>
+              username: <input type="text" {...username.getPassProps()} />
+              {username.showError() ? <span>Error: {username.errorText}</span> : null}
+            </div>
+            <button type="submit" disabled={!form.isValid() || form.submitting}>
+              {form.submitting ? 'Submitting...' : 'Submit'}
+            </button>
+            {form.submitFailed ? form.submitErrorText : ''}
+            {form.isValid() ? '' : 'Please fill all fields'}
+          </form>
+        );
+      }}
+    />
+  );
+
+  return (
+    <React.Fragment>
+      <h1>Unknown submit error</h1>
+      <article>
+        <p>Just click the button without changing the value.</p>
+        {example}
+      </article>
+    </React.Fragment>
+  );
+};
+
 export const SubmittingExample = ({ action }: *) => {
   const initialValues = {
     name: 'Eliana Rendón',
@@ -345,9 +397,9 @@ export const ResetWithNewData = ({ action }: *) => {
     <React.Fragment>
       <h1>Reset data from submit result</h1>
       <article>
-          <p>Server returns new data that are applied as new values of the form.</p>
-          <p className="help">Write </p>
-          {example}
+        <p>Server returns new data that are applied as new values of the form.</p>
+        <p className="help">Write </p>
+        {example}
       </article>
     </React.Fragment>
   );
@@ -357,6 +409,7 @@ export default {
   'submitting state': SubmittingExample,
   'w/ field errors': SubmittingWithErrorsExample,
   'w/ nonfield error': SubmittingNonFieldErrorExample,
+  'w/ nonfield unknown error': SubmittingUnkownErrorExample,
   'w/ form rejected': SubmittingRejectedExample,
   'w/ reset with result': ResetWithNewData,
 };

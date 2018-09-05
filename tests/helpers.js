@@ -18,3 +18,18 @@ export function createChangeEvent(props: {| name: string, value: string |}) {
   };
   return { target, preventDefault: jest.fn };
 }
+
+export function changeInputValue(form: *, inputName: string, value: string) {
+  // $FlowFixMe
+  form.changeInput(inputName, value);
+}
+
+export function createSubmitEvent() {
+  // $FlowFixMe
+  return { preventDefault: jest.fn() };
+}
+
+export function triggerSubmit(form: *) {
+  const e = createSubmitEvent();
+  form.onSubmit(e);
+}
