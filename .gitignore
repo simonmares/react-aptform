@@ -7,3 +7,4 @@ lib/
 .storybook
 .watchman*
 dest/
+coverage/
