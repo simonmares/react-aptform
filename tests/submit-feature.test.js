@@ -5,15 +5,7 @@ import { render, waitForElement } from 'react-testing-library';
 
 import { Aptform } from '../src/index';
 
-import { defaultProps, changeInputValue, toStableJSON } from './helpers';
-
-const createEvent = () => ({ preventDefault: jest.fn() });
-
-const triggerSubmit = (form: *) => {
-  const e = createEvent();
-  // $FlowFixMe
-  form.onSubmit(e);
-};
+import { defaultProps, changeInputValue, toStableJSON, triggerSubmit } from './helpers';
 
 describe('form.onSubmit defensivity', () => {
   beforeEach(() => {
@@ -24,9 +16,13 @@ describe('form.onSubmit defensivity', () => {
     global.console.warn.mockRestore();
   });
 
+  function createSubmitEvent() {
+    return { preventDefault: jest.fn() };
+  }
+
   test('should call preventDefault and onSubmit prop', () => {
     const renderMock = jest.fn(({ form }) => {
-      const e = createEvent();
+      const e = createSubmitEvent();
       form.onSubmit(e);
       expect(e.preventDefault).toBeCalled();
       return 'mock';
@@ -43,7 +39,7 @@ describe('form.onSubmit defensivity', () => {
 
   test('should not call missing onSubmit prop (its optional)', () => {
     const renderMock = jest.fn(({ form }) => {
-      const e = createEvent();
+      const e = createSubmitEvent();
       form.onSubmit(e);
       return 'mock';
     });

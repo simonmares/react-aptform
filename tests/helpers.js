@@ -31,6 +31,7 @@ export function createSubmitEvent() {
 
 export function triggerSubmit(form: *) {
   const e = createSubmitEvent();
+  // $FlowFixMe
   form.onSubmit(e);
 }
 
