@@ -39,3 +39,15 @@ export function toStableJSON(obj: Object): string {
   // only shallow objects
   return JSON.stringify(obj, Object.keys(obj).sort());
 }
+
+export function resolveAfter(value: any, time: number = 0) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(value), time);
+  });
+}
+
+export function rejectAfter(value: any, time: number = 0) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(value), time);
+  });
+}

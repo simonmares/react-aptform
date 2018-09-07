@@ -26,6 +26,9 @@ test('`render` prop receives `form` prop with given API', () => {
     expect(form.focusInput).toBeDefined();
     expect(form.blurInput).toBeDefined();
     expect(form.submitting).toBe(false);
+    // experimental:
+    expect(form.isSubmitting()).toBe(false);
+    expect(form.hasChanged()).toBe(false);
     return null;
   });
   render(<Aptform {...defaultProps} render={renderMock} />);
@@ -61,6 +64,7 @@ test('`render` prop receives `inputs` prop', () => {
 
     // boolean API
     expect(inputEmail.hasChanged()).toEqual(false);
+    expect(inputEmail.hasError()).toEqual(false);
 
     // pass props
     const passProps = inputEmail.getPassProps();
@@ -147,11 +151,10 @@ describe('validates props on development', () => {
       render(<Aptform {...invalidProps} />);
     }).toThrow();
     // Using missing prop is logged to console
-    expect(console.warn).toBeCalledWith(expect.stringMatching(/Prop render is missing./));
+    expect(console.warn).toBeCalledWith(expect.stringMatching(/Prop `render` is missing./));
   });
 
-  // NoteReview(simon): atm initialValues are required only
-  test.skip('validates required prop `inputs` is passed', () => {
+  test('validates required prop `inputs` is passed', () => {
     const invalidProps = { ...defaultProps };
     delete invalidProps.inputs;
     // Using it as an object should resolve with TypeError
@@ -159,6 +162,20 @@ describe('validates props on development', () => {
       render(<Aptform {...invalidProps} />);
     }).toThrow();
     // Using missing prop is logged to console
-    expect(console.warn).toBeCalledWith(expect.stringMatching(/Prop inputs is missing./));
+    expect(console.warn).toBeCalledWith(expect.stringMatching(/Prop `inputs` is missing./));
+  });
+
+  test('validates inputs and initialValues mismatches', () => {
+    const invalidProps = {
+      ...defaultProps,
+      inputs: { name: { required: true }, email: { required: true } },
+      initialValues: { firstName: '', lastName: '', email: '' },
+    };
+    render(<Aptform {...invalidProps} />);
+    expect(console.warn).toBeCalledWith(
+      expect.stringMatching(
+        /Extra keys in `initialValues`: \[firstName, lastName\] missing in `inputs`./
+      )
+    );
   });
 });

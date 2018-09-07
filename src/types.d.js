@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from 'react';
+import type { Node } from 'react';
 
 type EventHandler = (e: Event) => any;
 
@@ -55,6 +55,8 @@ export type InputState<TInputNames> = {
   // input has changed (no matter it had initial or not)
   pristine: boolean,
 
+  asyncValidating: boolean,
+
   //
   // NOTE_REVIEW: just ideas
   //
@@ -98,11 +100,14 @@ export type FormState = {|
 |};
 
 // type TInputNames = string;
-type validationFunc = (value: any) => boolean | Promise<boolean>;
-export type ValidationMapping<TInputNames> = { [key: TInputNames]: validationFunc };
+
+export type AsyncValidationMapping<TInputNames> = {
+  [key: TInputNames]: (value: any) => Promise<boolean>,
+};
 
 export type InputConfig<TInputNames> = {|
-  validations?: ValidationMapping<TInputNames>,
+  validations?: { [key: TInputNames]: (value: any) => boolean },
+  asyncValidations?: AsyncValidationMapping<TInputNames>,
   validationOrder?: Array<TInputNames>,
   required?: boolean,
   getErrorText?: (input: InputState<TInputNames>) => ?string,
@@ -154,7 +159,7 @@ export type LocalProps<TInputNames> = {
   initialValues?: FormValuesMap<TInputNames>,
 
   // can return anything
-  render: (props: RenderProps<TInputNames>) => React.Node,
+  render: (props: RenderProps<TInputNames>) => Node,
 
   formValidations?: {
     [inputName: string]: {

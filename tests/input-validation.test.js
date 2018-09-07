@@ -27,7 +27,7 @@ const validators = (() => {
   };
 })();
 
-describe('builtin errors', () => {
+describe('custom errors', () => {
   const inputs = {
     password: {
       validations: { includesNum: validators.includesNum, includesAlpha: validators.includesAlpha },
@@ -157,3 +157,5 @@ describe('builtin errors', () => {
     );
   });
 });
+
+describe('builtin errors', () => {});

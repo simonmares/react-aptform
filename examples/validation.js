@@ -37,7 +37,8 @@ export const AsyncValidationExample = ({ action }: *) => {
         name: { required: true },
         email: {
           required: true,
-          validations: { isEmail, alreadyExists },
+          validations: { isEmail },
+          asyncValidations: { alreadyExists },
           getErrorText: i =>
             i._serverErrors && i._serverErrors.alreadyExists ? 'The email is used' : '',
         },
@@ -150,7 +151,9 @@ export const SortedValidations = ({ action }: *) => {
               inputState={superNumber}
               {...superNumber.getPassProps()}
             />
-            <button onClick={form.onSubmit} disabled={!form.isValid()}>Submit</button>
+            <button onClick={form.onSubmit} disabled={!form.isValid()}>
+              Submit
+            </button>
           </form>
         );
       }}

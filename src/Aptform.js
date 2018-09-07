@@ -10,7 +10,7 @@ import type {
   InputConfig,
   PassProps,
   ValidationErrs,
-  ValidationMapping,
+  AsyncValidationMapping,
   ValidationPolicyNames,
   LocalProps,
   LocalState,
@@ -62,10 +62,10 @@ const inputValueMethods = {
     return !this.pristine && (!this.changing || !this.focused) && this.valid === true;
   },
 
-  hasServerError() {
-    // serverErrors are now nullable, set only if submit fails
-    return !!this._serverErrors;
-  },
+  // hasServerError() {
+  //   // serverErrors are now nullable, set only if submit fails
+  //   return !!this._serverErrors;
+  // },
 
   hasError() {
     return this.valid === false;
@@ -96,7 +96,7 @@ const inputValueMethods = {
   },
 
   isValidating() {
-    return this.valid === undefined && this.changing;
+    return (this.valid === undefined && this.changing) || this.asyncValidating;
   },
 };
 
@@ -108,11 +108,13 @@ const defaultConfig: FormConfig = {
   initialValid: false,
   joinChar: ', ',
   msgInvalid: 'This input is invalid.',
+  msgRequired: 'This input is required.',
   msgFormInvalid: 'Form has errors.',
   msgUnknownError: 'Unknown error ocurred.',
   validationPolicy: {
     onMount: false,
-    onDelay: false,
+    // NotePrototype(simon): add feat. or remove
+    // onDelay: false,
     onBlur: true,
     onSubmit: true,
   },
@@ -218,6 +220,11 @@ class Aptform<TInputNames: string> extends React.Component<
     inputConfig: InputConfig<TInputNames>,
     opts: { failFast: boolean, defaultText: string }
   ): string {
+    // if its the 'required' error, we don't care about others and output this error directly.
+    if (inputState.clientErrors.required) {
+      return this.getFormConfigVal('msgRequired') || '';
+    }
+
     if (inputConfig.getErrorText) {
       // $FlowFixMe
       return nonNilOrDefault(inputConfig.getErrorText(inputState), opts.defaultText);
@@ -588,16 +595,17 @@ class Aptform<TInputNames: string> extends React.Component<
 
   validateInputAsync(
     input: InputState<TInputNames>,
-    validations: ValidationMapping<TInputNames>
+    validations: AsyncValidationMapping<TInputNames>
   ): Promise<?{ valid: boolean, errorCode: string }> {
     const { value } = input;
+
     for (const key of Object.keys(validations)) {
-      const validate = validations[key];
-      const validationValue = validate(value);
+      const validationValue = validations[key](value);
       // NoteReview(simon): should always be Promise
       if (!(validationValue instanceof Promise)) {
         continue;
       }
+
       // NoteReview(simon): what is my responsibility over promise rejection?
       return validationValue.then(result => {
         if (typeof result === 'boolean') {
@@ -616,16 +624,15 @@ class Aptform<TInputNames: string> extends React.Component<
     inputValue: InputValue,
     inputName: TInputNames,
     opts: { failFast: boolean } = { failFast: false }
-  ): [boolean, ValidationErrs, ValidationMapping<TInputNames>] {
+  ): [boolean, ValidationErrs] {
     const inputConfig = this.getInputConfig(inputName);
     const validationErrors = {};
-    const asyncValidations = {};
 
     const isEmpty = valueEmpty(inputValue);
     if (inputConfig.required && isEmpty) {
-      return [false, { required: true }, asyncValidations];
+      return [false, { required: true }];
     } else if (isEmpty) {
-      return [true, {}, asyncValidations];
+      return [true, {}];
     }
 
     let isValid = true;
@@ -641,15 +648,11 @@ class Aptform<TInputNames: string> extends React.Component<
           this.onValidationThrown(e, valKey, { name: inputName, value: inputValue });
           continue;
         }
-        // ignore async validations as this method is synchronous
-        if (validationResult instanceof Promise) {
-          asyncValidations[valKey] = validateFunc;
-          continue;
-        }
+
         const hasError = !validationResult;
         validationErrors[valKey] = hasError;
         if (hasError && opts.failFast) {
-          return [false, validationErrors, asyncValidations];
+          return [false, validationErrors];
         }
         if (hasError) {
           isValid = false;
@@ -657,7 +660,7 @@ class Aptform<TInputNames: string> extends React.Component<
       }
     }
 
-    return [isValid, validationErrors, asyncValidations];
+    return [isValid, validationErrors];
   }
 
   _updateErrorText(inputName: TInputNames) {
@@ -676,12 +679,17 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   _runAsyncValidation({ inputName, inputState, asyncValidations }: *, onValidated: Function) {
+    // this.setInputState(inputName, {
+    //   asyncValidating: true,
+    // });
+
     const onValidateAsyncReady = () => {
       // reset timer if exists (debounce)
       this.asyncTimer && clearTimeout(this.asyncTimer);
 
       this.setInputState(inputName, {
         valid: undefined,
+        asyncValidating: true,
       });
 
       const asyncValidated = this.validateInputAsync(inputState, asyncValidations)
@@ -689,6 +697,7 @@ class Aptform<TInputNames: string> extends React.Component<
           if (!result) {
             return this.setInputState(inputName, {
               valid: true,
+              asyncValidating: false,
               _serverErrors: undefined,
             });
           }
@@ -712,6 +721,7 @@ class Aptform<TInputNames: string> extends React.Component<
           this.onUnhandledRejection(reason);
           return this.setInputState(inputName, {
             valid: true,
+            asyncValidating: false,
           });
         });
       return asyncValidated.then(onValidated);
@@ -750,24 +760,30 @@ class Aptform<TInputNames: string> extends React.Component<
     };
 
     const inputState = this.getInputState(inputName);
-    const [isValid, clientErrors, asyncValidations] = this.validateInputSync(
-      inputState.value,
-      inputName,
-      { failFast }
-    );
+    const [isValid, clientErrors] = this.validateInputSync(inputState.value, inputName, {
+      failFast,
+    });
     let valid = isValid;
 
     // validate asynchronously iff client validations pass and an async validation exist
-    if (isValid && !inputState.pristine && Object.keys(asyncValidations).length) {
-      // NoteReview(simon): must keep validating status of the input until Promise is settled
-      this._runAsyncValidation(
-        {
-          inputName,
-          inputState,
-          asyncValidations,
-        },
-        onValidated
-      );
+    if (isValid && !inputState.pristine) {
+      const asyncValidations = this.getInputConfig(inputName).asyncValidations || {};
+
+      if (Object.keys(asyncValidations).length) {
+        // NoteReview(simon): must keep validating status of the input until Promise is settled
+        this.setInputState(inputName, {
+          asyncValidating: true,
+        });
+
+        this._runAsyncValidation(
+          {
+            inputName,
+            inputState,
+            asyncValidations,
+          },
+          onValidated
+        );
+      }
     }
 
     const syncValidated = this.setInputState(inputName, {
@@ -888,6 +904,8 @@ class Aptform<TInputNames: string> extends React.Component<
       changing: nonNilOrDefault(fromProps.changing, false),
       errorText: nonNilOrDefault(fromProps.errorText, NO_ERROR_TEXT),
       clientErrors: nonNilOrDefault(fromProps.clientErrors, {}),
+      //
+      asyncValidating: nonNilOrDefault(fromProps.asyncValidating, false),
     };
 
     // methods
@@ -953,7 +971,10 @@ if (process.env.NODE_ENV !== 'production') {
       warnUser('You have to provide onSubmit prop.');
     }
     if (!props.render) {
-      warnUser('Prop render is missing.');
+      warnUser('Prop `render` is missing.');
+    }
+    if (!props.inputs) {
+      warnUser('Prop `inputs` is missing.');
     }
     if ('children' in props) {
       warnUser('Aptform does not accept children prop.');
@@ -984,9 +1005,8 @@ if (process.env.NODE_ENV !== 'production') {
         return _difference;
       }
 
-      warnUser('Prop `initialValues` contains keys missing in `inputs`.');
       const extraKeys = Array.from(difference(initialKeys, inputKeys)).join(', ');
-      warnUser(`Extra keys in initialValues: ${extraKeys}`);
+      warnUser(`Extra keys in \`initialValues\`: [${extraKeys}] missing in \`inputs\`.`);
     }
   };
 }
