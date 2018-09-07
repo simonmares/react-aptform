@@ -17,8 +17,7 @@ import type {
   InitialValues,
 } from './types.d';
 
-import * as objutils from './objutils';
-import * as arrutils from './arrutils';
+import { sortByArray, mapObjVals, objValuesByKeys, filterObjValues, filterObj } from './utils';
 
 const NO_ERROR_TEXT = '';
 const DEFAULT_VALUE = '';
@@ -205,9 +204,11 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   getSortedValidationCodes(inputConfig: *) {
-    const codesUnsorted = inputConfig.validations ? Object.keys(inputConfig.validations) : [];
+    const codesUnsorted: Array<string> = inputConfig.validations
+      ? Object.keys(inputConfig.validations)
+      : [];
     if (inputConfig.validationOrder && inputConfig.validationOrder.length) {
-      return arrutils.sortByArray(codesUnsorted, inputConfig.validationOrder);
+      return sortByArray(codesUnsorted, inputConfig.validationOrder);
     }
     return codesUnsorted;
   }
@@ -226,7 +227,7 @@ class Aptform<TInputNames: string> extends React.Component<
     if (errorsMap) {
       const hasError = (msg, isError) => isError === true;
       const errorsObject = { ...inputState.clientErrors, ...inputState._serverErrors };
-      const allErrorCodes = Object.keys(objutils.filterObj(errorsObject, hasError));
+      const allErrorCodes = Object.keys(filterObj(errorsObject, hasError));
 
       // Be defensive: should be called when an error exists, but it can happen.
       if (allErrorCodes.length === 0) {
@@ -245,12 +246,12 @@ class Aptform<TInputNames: string> extends React.Component<
       if (opts.failFast) {
         // NoteReview: can sortedCodes be empty array?
         const sortedCodes = this.getSortedValidationCodes(inputConfig);
-        const firstError = arrutils.sortByArray(allErrorCodes, sortedCodes)[0];
+        const firstError = sortByArray(allErrorCodes, sortedCodes)[0];
         const errorText = errorsMap[(firstError: string)];
         return resolveErr(errorText);
       }
 
-      const errorTexts = objutils.objValuesByKeys(errorsMap, allErrorCodes).map(resolveErr);
+      const errorTexts = objValuesByKeys(errorsMap, allErrorCodes).map(resolveErr);
       if (errorTexts.length === 0) {
         return opts.defaultText;
       }
@@ -479,12 +480,9 @@ class Aptform<TInputNames: string> extends React.Component<
 
         for (const inputName of Object.keys(validations)) {
           const validators = validations[inputName];
-          const clientErrors = objutils.mapObjVals(
-            validators,
-            validator => !validator(inputValues)
-          );
+          const clientErrors = mapObjVals(validators, validator => !validator(inputValues));
 
-          const newErrors = objutils.filterObjValues(clientErrors, v => v === true);
+          const newErrors = filterObjValues(clientErrors, v => v === true);
           const hasNewErrors = newErrors.length > 0;
           const valid = !hasNewErrors && priorValid;
           if (!valid) {
@@ -534,7 +532,7 @@ class Aptform<TInputNames: string> extends React.Component<
 
   getAllFormValues() {
     // => input name to value map.
-    return objutils.mapObjVals(this.state.inputStates, is => is.value);
+    return mapObjVals(this.state.inputStates, is => is.value);
   }
 
   getSubmitErrorText(errorCode: string = 'unknownError'): string {
@@ -634,6 +632,7 @@ class Aptform<TInputNames: string> extends React.Component<
     const validations = inputConfig && inputConfig.validations;
     if (validations) {
       for (const valKey of this.getSortedValidationCodes(inputConfig)) {
+        // $FlowFixMe TInputNames is string
         const validateFunc = validations[valKey];
         let validationResult;
         try {
@@ -728,9 +727,9 @@ class Aptform<TInputNames: string> extends React.Component<
     // react in batch.
     for (const inputName of Object.keys(validations)) {
       const validators = validations[inputName];
-      const clientErrors = objutils.mapObjVals(validators, validator => !validator(inputValues));
+      const clientErrors = mapObjVals(validators, validator => !validator(inputValues));
 
-      const newErrors = objutils.filterObjValues(clientErrors, v => v === true);
+      const newErrors = filterObjValues(clientErrors, v => v === true);
       const hasNewErrors = newErrors.length > 0;
 
       const oldState = this.getInputState(inputName);

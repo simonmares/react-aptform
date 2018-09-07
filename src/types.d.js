@@ -157,7 +157,7 @@ export type LocalProps<TInputNames> = {
   render: (props: RenderProps<TInputNames>) => React.Node,
 
   formValidations?: {
-    [inputName: TInputNames]: {
+    [inputName: string]: {
       [errorCode: string]: (formValues: FormValuesMap<TInputNames>) => boolean,
     },
   },
