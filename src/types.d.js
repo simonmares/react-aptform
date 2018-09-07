@@ -133,6 +133,7 @@ type RenderProps<TInputNames> = {|
 
     submitting: boolean,
     submitFailed: boolean,
+    submitSucceeded: boolean,
     submitErrorText: string,
   |},
 |};
@@ -141,6 +142,7 @@ export type LocalState<TInputNames> = {|
   inputStates: { [TInputNames]: InputState<TInputNames> },
   submitting: boolean,
   submitFailed: boolean,
+  submitSucceeded: boolean,
   submitErrorText: string,
 |};
 

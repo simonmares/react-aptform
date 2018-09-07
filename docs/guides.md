@@ -61,3 +61,9 @@ However if you resolve e.g. `{ errors: { email: '???' } }` and it doesn't map to
 _This is not possible._
 
 Multiple field errors usually happens when you omit client-side validation. You need to map multiple errors from server to e.g. first one.
+
+## Experimental
+
+### test submit succeeded
+
+You can tell if a form has been submitted successfully with `form.submitSucceeded`.

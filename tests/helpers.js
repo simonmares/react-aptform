@@ -33,3 +33,8 @@ export function triggerSubmit(form: *) {
   const e = createSubmitEvent();
   form.onSubmit(e);
 }
+
+export function toStableJSON(obj: Object): string {
+  // only shallow objects
+  return JSON.stringify(obj, Object.keys(obj).sort());
+}

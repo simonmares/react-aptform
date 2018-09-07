@@ -199,6 +199,7 @@ class Aptform<TInputNames: string> extends React.Component<
       inputStates: this.createInputStateMap(inputNames, initialValues),
       submitting: false,
       submitFailed: false,
+      submitSucceeded: false,
       submitErrorText: '',
     };
   }
@@ -274,6 +275,7 @@ class Aptform<TInputNames: string> extends React.Component<
     if (!this.isFormValid()) {
       this.setState({
         submitFailed: true,
+        submitSucceeded: false,
         submitErrorText: this.getSubmitErrorText('formInvalid'),
       });
       return;
@@ -312,33 +314,43 @@ class Aptform<TInputNames: string> extends React.Component<
     };
 
     const onErr = reason => {
-      this.setState({ submitting: false });
+      this.setState({ submitting: false, submitFailed: true, submitSucceeded: false });
       this.onUnhandledRejection(reason);
     };
 
     const onOk = (result = {}) => {
-      this.setState({ submitting: false, submitFailed: false, submitErrorText: '' });
+      // reset all previous submit states
+      this.setState({
+        submitting: false,
+        submitFailed: false,
+        submitSucceeded: false,
+        submitErrorText: '',
+      });
 
       if (result.data) {
         const resetData = { ...this.props.initialValues, ...result.data };
-        this.resetFormState(this.props, resetData);
+        this.resetFormState(this.props, resetData).then(() => {
+          this.setState({ submitSucceeded: true });
+        });
         return;
-      }
-
-      if (result.errors || result.submitError) {
-        const submitErrorText = this.getSubmitErrorText(result.submitError === true ? undefined : result.submitError);
+      } else if (result.errors || result.submitError) {
+        const submitErrorText = this.getSubmitErrorText(
+          result.submitError === true ? undefined : result.submitError
+        );
         this.setState({ submitFailed: true, submitErrorText });
         if (result.errors) {
           handleErrors(result.errors);
         }
         return;
+      } else {
+        const resetOnSubmit = this.getFormConfigVal('resetOnSubmit');
+        if (resetOnSubmit) {
+          this.resetFormState(this.props, this.props.initialValues).then(() => {
+            this.setState({ submitSucceeded: true });
+          });
+        }
+        return;
       }
-
-      const resetOnSubmit = this.getFormConfigVal('resetOnSubmit');
-      if (resetOnSubmit) {
-        this.resetFormState(this.props, this.props.initialValues);
-      }
-      return;
     };
 
     submitPromise.then(onOk, onErr);
@@ -898,14 +910,17 @@ class Aptform<TInputNames: string> extends React.Component<
     return inputState;
   }
 
-  resetFormState(props: LocalProps<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
+  resetFormState(
+    props: LocalProps<TInputNames>,
+    initialValues: ?InitialValues<TInputNames>
+  ): Promise<typeof undefined> {
     this.clearAllTimers();
     const initialState = this.getInitialState(props, initialValues);
-    this.setFormState(initialState);
+    return this.setFormState(initialState);
   }
 
   render() {
-    const { inputStates, submitting, submitFailed, submitErrorText } = this.state;
+    const { inputStates, submitting, submitFailed, submitErrorText, submitSucceeded } = this.state;
     const form = {
       // form state getters
       isValid: this.isFormValid,
@@ -926,6 +941,7 @@ class Aptform<TInputNames: string> extends React.Component<
       // direct state
       submitting,
       submitFailed,
+      submitSucceeded,
       submitErrorText,
     };
     return this.props.render({ inputs: inputStates, form });

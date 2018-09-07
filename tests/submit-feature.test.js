@@ -5,7 +5,7 @@ import { render, waitForElement } from 'react-testing-library';
 
 import { Aptform } from '../src/index';
 
-import { defaultProps, changeInputValue } from './helpers';
+import { defaultProps, changeInputValue, toStableJSON } from './helpers';
 
 const createEvent = () => ({ preventDefault: jest.fn() });
 
@@ -255,4 +255,97 @@ describe('submit render states', () => {
   test('submit failed w/ text', () => {});
 
   test('is submitting', () => {});
+});
+
+describe('submit render states', () => {
+  const inputs = {
+    firstName: { required: true },
+    lastName: { required: true },
+  };
+
+  const initialValues = {
+    firstName: 'Charlie',
+    lastName: 'Jones',
+  };
+
+  const AptformUnit = (props: *) => (
+    <Aptform {...defaultProps} inputs={inputs} initialValues={initialValues} {...props} />
+  );
+
+  test('submit succeeded', async () => {
+    let form;
+    const renderMock = jest.fn(renderProps => {
+      form = renderProps.form;
+      return toStableJSON(form);
+    });
+
+    const onSubmitMock = jest.fn(() => Promise.resolve());
+    const { getByText } = render(<AptformUnit render={renderMock} onSubmit={onSubmitMock} />);
+
+    // initial form state
+    await waitForElement(() =>
+      getByText(
+        '{"submitErrorText":"","submitFailed":false,"submitSucceeded":false,"submitting":false}'
+      )
+    );
+
+    triggerSubmit(form);
+    expect(onSubmitMock).toHaveBeenCalled();
+
+    // submitting state
+    await waitForElement(() =>
+      getByText(
+        '{"submitErrorText":"","submitFailed":false,"submitSucceeded":false,"submitting":true}'
+      )
+    );
+
+    // submitting resolved => not in submitting state, resets previous submit state
+    await waitForElement(() =>
+      getByText(
+        '{"submitErrorText":"","submitFailed":false,"submitSucceeded":false,"submitting":false}'
+      )
+    );
+
+    // submitting succeeded
+    await waitForElement(() =>
+      getByText(
+        '{"submitErrorText":"","submitFailed":false,"submitSucceeded":true,"submitting":false}'
+      )
+    );
+  });
+
+  test('submit failed', async () => {
+    let form;
+    const renderMock = jest.fn(renderProps => {
+      form = renderProps.form;
+      return toStableJSON(form);
+    });
+
+    const onSubmitMock = jest.fn(() => Promise.resolve({ submitError: true }));
+    const { getByText } = render(<AptformUnit render={renderMock} onSubmit={onSubmitMock} />);
+
+    // initial form state
+    await waitForElement(() =>
+      getByText(
+        '{"submitErrorText":"","submitFailed":false,"submitSucceeded":false,"submitting":false}'
+      )
+    );
+
+    triggerSubmit(form);
+    expect(onSubmitMock).toHaveBeenCalled();
+
+    // submitting state
+    await waitForElement(() =>
+      getByText(
+        '{"submitErrorText":"","submitFailed":false,"submitSucceeded":false,"submitting":true}'
+      )
+    );
+
+    // submitting failed
+    await waitForElement(() =>
+      getByText(
+        '{"submitErrorText":"Unknown error ocurred.","submitFailed":true,"submitSucceeded":false,"submitting":false}'
+      )
+    );
+  });
 });
