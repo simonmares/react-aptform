@@ -194,6 +194,10 @@ class Aptform<TInputNames: string> extends React.Component<
     }
   }
 
+  componentWillUnmount() {
+    this.clearAllTimers();
+  }
+
   getInitialState(props: LocalProps<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
     const inputNames = Object.keys(props.inputs);
     return {
