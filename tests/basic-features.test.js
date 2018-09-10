@@ -179,3 +179,11 @@ describe('validates props on development', () => {
     );
   });
 });
+
+test('clear all timers on unmount', () => {
+  const clearAllTimersSpy = jest.spyOn(Aptform.prototype, 'clearAllTimers');
+  const { unmount } = render(<Aptform {...defaultProps} />);
+  unmount();
+  expect(clearAllTimersSpy).toHaveBeenCalled();
+});
+
