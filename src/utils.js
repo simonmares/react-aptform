@@ -21,6 +21,10 @@ export function objValuesByKeys(obj: *, keys: *) {
   return keys.map(k => obj[k]);
 }
 
+export function objValues(obj: *): Array<*> {
+  return Object.keys(obj).map(k => obj[k]);
+}
+
 // Returns object values filtered by filterFunc.
 export function filterObjValues(obj: *, filterFunc: *): Array<*> {
   const keys = Object.keys(obj);

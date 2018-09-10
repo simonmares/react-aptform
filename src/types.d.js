@@ -8,7 +8,7 @@ type EventHandler = (e: Event) => any;
 type ValidationState = ?boolean;
 
 export type ValidationErrs = { [string]: boolean };
-export type ValidationPolicyNames = 'onMount' | 'onDelay' | 'onBlur' | 'onSubmit';
+export type ValidationPolicyNames = 'onMount' | 'onDelay' | 'onBlur' | 'onSubmit' | 'onCreate';
 
 export type InputValue = any;
 export type EventType = SyntheticInputEvent<HTMLInputElement>;
@@ -101,13 +101,11 @@ export type FormState = {|
 
 // type TInputNames = string;
 
-export type AsyncValidationMapping<TInputNames> = {
-  [key: TInputNames]: (value: any) => Promise<boolean>,
-};
+export type AsyncValidator = (value: any) => Promise<{ asyncError: string | boolean }>;
 
 export type InputConfig<TInputNames> = {|
   validations?: { [key: TInputNames]: (value: any) => boolean },
-  asyncValidations?: AsyncValidationMapping<TInputNames>,
+  validateAsync?: AsyncValidator,
   validationOrder?: Array<TInputNames>,
   required?: boolean,
   getErrorText?: (input: InputState<TInputNames>) => ?string,

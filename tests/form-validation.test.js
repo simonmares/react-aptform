@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react';
-import { render, waitForElement } from 'react-testing-library';
+import { render, waitForElement, cleanup } from 'react-testing-library';
 
 import { Aptform } from '../src/index';
 
@@ -15,13 +15,17 @@ function mergeWithDefaultProps(props) {
   return finalProps;
 }
 
-const waitForMiliSeconds = async time => {
+const waitForMilliseconds = async time => {
   return new Promise(resolve => {
     setTimeout(resolve, time);
   });
 };
 
 describe('initial state', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   test('required and empty => not valid', () => {
     let results = {};
 
@@ -119,7 +123,7 @@ describe('form-wide validation', () => {
     // fix input
     results.changeInput('password', 'ahojky23!');
 
-    await waitForMiliSeconds(50);
+    await waitForMilliseconds(50);
 
     results.changeInput('passwordAgain', 'ahojky23!');
 

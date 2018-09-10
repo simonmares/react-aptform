@@ -109,7 +109,7 @@ describe('custom errors', () => {
 
     // with initial state its invalid because its required and its empty
     expect(container.textContent).toBe(
-      toJSON({ isValid: false, isValidating: false, value: '', errorText: '' })
+      toJSON({ isValid: false, isValidating: false, value: '', errorText: 'This input is required.' })
     );
 
     // trigger the validation by changing it

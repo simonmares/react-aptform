@@ -36,8 +36,7 @@
 	},
 	"whys-scripts": {
 		"src": [
-			"src/**/*.js",
-			"examples/**/*.js"
+			"src/**/*.js"
 		],
 		"tests": [
 			"tests/**/*.test.js"

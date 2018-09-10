@@ -10,7 +10,7 @@ import type {
   InputConfig,
   PassProps,
   ValidationErrs,
-  AsyncValidationMapping,
+  AsyncValidator,
   ValidationPolicyNames,
   LocalProps,
   LocalState,
@@ -20,6 +20,7 @@ import type {
 import {
   sortByArray,
   mapObjVals,
+  objValues,
   objValuesByKeys,
   filterObjValues,
   filterObj,
@@ -105,6 +106,8 @@ const defaultConfig: FormConfig = {
     // onDelay: false,
     onBlur: true,
     onSubmit: true,
+    onCreate: true,
+    // onChange: true,
   },
 };
 
@@ -189,7 +192,7 @@ class Aptform<TInputNames: string> extends React.Component<
   getInitialState(props: LocalProps<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
     const inputNames = Object.keys(props.inputs);
     return {
-      inputStates: this.createInputStateMap(inputNames, initialValues),
+      inputStates: this.initInputStates(inputNames, initialValues),
       submitting: false,
       submitFailed: false,
       submitSucceeded: false,
@@ -262,6 +265,20 @@ class Aptform<TInputNames: string> extends React.Component<
     return opts.defaultText;
   }
 
+  getInputText(inputName: TInputNames, inputState: *): string {
+    const failFast = this.getFormConfigVal('failFast');
+    const msgInvalid = this.getFormConfigVal('msgInvalid');
+    if (inputState.valid === false) {
+      const inputConfig = this.getInputConfig(inputName);
+      const errorText = this.getInputErrorText(inputState, inputConfig, {
+        failFast: failFast || false,
+        defaultText: msgInvalid || '',
+      });
+      return errorText;
+    }
+    return '';
+  }
+
   onSubmit(e: Event) {
     // Do not submit the form
     e.preventDefault();
@@ -273,6 +290,10 @@ class Aptform<TInputNames: string> extends React.Component<
     }
 
     if (!this.isFormValid()) {
+      if (this.shouldValidate('onSubmit')) {
+        this.updateAllInputsValidationState();
+      }
+
       this.setState({
         submitFailed: true,
         submitSucceeded: false,
@@ -459,28 +480,31 @@ class Aptform<TInputNames: string> extends React.Component<
     return { validations: {} };
   }
 
-  getValidationPolicies() {
-    const validationPolicy = this.getFormConfigVal('validationPolicy');
-    return { ...defaultConfig.validationPolicy, ...validationPolicy };
-  }
-
   shouldValidate(type: ValidationPolicyNames) {
-    const policies = this.getValidationPolicies();
+    const policies = this.getFormConfigVal('validationPolicy');
+    // $FlowFixMe: I know getFormConfigVal works
     return policies[type] === true;
   }
 
   isFormValid() {
+    //
+    // Returns whether form is valid unambiguously. It means if the input is invalid or
+    // validity is unknown, it returns false.
+    //
+
+    const { inputStates } = this.state;
+    const invalidInputExists = objValues(inputStates).some(input => input.valid !== true);
+    if (invalidInputExists) {
+      return false;
+    }
+
     const { formValidations } = this.props;
-
-    let isFormValid;
     if (formValidations) {
-      isFormValid = ({ validations, priorValid, inputName }) => {
+      for (const input of objValues(inputStates)) {
+        const priorValid = input.valid;
         const inputValues = this.getAllFormValues();
-
-        for (const inputName of Object.keys(validations)) {
-          const validators = validations[inputName];
+        for (const validators of objValues(formValidations)) {
           const clientErrors = mapObjVals(validators, validator => !validator(inputValues));
-
           const newErrors = filterObjValues(clientErrors, v => v === true);
           const hasNewErrors = newErrors.length > 0;
           const valid = !hasNewErrors && priorValid;
@@ -488,20 +512,7 @@ class Aptform<TInputNames: string> extends React.Component<
             return false;
           }
         }
-
         return true;
-      };
-    }
-
-    for (const inputName of Object.keys(this.state.inputStates)) {
-      const input = this.state.inputStates[inputName];
-      if (input.valid === false) {
-        return false;
-      }
-      if (formValidations && typeof isFormValid === 'function') {
-        if (!isFormValid({ validations: formValidations, priorValid: input.valid, inputName })) {
-          return false;
-        }
       }
     }
     return true;
@@ -587,29 +598,26 @@ class Aptform<TInputNames: string> extends React.Component<
 
   validateInputAsync(
     input: InputState<TInputNames>,
-    validations: AsyncValidationMapping<TInputNames>
-  ): Promise<?{ valid: boolean, errorCode: string }> {
-    const { value } = input;
+    validateAsync: AsyncValidator
+  ): Promise<{ valid: boolean, errorCode: string }> {
+    //
+    // Runs all async validations for an input.
+    // Returns a promise only when each validations settled.
+    //
 
-    for (const key of Object.keys(validations)) {
-      const validationValue = validations[key](value);
-      // NoteReview(simon): should always be Promise
-      if (!(validationValue instanceof Promise)) {
-        continue;
+    const { value } = input;
+    return validateAsync(value).then((result = {}) => {
+      // NotePrototype(simon): handle not error cases....
+      if (!result.asyncError) {
+        return Promise.resolve({ valid: true, errorCode: '' });
       }
 
-      // NoteReview(simon): what is my responsibility over promise rejection?
-      return validationValue.then(result => {
-        if (typeof result === 'boolean') {
-          return Promise.resolve({
-            valid: result,
-            errorCode: key,
-          });
-        }
-        return Promise.resolve();
+      const errorCode = result.asyncError === true ? 'unknownError' : result.asyncError;
+      return Promise.resolve({
+        valid: false,
+        errorCode,
       });
-    }
-    return Promise.resolve();
+    });
   }
 
   validateInputSync(
@@ -656,21 +664,11 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   _updateErrorText(inputName: TInputNames) {
-    const failFast = this.getFormConfigVal('failFast');
-    const msgInvalid = this.getFormConfigVal('msgInvalid');
     const inputState = this.getInputState(inputName);
-    if (inputState.valid === false) {
-      const inputState = this.getInputState(inputName);
-      const inputConfig = this.getInputConfig(inputName);
-      const errorText = this.getInputErrorText(inputState, inputConfig, {
-        failFast: failFast || false,
-        defaultText: msgInvalid || '',
-      });
-      this.setInputState(inputName, { errorText });
-    }
+    this.setInputState(inputName, { errorText: this.getInputText(inputName, inputState) });
   }
 
-  _runAsyncValidation({ inputName, inputState, asyncValidations }: *, onValidated: Function) {
+  _runAsyncValidation({ inputName, inputState, validateAsync }: *, onValidated: Function) {
     // this.setInputState(inputName, {
     //   asyncValidating: true,
     // });
@@ -684,9 +682,9 @@ class Aptform<TInputNames: string> extends React.Component<
         asyncValidating: true,
       });
 
-      const asyncValidated = this.validateInputAsync(inputState, asyncValidations)
-        .then((result: *) => {
-          if (!result) {
+      const asyncValidated = this.validateInputAsync(inputState, validateAsync)
+        .then(result => {
+          if (!result.errorCode) {
             return this.setInputState(inputName, {
               valid: true,
               asyncValidating: false,
@@ -723,25 +721,30 @@ class Aptform<TInputNames: string> extends React.Component<
     this.asyncTimer = setTimeout(onValidateAsyncReady, asyncTimeout);
   }
 
-  _runFormValidation({ validations, priorValid, inputName }: *) {
+  validateFormWide({ validations, priorValid, inputName }: *): { clientErrors: *, isOk: boolean } {
     const inputValues = this.getAllFormValues();
-    // NotePrototype(simon): consider building partial state upfront and set it to
-    // react in batch.
-    for (const inputName of Object.keys(validations)) {
-      const validators = validations[inputName];
-      const clientErrors = mapObjVals(validators, validator => !validator(inputValues));
+    const clientErrors = mapObjVals(validations, validators =>
+      mapObjVals(validators, validator => !validator(inputValues))
+    );
 
-      const newErrors = filterObjValues(clientErrors, v => v === true);
-      const hasNewErrors = newErrors.length > 0;
+    // for (const inputName of Object.keys(validations)) {
+    // const validators = validations[inputName];
+    // const newErrors = mapObjVals(validators, validator => !validator(inputValues));
+    // clientErrors = { ...clientErrors, ...newErrors };
 
-      const oldState = this.getInputState(inputName);
-      const isValid = !hasNewErrors && priorValid;
-      this.setInputState(inputName, {
-        clientErrors: { ...oldState.clientErrors, ...clientErrors },
-        valid: isValid,
-      });
-      this._updateErrorText(inputName);
-    }
+    // const hasNewErrors = newErrors.length > 0;
+
+    // const oldState = this.getInputState(inputName);
+    // const isValid = !hasNewErrors && priorValid;
+
+    // this.setInputState(inputName, {
+    //   clientErrors: { ...oldState.clientErrors, ...clientErrors },
+    //   valid: isValid,
+    // });
+    // }
+
+    const isOk = Object.keys(clientErrors).length > 0;
+    return { clientErrors, isOk };
   }
 
   runInputValidation(inputName: TInputNames): Promise<*> {
@@ -756,12 +759,12 @@ class Aptform<TInputNames: string> extends React.Component<
       failFast,
     });
     let valid = isValid;
+    let allErrors = clientErrors;
 
     // validate asynchronously iff client validations pass and an async validation exist
     if (isValid && !inputState.pristine) {
-      const asyncValidations = this.getInputConfig(inputName).asyncValidations || {};
-
-      if (Object.keys(asyncValidations).length) {
+      const validateAsync = this.getInputConfig(inputName).validateAsync;
+      if (validateAsync) {
         // NoteReview(simon): must keep validating status of the input until Promise is settled
         this.setInputState(inputName, {
           asyncValidating: true,
@@ -771,27 +774,28 @@ class Aptform<TInputNames: string> extends React.Component<
           {
             inputName,
             inputState,
-            asyncValidations,
+            validateAsync,
           },
           onValidated
         );
       }
     }
 
+    const { formValidations } = this.props;
+    if (formValidations) {
+      const { isOk, clientErrors } = this.validateFormWide({
+        validations: formValidations,
+        priorValid: isValid,
+        inputName,
+      });
+      valid = valid && isOk;
+      allErrors = { ...allErrors, ...clientErrors };
+    }
+
     const syncValidated = this.setInputState(inputName, {
       valid,
       clientErrors,
     });
-
-    // NotePrototype(simon): just quick code to design API, refactor!
-    const { formValidations } = this.props;
-    if (formValidations) {
-      this._runFormValidation({
-        validations: formValidations,
-        priorValid: valid,
-        inputName,
-      });
-    }
 
     return syncValidated.then(onValidated);
   }
@@ -846,11 +850,9 @@ class Aptform<TInputNames: string> extends React.Component<
     });
   }
 
-  createInputStateMap(
-    inputNameList: Array<TInputNames>,
-    initialValues: ?InitialValues<TInputNames>
-  ) {
+  initInputStates(inputNameList: Array<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
     const initialValid = this.getFormConfigVal('initialValid');
+    const shouldValidate = this.shouldValidate('onCreate');
     const inputStates = {};
     for (const inputName of inputNameList) {
       // RuleIntialValueMustBeStr
@@ -858,16 +860,28 @@ class Aptform<TInputNames: string> extends React.Component<
       // by default, input is valid unless its in state of validating or has an error
 
       let valid;
+      let clientErrors;
       if (initialValid) {
         valid = true;
-      } else {
-        const [isValid] = this.validateInputSync(value, inputName);
+      } else if (shouldValidate) {
+        const [isValid, _clientErrors] = this.validateInputSync(value, inputName);
+        clientErrors = _clientErrors;
         valid = isValid;
       }
 
-      const props: $Shape<InputState<TInputNames>> = { value, valid, name: inputName };
-      const inputValue = this.createInputState(props);
-      inputStates[inputName] = inputValue;
+      const props: $Shape<InputState<TInputNames>> = {
+        value,
+        valid,
+        name: inputName,
+        clientErrors,
+      };
+      const inputState = this.createInputState(props);
+      inputStates[inputName] = inputState;
+
+      // should add errorText if did validate
+      if (shouldValidate) {
+        inputState.errorText = this.getInputText(inputName, inputState);
+      }
     }
     return inputStates;
   }

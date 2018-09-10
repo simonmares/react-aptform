@@ -70,7 +70,7 @@ test('All state transition', async () => {
     expect(email.value).toEqual('');
     // Assert not changing
     expect(email.changing).toEqual(false);
-    // Assert value is not valid
+    // Assert value is invalid
     expect(email.valid).toEqual(false);
     // Assert not changed yet
     expect(email.pristine).toEqual(true);
@@ -80,7 +80,7 @@ test('All state transition', async () => {
     expect(email.showSuccess()).toEqual(false);
     expect(email.showError()).toEqual(true);
     // Assert no client errors exist yet
-    expect(email.clientErrors).toEqual({});
+    expect(email.clientErrors).toEqual({ required: true });
   }
 
   const { changeInput } = receivedProps.form;

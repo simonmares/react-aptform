@@ -9,64 +9,6 @@ import { Aptform } from '../src/index';
 import { yesNo, DebugStateInput } from './helper-ui';
 import { isEmailNaive as isEmail } from './helper-validators';
 
-export const AsyncValidationExample = ({ action }: *) => {
-  const alreadyExists = value => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(value !== 'rendon@example.com');
-      }, 700);
-    });
-  };
-
-  return (
-    <Aptform
-      initialValues={{
-        name: 'Eliana Rendón',
-        email: 'rendon@example.com',
-      }}
-      onSubmit={values => {
-        return new Promise(resolve => {
-          setTimeout(() => {
-            alreadyExists(values.email).then(unique => {
-              resolve(unique ? null : { errors: { email: 'alreadyExists' } });
-            });
-          }, 750);
-        });
-      }}
-      inputs={{
-        name: { required: true },
-        email: {
-          required: true,
-          validations: { isEmail },
-          asyncValidations: { alreadyExists },
-          getErrorText: i =>
-            i._serverErrors && i._serverErrors.alreadyExists ? 'The email is used' : '',
-        },
-      }}
-      render={({ inputs, form }) => {
-        const { name, email } = inputs;
-        return (
-          <form onBlur={form.onBlur} onFocus={form.onFocus} onSubmit={form.onSubmit}>
-            <div>
-              Name: <input type="text" {...name.getPassProps()} />
-              {name.showError() && name.errorText}
-            </div>
-            <div>
-              Email: <input type="text" {...email.getPassProps()} />
-              {email.showError() && email.errorText}
-              {email.isValidating() ? '...' : ''}
-            </div>
-            <button type="submit" disabled={!form.isValid() || form.submitting}>
-              {form.submitting ? 'Submitting...' : 'Submit'}
-            </button>
-            {form.isValid() ? '' : 'Please fill all fields'}
-          </form>
-        );
-      }}
-    />
-  );
-};
-
 export const WithValidations = ({ action }: *) => {
   const example = (
     <Aptform
@@ -375,7 +317,6 @@ export const RequiredEmptyExample = ({ action }: *) => {
 };
 
 export default {
-  'Async validation': AsyncValidationExample,
   'With validations': WithValidations,
   'Invalid initial': WithInvalidInitial,
   'Sorted validations': SortedValidations,

@@ -37,11 +37,13 @@ export function triggerSubmit(form: *) {
 
 export function triggerBlur(form: *, inputName: string, targetProps?: Object) {
   const e = { target: { name: inputName, ...targetProps } };
+  // $FlowFixMe
   form.onBlur(e);
 }
 
 export function triggerFocus(form: *, inputName: string) {
   const e = { target: { name: inputName } };
+  // $FlowFixMe
   form.onFocus(e);
 }
 

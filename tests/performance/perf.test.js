@@ -3,9 +3,9 @@
 import * as React from 'react';
 import { render, waitForElement } from 'react-testing-library';
 
-import { createChangeEvent } from './helpers';
+import { createChangeEvent } from '../helpers';
 
-import { Aptform } from '../src/index';
+import { Aptform } from '../../src/index';
 
 function createPerfContainer(amount) {
   const inputs = {};

@@ -1,11 +1,11 @@
 // @flow
 
 import React from 'react';
-import { render, waitForElement } from 'react-testing-library';
+import { render, waitForElement, cleanup } from 'react-testing-library';
 
 import { Aptform } from '../src/index';
 
-import { defaultProps, changeInputValue, toStableJSON, triggerSubmit } from './helpers';
+import { defaultProps, changeInputValue, toStableJSON as toJSON, triggerSubmit } from './helpers';
 
 describe('form.onSubmit defensivity', () => {
   beforeEach(() => {
@@ -14,6 +14,7 @@ describe('form.onSubmit defensivity', () => {
 
   afterEach(() => {
     global.console.warn.mockRestore();
+    cleanup();
   });
 
   function createSubmitEvent() {
@@ -56,6 +57,10 @@ describe('form.onSubmit defensivity', () => {
 });
 
 describe('onSubmit resolved => update input values', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   const inputs = {
     firstName: { required: true },
     lastName: { required: true },
@@ -140,6 +145,10 @@ describe('onSubmit resolved => update input values', () => {
 });
 
 describe('onSubmit resolved => errors', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   const initialValues = {
     nameHandle: 'charley1!!!',
     username: 'john',
@@ -254,6 +263,10 @@ describe('submit render states', () => {
 });
 
 describe('submit render states', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   const inputs = {
     firstName: { required: true },
     lastName: { required: true },
@@ -272,7 +285,7 @@ describe('submit render states', () => {
     let form;
     const renderMock = jest.fn(renderProps => {
       form = renderProps.form;
-      return toStableJSON(form);
+      return toJSON(form);
     });
 
     const onSubmitMock = jest.fn(() => Promise.resolve());
@@ -314,7 +327,7 @@ describe('submit render states', () => {
     let form;
     const renderMock = jest.fn(renderProps => {
       form = renderProps.form;
-      return toStableJSON(form);
+      return toJSON(form);
     });
 
     const onSubmitMock = jest.fn(() => Promise.resolve({ submitError: true }));
