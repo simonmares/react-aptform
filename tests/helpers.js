@@ -35,6 +35,16 @@ export function triggerSubmit(form: *) {
   form.onSubmit(e);
 }
 
+export function triggerBlur(form: *, inputName: string, targetProps?: Object) {
+  const e = { target: { name: inputName, ...targetProps } };
+  form.onBlur(e);
+}
+
+export function triggerFocus(form: *, inputName: string) {
+  const e = { target: { name: inputName } };
+  form.onFocus(e);
+}
+
 export function toStableJSON(obj: Object): string {
   // only shallow objects
   return JSON.stringify(obj, Object.keys(obj).sort());
