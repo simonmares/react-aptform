@@ -17,33 +17,21 @@ import type {
   InitialValues,
 } from './types.d';
 
-import { sortByArray, mapObjVals, objValuesByKeys, filterObjValues, filterObj } from './utils';
+import {
+  sortByArray,
+  mapObjVals,
+  objValuesByKeys,
+  filterObjValues,
+  filterObj,
+  isButton,
+  getInputValue,
+  nonNilOrDefault,
+} from './utils';
 
 const NO_ERROR_TEXT = '';
 const DEFAULT_VALUE = '';
 
 const valueEmpty = value => !value && value !== 0;
-const isButton = element => arrayIncludes(['submit', 'reset', 'button', 'menu'], element.type);
-const numValueOrUndef = numValue => (Number.isNaN(numValue) ? numValue : undefined);
-const arrayIncludes = (array, item) => array.indexOf(item) !== -1;
-
-function getInputValue(element: HTMLInputElement): ?InputValue {
-  if (element.type === 'checkbox') {
-    return element.checked;
-  }
-
-  if (arrayIncludes(['number', 'range'], element.type)) {
-    const numValue = parseFloat(element.value);
-    // NaN evaluates to false,
-    return numValue ? numValue : numValueOrUndef(numValue);
-  }
-
-  return element.value;
-}
-
-function nonNilOrDefault<T>(val: ?T, defaultVal: T): T {
-  return val !== undefined && val !== null ? val : defaultVal;
-}
 
 const warnUser = msg => {
   console.warn(msg);

@@ -1,5 +1,7 @@
 // @flow
 
+import type { InputValue } from './types.d';
+
 export function sortByArray<T: *>(arr: Array<T>, sortedArr: Array<T>): Array<T> {
   const compareFunction = (a: T, b: T) => {
     return sortedArr.indexOf(a) - sortedArr.indexOf(b);
@@ -35,4 +37,28 @@ export function filterObj<T: Object>(obj: T, filterFunc: *): $Shape<T> {
     }
   }
   return filteredObj;
+}
+
+const numValueOrUndef = numValue => (Number.isNaN(numValue) ? undefined : numValue);
+const arrayIncludes = (array, item) => array.indexOf(item) !== -1;
+
+export function getInputValue(element: HTMLInputElement): ?InputValue {
+  if (element.type === 'checkbox') {
+    return element.checked;
+  }
+
+  if (arrayIncludes(['number', 'range'], element.type)) {
+    const numValue = parseFloat(element.value);
+    // NaN evaluates to false,
+    return numValue ? numValue : numValueOrUndef(numValue);
+  }
+
+  return element.value;
+}
+
+export const isButton = (element: HTMLInputElement) =>
+  arrayIncludes(['submit', 'reset', 'button', 'menu'], element.type);
+
+export function nonNilOrDefault<T>(val: ?T, defaultVal: T): T {
+  return val !== undefined && val !== null ? val : defaultVal;
 }
