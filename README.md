@@ -1,5 +1,10 @@
 ## About
 
+[![npm](https://badgen.net/npm/v/react-aptform)](https://www.npmjs.com/package/react-aptform)
+[![gzip size](https://badgen.net/bundlephobia/minzip/react-aptform)](https://bundlephobia.com/result?p=react-aptform)
+[![build status](https://badgen.net/travis/simonmares/react-aptform)](https://travis-ci.org/simonmares/react-aptform)
+
+
 `react-aptform` is a library to work with forms in react efficiently. It aims for both DX and UX to make forms less tedious.
 
 ### Installation
@@ -22,14 +27,30 @@ The package expects at least `react@16.0.0`.
 - specify common form behaviour declaratively
 - API that doesn't go in your way
 
-### Features
+## Documentation
+
+Docs lives in [`docs`](docs) directory of the repository.
+
+Highlights:
+
+- [**docs/API.md**](docs/API.md): documented components, their props and object shapes
+- [**docs/guides.md**](docs/guides.md): how to use the package for different use cases
+- [**docs/implementation.md**](docs/implementation.md): implementation decisions rationale to help you memorize the API
+
+See it in action on [**deployed examples**](https://simonmares.github.io/react-aptform/) and also check the [**example sources**](examples).
+
+Many edge cases are implemented in the [**tests in the repository**](tests).
+
+## Features
 
 **Functional**
 
 - storing values of controlled inputs
 - tracking input meta state (for custom UI e.g. to make UX better)
-- consistent forms behaviour accross your app (`preconfigure`)
+- consistent forms behaviour throughout your app (`preconfigure`)
+- declarative input configuration allows consistent behavior of same inputs in different forms throughout your app
 - validation framework (i18n friendly errors, suggestions on *showing* the validation error/success)
+- submit framework (reset data on success, set server errors, managing submitting state)
 
 **Non functional**
 
@@ -37,16 +58,17 @@ The package expects at least `react@16.0.0`.
 - does not render anything on its own neither it listens to DOM events
 - provides mature input meta state modeling
 - no setup needed (main component works out-of-box)
+- flow typed
 
-#### Show validation insight
+**Show validation insight**
 
-Our API includes method that shows validation error / success on custom rules in order to improve UX.
+API includes methods to show validation error / success based on custom configured rules in order to improve UX.
 
-#### i18n friendly validation
+**i18n friendly validation**
 
 Validation is boolean-based rather string-based, it makes i18n simpler and its less fragile.
 
-#### No actual rendering
+**No actual rendering**
 
 We provide behavioral components that only hook into React system, but leaves rendering up to a function you provide. This avoids e.g. styling problems. You have total control of how your inputs look.
 
@@ -58,9 +80,9 @@ We provide behavioral components that only hook into React system, but leaves re
 
 For more complex use cases see below for **[Alternatives](#alternatives)**.
 
-## Usage gist
+## Usage example
 
-What you gain in this example:
+What you gain in this example by using the package:
 
 - you know whether a **form is valid**
 - you know whether an **input is valid**
@@ -112,16 +134,20 @@ Notes:
   />
 ```
 
-## More documentation
-
-- [**API.md:** documented components, their props and object shapes](docs/API.md)
-- [**implementation.md:** documented implementation decisions](docs/implementation.md)
-
 ## Limitations
 
 - Typescript support (use Formik)
 - React native support (use Formik)
 - Nested fields (use Formik or `react-final-form`)
+
+**Project constraints:**
+
+- browser only
+- no complex form solutions (nested, multi-step forms, ...)
+- must be i18n-friendly
+- conventions for common tasks (submit, validation)
+- only one API
+- enable great UX
 
 ## Alternatives
 
@@ -132,3 +158,5 @@ This library was inherently inspired by following react form solutions:
 - https://github.com/vacuumlabs/react-custom-validation (show validation recommendation)
 - https://github.com/christianalfoni/formsy-react (convenience)
 - https://github.com/erikras/redux-form (input states)
+
+The package was created a moment before Formik and `react-final-form` were released. They're both good and this package is definitely not "an order of magnitude better". I still use it because of simplicity (no duplicate API), i18n-friendliness and made conventions, so I don't have to think about how to implement forms over and over.

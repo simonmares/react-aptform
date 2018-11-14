@@ -8,3 +8,4 @@ lib/
 .watchman*
 dest/
 coverage/
+build
