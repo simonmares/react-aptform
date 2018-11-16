@@ -1,8 +1,8 @@
 ## About
 
+[![build status](https://badgen.net/travis/simonmares/react-aptform)](https://travis-ci.org/simonmares/react-aptform)
 [![npm](https://badgen.net/npm/v/react-aptform)](https://www.npmjs.com/package/react-aptform)
 [![gzip size](https://badgen.net/bundlephobia/minzip/react-aptform)](https://bundlephobia.com/result?p=react-aptform)
-[![build status](https://badgen.net/travis/simonmares/react-aptform)](https://travis-ci.org/simonmares/react-aptform)
 
 
 `react-aptform` is a library to work with forms in react efficiently. It aims for both DX and UX to make forms less tedious.
