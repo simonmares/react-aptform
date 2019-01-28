@@ -186,4 +186,3 @@ test('clear all timers on unmount', () => {
   unmount();
   expect(clearAllTimersSpy).toHaveBeenCalled();
 });
-

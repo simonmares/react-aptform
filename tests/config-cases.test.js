@@ -5,7 +5,13 @@ import { render, waitForElement, cleanup } from 'react-testing-library';
 
 import { preconfigure } from '../src/index';
 
-import { defaultProps, toStableJSON as toJSON, changeInputValue, triggerBlur, triggerSubmit } from './helpers';
+import {
+  defaultProps,
+  toStableJSON as toJSON,
+  changeInputValue,
+  triggerBlur,
+  triggerSubmit,
+} from './helpers';
 
 describe('initialValid', () => {
   beforeEach(() => {
@@ -227,7 +233,5 @@ describe('validationPolicy', () => {
     await waitForElement(() =>
       getByText(toJSON({ errorText: 'This input is required.', valid: false }))
     );
-
   });
-
 });
