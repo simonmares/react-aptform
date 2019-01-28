@@ -5,31 +5,11 @@ import * as React from 'react';
 // project
 import { Aptform } from '../src/index';
 
-export const SubmittingWithErrorsExample = ({ action }: *) => {
+function SubmittingWithErrorBase({ action, aptFormConfig }: *) {
   const example = (
     <Aptform
       initialValues={{
         name: 'Eliana Rendón',
-      }}
-      onSubmit={values => {
-        action('onSubmit')('Submitting values: ', values);
-        return new Promise(resolve => {
-          setTimeout(() => {
-            if (values.name === 'Eliana Rendón') {
-              resolve({ errors: { name: 'alreadyExists' } });
-            } else {
-              resolve();
-            }
-          }, 750);
-        });
-      }}
-      inputs={{
-        name: {
-          required: true,
-          errorTextMap: {
-            alreadyExists: 'user already taken',
-          },
-        },
       }}
       render={({ inputs, form }) => {
         const { name } = inputs;
@@ -46,6 +26,7 @@ export const SubmittingWithErrorsExample = ({ action }: *) => {
           </form>
         );
       }}
+      {...aptFormConfig}
     />
   );
 
@@ -58,6 +39,62 @@ export const SubmittingWithErrorsExample = ({ action }: *) => {
       </article>
     </React.Fragment>
   );
+}
+
+export const SubmittingWithErrorsExample = ({ action }: *) => {
+  const aptFormConfig = {
+    onSubmit: values => {
+      action('onSubmit')('Submitting values: ', values);
+      return new Promise(resolve => {
+        setTimeout(() => {
+          if (values.name === 'Eliana Rendón') {
+            resolve({ errors: { name: 'alreadyExists' } });
+          } else {
+            resolve();
+          }
+        }, 750);
+      });
+    },
+    inputs: {
+      name: {
+        required: true,
+        errorTextMap: {
+          alreadyExists: 'user already taken',
+        },
+      },
+    },
+  };
+
+  return <SubmittingWithErrorBase aptFormConfig={aptFormConfig} action={action} />;
+};
+
+export const FieldErrorsAndCustomText = ({ action }: *) => {
+  const aptFormConfig = {
+    onSubmit: values => {
+      action('onSubmit')('Submitting values: ', values);
+      return new Promise(resolve => {
+        setTimeout(() => {
+          if (values.name === 'Eliana Rendón') {
+            resolve({
+              errorTexts: {
+                name: 'User is already in DB',
+                email: 'Email is not in correct format',
+              },
+            });
+          } else {
+            resolve();
+          }
+        }, 750);
+      });
+    },
+    inputs: {
+      name: {
+        required: true,
+      },
+    },
+  };
+
+  return <SubmittingWithErrorBase aptFormConfig={aptFormConfig} action={action} />;
 };
 
 export const SubmittingNonFieldErrorExample = ({ action }: *) => {
@@ -408,6 +445,7 @@ export const ResetWithNewData = ({ action }: *) => {
 export default {
   'submitting state': SubmittingExample,
   'w/ field errors': SubmittingWithErrorsExample,
+  'w/ field errors and custom text': FieldErrorsAndCustomText,
   'w/ nonfield error': SubmittingNonFieldErrorExample,
   'w/ nonfield unknown error': SubmittingUnkownErrorExample,
   'w/ form rejected': SubmittingRejectedExample,
