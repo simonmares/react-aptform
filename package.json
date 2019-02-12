@@ -1,6 +1,6 @@
 {
 	"name": "react-aptform",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "Practical forms for react",
 	"main": "dist/index.js",
 	"files": [
