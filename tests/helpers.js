@@ -52,13 +52,13 @@ export function toStableJSON(obj: Object): string {
   return JSON.stringify(obj, Object.keys(obj).sort());
 }
 
-export function resolveAfter(value: any, time: number = 0) {
+export function resolveAfter<T>(value: T, time: number = 0): Promise<T> {
   return new Promise(resolve => {
     setTimeout(() => resolve(value), time);
   });
 }
 
-export function rejectAfter(value: any, time: number = 0) {
+export function rejectAfter<T>(value: T, time: number = 0): Promise<T> {
   return new Promise((resolve, reject) => {
     setTimeout(() => reject(value), time);
   });

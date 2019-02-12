@@ -58,7 +58,7 @@ test('Aptform fallbacks to default props', () => {
   // Desc: no values were passed to preconfigure so it does do anything effectively (but
   // does not break default props config either).
 
-  const AptformConfigured = preconfigure();
+  const AptformConfigured = preconfigure({});
 
   let inst;
   render(

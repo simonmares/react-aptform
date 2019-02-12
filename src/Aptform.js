@@ -200,7 +200,7 @@ class Aptform<TInputNames: string> extends React.Component<
     };
   }
 
-  getSortedValidationCodes(inputConfig: *) {
+  getSortedValidationCodes(inputConfig: *): Array<string> {
     const codesUnsorted: Array<string> = inputConfig.validations
       ? Object.keys(inputConfig.validations)
       : [];
