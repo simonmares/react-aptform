@@ -10,6 +10,7 @@ type ValidationState = ?boolean;
 export type ValidationErrs = { [string]: boolean };
 export type ValidationPolicyNames = 'onMount' | 'onDelay' | 'onBlur' | 'onSubmit' | 'onCreate';
 
+export type TInputNames = string;
 export type InputValue = any;
 export type EventType = SyntheticInputEvent<HTMLInputElement>;
 export type FormConfig = {|
@@ -40,7 +41,7 @@ export type PassProps = {
   required: boolean,
 };
 
-export type InputState<TInputNames> = {
+export type InputState = {
   name: TInputNames,
   onChange: EventHandler,
   value: InputValue,
@@ -103,13 +104,13 @@ export type FormState = {|
 
 export type AsyncValidator = (value: any) => Promise<{ asyncError: string | boolean }>;
 
-export type InputConfig<TInputNames> = {|
+export type InputConfig = {|
   validations?: { [key: TInputNames]: (value: any) => boolean },
   validateAsync?: AsyncValidator,
   validationOrder?: Array<TInputNames>,
   required?: boolean,
-  getErrorText?: (input: InputState<TInputNames>) => ?string,
-  errorTextMap?: { [string]: string | ((i: InputState<TInputNames>) => string) },
+  getErrorText?: (input: InputState) => ?string,
+  errorTextMap?: { [string]: string | ((i: InputState) => string) },
 |};
 
 type AnyInputValue = any;
@@ -124,8 +125,8 @@ type FormPassProps = {|
   onSubmit: Function,
 |};
 
-type RenderProps<TInputNames> = {|
-  inputs: InputMap<TInputNames, InputState<TInputNames>>,
+type RenderProps = {|
+  inputs: InputMap<TInputNames, InputState>,
   form: {|
     ...FormState,
     ...FormPassProps,
@@ -141,23 +142,23 @@ type RenderProps<TInputNames> = {|
   |},
 |};
 
-export type LocalState<TInputNames> = {|
-  inputStates: { [TInputNames]: InputState<TInputNames> },
+export type LocalState = {|
+  inputStates: { [TInputNames]: InputState },
   submitting: boolean,
   submitFailed: boolean,
   submitSucceeded: boolean,
   submitErrorText: string,
 |};
 
-export type LocalProps<TInputNames> = {
+export type LocalProps = {
   // config override prop object?
   config?: FormConfig,
 
-  inputs: { [TInputNames]: InputConfig<TInputNames> | null },
+  inputs: { [TInputNames]: InputConfig | null },
   initialValues?: FormValuesMap<TInputNames>,
 
   // can return anything
-  render: (props: RenderProps<TInputNames>) => Node,
+  render: (props: RenderProps) => Node,
 
   formValidations?: {
     [inputName: string]: {

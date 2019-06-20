@@ -14,6 +14,7 @@ import type {
   ValidationPolicyNames,
   LocalProps,
   LocalState,
+  TInputNames,
   InitialValues,
 } from './types.d';
 
@@ -123,16 +124,17 @@ const onErrorDefault = console.error.bind(console);
 // we set a value and react changes it to a "controlled" component, and issues the warning.
 // https://github.com/twisty/formsy-react-components/issues/66
 
-class Aptform<TInputNames: string> extends React.Component<
-  LocalProps<TInputNames>,
-  LocalState<TInputNames>
+
+class Aptform extends React.Component<
+  LocalProps,
+  LocalState
 > {
   typingTimer: *;
   asyncTimer: *;
   validateTimer: *;
 
-  props: LocalProps<TInputNames>;
-  state: LocalState<TInputNames>;
+  props: LocalProps;
+  state: LocalState;
 
   // In prototype if on development
   validateProps: *;
@@ -151,7 +153,7 @@ class Aptform<TInputNames: string> extends React.Component<
   isFormValid: *;
   hasFormChanged: *;
 
-  constructor(props: LocalProps<TInputNames>) {
+  constructor(props: LocalProps) {
     super(props);
 
     // bind event handlers
@@ -189,7 +191,7 @@ class Aptform<TInputNames: string> extends React.Component<
     this.clearAllTimers();
   }
 
-  getInitialState(props: LocalProps<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
+  getInitialState(props: LocalProps, initialValues: ?InitialValues<TInputNames>) {
     const inputNames = Object.keys(props.inputs);
     return {
       inputStates: this.initInputStates(inputNames, initialValues),
@@ -210,9 +212,9 @@ class Aptform<TInputNames: string> extends React.Component<
     return codesUnsorted;
   }
 
-  getInputErrorText<TInputNames>(
-    inputState: InputState<TInputNames>,
-    inputConfig: InputConfig<TInputNames>,
+  getInputErrorText(
+    inputState: InputState,
+    inputConfig: InputConfig,
     opts: { failFast: boolean, defaultText: string }
   ): string {
     // if its the 'required' error, we don't care about others and output this error directly.
@@ -237,7 +239,7 @@ class Aptform<TInputNames: string> extends React.Component<
         return '';
       }
 
-      const resolveErr = (err: string | ((i: InputState<TInputNames>) => string)) => {
+      const resolveErr = (err: string | ((i: InputState) => string)) => {
         if (typeof err === 'function') {
           return err(inputState);
         }
@@ -457,7 +459,7 @@ class Aptform<TInputNames: string> extends React.Component<
     onError(error, msg);
   }
 
-  getInputState(inputName: TInputNames): InputState<TInputNames> {
+  getInputState(inputName: TInputNames): InputState {
     // NoteReview: when can be undefined for given inputName?
     const inputState = this.state.inputStates[inputName];
     if (inputState) {
@@ -468,7 +470,7 @@ class Aptform<TInputNames: string> extends React.Component<
     return this.createInputState({ name: inputName });
   }
 
-  getInputConfig(inputName: TInputNames): InputConfig<TInputNames> {
+  getInputConfig(inputName: TInputNames): InputConfig {
     const { inputs } = this.props;
     if (inputs) {
       const config = inputs[inputName];
@@ -559,7 +561,7 @@ class Aptform<TInputNames: string> extends React.Component<
     return submitErrorText;
   }
 
-  setFormState(state: $Shape<LocalState<TInputNames>>): Promise<typeof undefined> {
+  setFormState(state: $Shape<LocalState>): Promise<typeof undefined> {
     return new Promise(resolve => {
       this.setState(state, resolve);
     });
@@ -567,7 +569,7 @@ class Aptform<TInputNames: string> extends React.Component<
 
   setInputState(
     inputName: TInputNames,
-    props: $Shape<InputState<TInputNames>>
+    props: $Shape<InputState>
   ): Promise<typeof undefined> {
     const { inputStates } = this.state;
 
@@ -596,7 +598,7 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   validateInputAsync(
-    input: InputState<TInputNames>,
+    input: InputState,
     validateAsync: AsyncValidator
   ): Promise<{ valid: boolean, errorCode: string }> {
     //
@@ -868,7 +870,7 @@ class Aptform<TInputNames: string> extends React.Component<
         valid = isValid;
       }
 
-      const props: $Shape<InputState<TInputNames>> = {
+      const props: $Shape<InputState> = {
         value,
         valid,
         name: inputName,
@@ -885,7 +887,7 @@ class Aptform<TInputNames: string> extends React.Component<
     return inputStates;
   }
 
-  createInputState(fromProps: $Shape<InputState<TInputNames>>): InputState<TInputNames> {
+  createInputState(fromProps: $Shape<InputState>): InputState {
     const initialValues = this.props.initialValues || {};
     const onFormChange = this.onChange;
     const inputName = fromProps.name;
@@ -894,7 +896,7 @@ class Aptform<TInputNames: string> extends React.Component<
     const required = inputConfig.required || false;
 
     const initial = initialValues[inputName];
-    const inputState: $Shape<InputState<TInputNames>> = {
+    const inputState: $Shape<InputState> = {
       name: fromProps.name,
 
       // nullable props
@@ -933,7 +935,7 @@ class Aptform<TInputNames: string> extends React.Component<
   }
 
   resetFormState(
-    props: LocalProps<TInputNames>,
+    props: LocalProps,
     initialValues: ?InitialValues<TInputNames>
   ): Promise<typeof undefined> {
     this.clearAllTimers();
@@ -971,7 +973,7 @@ class Aptform<TInputNames: string> extends React.Component<
 }
 
 if (process.env.NODE_ENV !== 'production') {
-  Aptform.prototype.validateProps = function(props: LocalProps<*>) {
+  Aptform.prototype.validateProps = function(props: LocalProps) {
     if (!props.onSubmit) {
       warnUser('You have to provide onSubmit prop.');
     }
