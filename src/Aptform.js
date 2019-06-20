@@ -528,8 +528,7 @@ class Aptform<TInputNames: string> extends React.Component<
     return false;
   }
 
-  // Typing from https://github.com/facebook/flow/issues/2310
-  getFormConfigVal<K: $Subtype<$Keys<FormConfig>>>(key: K): $ElementType<FormConfig, K> {
+  getFormConfigVal(key: string): any {
     // Returns config value with fallback to defaults. There is always a value for given
     // value key.
     // First it tries to find it in its props, then in context (from ConfigureForms) and
