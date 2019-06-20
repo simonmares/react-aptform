@@ -10,7 +10,7 @@ type ValidationState = ?boolean;
 export type ValidationErrs = { [string]: boolean };
 export type ValidationPolicyNames = 'onMount' | 'onDelay' | 'onBlur' | 'onSubmit' | 'onCreate';
 
-export type TInputNames = string;
+export type InputNames = string;
 export type InputValue = any;
 export type EventType = SyntheticInputEvent<HTMLInputElement>;
 export type FormConfig = {|
@@ -42,7 +42,7 @@ export type PassProps = {
 };
 
 export type InputState = {
-  name: TInputNames,
+  name: InputNames,
   onChange: EventHandler,
   value: InputValue,
   required: boolean,
@@ -100,14 +100,14 @@ export type FormState = {|
   // isPristine(): boolean,
 |};
 
-// type TInputNames = string;
+// type InputNames = string;
 
 export type AsyncValidator = (value: any) => Promise<{ asyncError: string | boolean }>;
 
 export type InputConfig = {|
-  validations?: { [key: TInputNames]: (value: any) => boolean },
+  validations?: { [key: InputNames]: (value: any) => boolean },
   validateAsync?: AsyncValidator,
-  validationOrder?: Array<TInputNames>,
+  validationOrder?: Array<InputNames>,
   required?: boolean,
   getErrorText?: (input: InputState) => ?string,
   errorTextMap?: { [string]: string | ((i: InputState) => string) },
@@ -126,7 +126,7 @@ type FormPassProps = {|
 |};
 
 type RenderProps = {|
-  inputs: InputMap<TInputNames, InputState>,
+  inputs: InputMap<InputNames, InputState>,
   form: {|
     ...FormState,
     ...FormPassProps,
@@ -143,7 +143,7 @@ type RenderProps = {|
 |};
 
 export type LocalState = {|
-  inputStates: { [TInputNames]: InputState },
+  inputStates: { [InputNames]: InputState },
   submitting: boolean,
   submitFailed: boolean,
   submitSucceeded: boolean,
@@ -154,21 +154,21 @@ export type LocalProps = {
   // config override prop object?
   config?: FormConfig,
 
-  inputs: { [TInputNames]: InputConfig | null },
-  initialValues?: FormValuesMap<TInputNames>,
+  inputs: { [InputNames]: InputConfig | null },
+  initialValues?: FormValuesMap<InputNames>,
 
   // can return anything
   render: (props: RenderProps) => Node,
 
   formValidations?: {
     [inputName: string]: {
-      [errorCode: string]: (formValues: FormValuesMap<TInputNames>) => boolean,
+      [errorCode: string]: (formValues: FormValuesMap<InputNames>) => boolean,
     },
   },
 
   // NOTE_REVIEW: type of promise
   // onSubmit is optional as there might be other props to handle submitting later
-  onSubmit?: (values: FormValuesMap<TInputNames>) => ?Promise<$FlowFixMe>,
+  onSubmit?: (values: FormValuesMap<InputNames>) => ?Promise<$FlowFixMe>,
   errorTextMap?: { [string]: string },
 
   // NOTE_REVIEW: usefulness?, what args?

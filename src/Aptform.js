@@ -14,7 +14,7 @@ import type {
   ValidationPolicyNames,
   LocalProps,
   LocalState,
-  TInputNames,
+  InputNames,
   InitialValues,
 } from './types.d';
 
@@ -191,7 +191,7 @@ class Aptform extends React.Component<
     this.clearAllTimers();
   }
 
-  getInitialState(props: LocalProps, initialValues: ?InitialValues<TInputNames>) {
+  getInitialState(props: LocalProps, initialValues: ?InitialValues<InputNames>) {
     const inputNames = Object.keys(props.inputs);
     return {
       inputStates: this.initInputStates(inputNames, initialValues),
@@ -267,7 +267,7 @@ class Aptform extends React.Component<
     return opts.defaultText;
   }
 
-  getInputText(inputName: TInputNames, inputState: *): string {
+  getInputText(inputName: InputNames, inputState: *): string {
     const failFast = this.getFormConfigVal('failFast');
     const msgInvalid = this.getFormConfigVal('msgInvalid');
     if (inputState.valid === false) {
@@ -313,7 +313,7 @@ class Aptform extends React.Component<
 
     this.setState({ submitting: true });
 
-    const handleErrors = (errors: { [TInputNames]: string }) => {
+    const handleErrors = (errors: { [InputNames]: string }) => {
       const msgInvalid = this.getFormConfigVal('msgInvalid');
       const failFast = this.getFormConfigVal('failFast');
 
@@ -389,7 +389,7 @@ class Aptform extends React.Component<
     this.onBlurInput(inputName);
   }
 
-  onBlurInput(inputName: TInputNames) {
+  onBlurInput(inputName: InputNames) {
     const changes = {
       focused: false,
       changing: false,
@@ -413,7 +413,7 @@ class Aptform extends React.Component<
     this.onFocusInput(inputName);
   }
 
-  onFocusInput(name: TInputNames) {
+  onFocusInput(name: InputNames) {
     const { focused } = this.getInputState(name);
     if (!focused) {
       this.setInputState(name, { focused: true });
@@ -424,12 +424,12 @@ class Aptform extends React.Component<
     const target = e.target;
     const changedValue = getInputValue(target);
     if (changedValue !== undefined && changedValue !== null) {
-      const inputName = ((target.name: any): TInputNames);
+      const inputName = ((target.name: any): InputNames);
       this.changeInputValue(inputName, changedValue);
     }
   }
 
-  onChangeInput(name: TInputNames, value: InputValue) {
+  onChangeInput(name: InputNames, value: InputValue) {
     this.changeInputValue(name, value);
   }
 
@@ -451,7 +451,7 @@ class Aptform extends React.Component<
   onValidationThrown(
     error: Error,
     validation: string,
-    input: { name: TInputNames, value: InputValue }
+    input: { name: InputNames, value: InputValue }
   ) {
     // NoteReview(simon): didWarn per validation
     const msg = `validating ${validation} for input name=${input.name} value=${input.value} threw`;
@@ -459,7 +459,7 @@ class Aptform extends React.Component<
     onError(error, msg);
   }
 
-  getInputState(inputName: TInputNames): InputState {
+  getInputState(inputName: InputNames): InputState {
     // NoteReview: when can be undefined for given inputName?
     const inputState = this.state.inputStates[inputName];
     if (inputState) {
@@ -470,7 +470,7 @@ class Aptform extends React.Component<
     return this.createInputState({ name: inputName });
   }
 
-  getInputConfig(inputName: TInputNames): InputConfig {
+  getInputConfig(inputName: InputNames): InputConfig {
     const { inputs } = this.props;
     if (inputs) {
       const config = inputs[inputName];
@@ -568,7 +568,7 @@ class Aptform extends React.Component<
   }
 
   setInputState(
-    inputName: TInputNames,
+    inputName: InputNames,
     props: $Shape<InputState>
   ): Promise<typeof undefined> {
     const { inputStates } = this.state;
@@ -623,7 +623,7 @@ class Aptform extends React.Component<
 
   validateInputSync(
     inputValue: InputValue,
-    inputName: TInputNames,
+    inputName: InputNames,
     opts: { failFast: boolean } = { failFast: false }
   ): [boolean, ValidationErrs] {
     const inputConfig = this.getInputConfig(inputName);
@@ -640,7 +640,7 @@ class Aptform extends React.Component<
     const validations = inputConfig && inputConfig.validations;
     if (validations) {
       for (const valKey of this.getSortedValidationCodes(inputConfig)) {
-        // $FlowFixMe TInputNames is string
+        // $FlowFixMe InputNames is string
         const validateFunc = validations[valKey];
         let validationResult;
         try {
@@ -664,7 +664,7 @@ class Aptform extends React.Component<
     return [isValid, validationErrors];
   }
 
-  _updateErrorText(inputName: TInputNames) {
+  _updateErrorText(inputName: InputNames) {
     const inputState = this.getInputState(inputName);
     this.setInputState(inputName, { errorText: this.getInputText(inputName, inputState) });
   }
@@ -748,7 +748,7 @@ class Aptform extends React.Component<
     return { clientErrors, isOk };
   }
 
-  runInputValidation(inputName: TInputNames): Promise<*> {
+  runInputValidation(inputName: InputNames): Promise<*> {
     const failFast = this.getFormConfigVal('failFast') || false;
 
     const onValidated = () => {
@@ -807,7 +807,7 @@ class Aptform extends React.Component<
     this.validateTimer && clearTimeout(this.validateTimer);
   }
 
-  changeInputValue(inputName: TInputNames, value: InputValue) {
+  changeInputValue(inputName: InputNames, value: InputValue) {
     const props = {
       // constants
       changing: true,
@@ -851,7 +851,7 @@ class Aptform extends React.Component<
     });
   }
 
-  initInputStates(inputNameList: Array<TInputNames>, initialValues: ?InitialValues<TInputNames>) {
+  initInputStates(inputNameList: Array<InputNames>, initialValues: ?InitialValues<InputNames>) {
     const initialValid = this.getFormConfigVal('initialValid');
     const shouldValidate = this.shouldValidate('onCreate');
     const inputStates = {};
@@ -936,7 +936,7 @@ class Aptform extends React.Component<
 
   resetFormState(
     props: LocalProps,
-    initialValues: ?InitialValues<TInputNames>
+    initialValues: ?InitialValues<InputNames>
   ): Promise<typeof undefined> {
     this.clearAllTimers();
     const initialState = this.getInitialState(props, initialValues);
