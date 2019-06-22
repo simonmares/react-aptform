@@ -19,8 +19,9 @@
 		"prepublishOnly": "npm run build",
 		"build": "whys-scripts bundle",
 		"test": "whys-scripts test",
-		"check": "npm run test && whys-scripts format-check && whys-scripts lint && ",
-		"check:strict": "npm run check && npx flow check",
+		"pre-commit": "whys-scripts format --staged --add && whys-scripts lint --staged",
+		"pre-push": "npm t && whys-scripts lint --changed && npx flow",
+		"check:ci": "npm t && whys-scripts format-check && whys-scripts lint && npx flow check",
 		"storybook": "npx whys-scripts run-storybook"
 	},
 	"devDependencies": {
