@@ -10,7 +10,6 @@ import type {
   InputConfig,
   PassProps,
   ValidationErrs,
-  AsyncValidator,
   ValidationPolicyNames,
   LocalProps,
   LocalState,
@@ -86,13 +85,12 @@ const inputValueMethods = {
   },
 
   isValidating() {
-    return (this.valid === undefined && this.changing) || this.asyncValidating;
+    return this.valid === undefined && this.changing;
   },
 };
 
 const defaultConfig: FormConfig = {
   typeTimeout: 650,
-  asyncTimeout: 500,
   failFast: false,
   resetOnSubmit: true,
   initialValid: false,
@@ -126,7 +124,6 @@ const onErrorDefault = console.error.bind(console);
 
 class Aptform extends React.Component<LocalProps, LocalState> {
   typingTimer: *;
-  asyncTimer: *;
   validateTimer: *;
 
   props: LocalProps;
@@ -590,30 +587,6 @@ class Aptform extends React.Component<LocalProps, LocalState> {
     }
   }
 
-  validateInputAsync(
-    input: InputState,
-    validateAsync: AsyncValidator
-  ): Promise<{ valid: boolean, errorCode: string }> {
-    //
-    // Runs all async validations for an input.
-    // Returns a promise only when each validations settled.
-    //
-
-    const { value } = input;
-    return validateAsync(value).then((result = {}) => {
-      // NotePrototype(simon): handle not error cases....
-      if (!result.asyncError) {
-        return Promise.resolve({ valid: true, errorCode: '' });
-      }
-
-      const errorCode = result.asyncError === true ? 'unknownError' : result.asyncError;
-      return Promise.resolve({
-        valid: false,
-        errorCode,
-      });
-    });
-  }
-
   validateInputSync(
     inputValue: InputValue,
     inputName: InputNames,
@@ -662,81 +635,11 @@ class Aptform extends React.Component<LocalProps, LocalState> {
     this.setInputState(inputName, { errorText: this.getInputText(inputName, inputState) });
   }
 
-  _runAsyncValidation({ inputName, inputState, validateAsync }: *, onValidated: Function) {
-    // this.setInputState(inputName, {
-    //   asyncValidating: true,
-    // });
-
-    const onValidateAsyncReady = () => {
-      // reset timer if exists (debounce)
-      this.asyncTimer && clearTimeout(this.asyncTimer);
-
-      this.setInputState(inputName, {
-        valid: undefined,
-        asyncValidating: true,
-      });
-
-      const asyncValidated = this.validateInputAsync(inputState, validateAsync)
-        .then((result) => {
-          if (!result.errorCode) {
-            return this.setInputState(inputName, {
-              valid: true,
-              asyncValidating: false,
-              _serverErrors: undefined,
-            });
-          }
-
-          // input has changed, validation is not valid...
-          const curInputState = this.getInputState(inputName);
-          if (curInputState.value !== inputState.value) {
-            return this.setInputState(inputName, {
-              valid: true,
-              _serverErrors: undefined,
-            });
-          }
-
-          const { valid, errorCode } = result;
-          return this.setInputState(inputName, {
-            valid,
-            _serverErrors: { [errorCode]: true },
-          });
-        })
-        .catch((reason) => {
-          this.onUnhandledRejection(reason);
-          return this.setInputState(inputName, {
-            valid: true,
-            asyncValidating: false,
-          });
-        });
-      return asyncValidated.then(onValidated);
-    };
-
-    const asyncTimeout = this.getFormConfigVal('asyncTimeout');
-    this.asyncTimer = setTimeout(onValidateAsyncReady, asyncTimeout);
-  }
-
   validateFormWide({ validations, priorValid, inputName }: *): { clientErrors: *, isOk: boolean } {
     const inputValues = this.getAllFormValues();
     const clientErrors = mapObjVals(validations, (validators) =>
       mapObjVals(validators, (validator) => !validator(inputValues))
     );
-
-    // for (const inputName of Object.keys(validations)) {
-    // const validators = validations[inputName];
-    // const newErrors = mapObjVals(validators, validator => !validator(inputValues));
-    // clientErrors = { ...clientErrors, ...newErrors };
-
-    // const hasNewErrors = newErrors.length > 0;
-
-    // const oldState = this.getInputState(inputName);
-    // const isValid = !hasNewErrors && priorValid;
-
-    // this.setInputState(inputName, {
-    //   clientErrors: { ...oldState.clientErrors, ...clientErrors },
-    //   valid: isValid,
-    // });
-    // }
-
     const isOk = Object.keys(clientErrors).length > 0;
     return { clientErrors, isOk };
   }
@@ -753,27 +656,7 @@ class Aptform extends React.Component<LocalProps, LocalState> {
       failFast,
     });
     let valid = isValid;
-    let allErrors = clientErrors;
-
-    // validate asynchronously iff client validations pass and an async validation exist
-    if (isValid && !inputState.pristine) {
-      const validateAsync = this.getInputConfig(inputName).validateAsync;
-      if (validateAsync) {
-        // NoteReview(simon): must keep validating status of the input until Promise is settled
-        this.setInputState(inputName, {
-          asyncValidating: true,
-        });
-
-        this._runAsyncValidation(
-          {
-            inputName,
-            inputState,
-            validateAsync,
-          },
-          onValidated
-        );
-      }
-    }
+    // let allErrors = clientErrors;
 
     const { formValidations } = this.props;
     if (formValidations) {
@@ -783,7 +666,7 @@ class Aptform extends React.Component<LocalProps, LocalState> {
         inputName,
       });
       valid = valid && isOk;
-      allErrors = { ...allErrors, ...clientErrors };
+      // allErrors = { ...allErrors, ...clientErrors };
     }
 
     const syncValidated = this.setInputState(inputName, {
@@ -796,7 +679,6 @@ class Aptform extends React.Component<LocalProps, LocalState> {
 
   clearAllTimers() {
     this.typingTimer && clearTimeout(this.typingTimer);
-    this.asyncTimer && clearTimeout(this.asyncTimer);
     this.validateTimer && clearTimeout(this.validateTimer);
   }
 
@@ -904,8 +786,6 @@ class Aptform extends React.Component<LocalProps, LocalState> {
       changing: nonNilOrDefault(fromProps.changing, false),
       errorText: nonNilOrDefault(fromProps.errorText, NO_ERROR_TEXT),
       clientErrors: nonNilOrDefault(fromProps.clientErrors, {}),
-      //
-      asyncValidating: nonNilOrDefault(fromProps.asyncValidating, false),
     };
 
     // methods

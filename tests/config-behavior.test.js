@@ -11,7 +11,6 @@ import type { FormConfig } from '../src/types.d';
 
 const defaultConfig = {
   typeTimeout: 650,
-  asyncTimeout: 500,
   failFast: false,
   resetOnSubmit: true,
   msgInvalid: 'This input is invalid.',
@@ -25,7 +24,6 @@ test('it fallbacks to all preconfigured values', () => {
 
   const preconfig: FormConfig = {
     typeTimeout: 1234,
-    asyncTimeout: 432,
     failFast: true,
     resetOnSubmit: false,
     msgInvalid: 'Test: Invalid input.',
@@ -48,7 +46,6 @@ test('it fallbacks to all preconfigured values', () => {
   }
 
   expect(inst.getFormConfigVal('typeTimeout')).toEqual(1234);
-  expect(inst.getFormConfigVal('asyncTimeout')).toEqual(432);
   expect(inst.getFormConfigVal('failFast')).toEqual(true);
   expect(inst.getFormConfigVal('resetOnSubmit')).toEqual(false);
   expect(inst.getFormConfigVal('msgInvalid')).toEqual('Test: Invalid input.');

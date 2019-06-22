@@ -15,7 +15,6 @@ export type InputValue = any;
 export type EventType = SyntheticInputEvent<HTMLInputElement>;
 export type FormConfig = {|
   typeTimeout?: number,
-  asyncTimeout?: number,
   failFast?: boolean,
   resetOnSubmit?: boolean,
   initialValid?: boolean,
@@ -55,8 +54,6 @@ export type InputState = {
   focused: boolean,
   // input has changed (no matter it had initial or not)
   pristine: boolean,
-
-  asyncValidating: boolean,
 
   //
   // NOTE_REVIEW: just ideas
@@ -102,11 +99,8 @@ export type FormState = {|
 
 // type InputNames = string;
 
-export type AsyncValidator = (value: any) => Promise<{ asyncError: string | boolean }>;
-
 export type InputConfig = {|
   validations?: { [key: InputNames]: (value: any) => boolean },
-  validateAsync?: AsyncValidator,
   validationOrder?: Array<InputNames>,
   required?: boolean,
   getErrorText?: (input: InputState) => ?string,
