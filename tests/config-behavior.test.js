@@ -36,7 +36,7 @@ test('it fallbacks to all preconfigured values', () => {
   let inst;
   render(
     <AptformConfigured
-      componentRef={ref => {
+      componentRef={(ref) => {
         inst = ref;
       }}
       {...defaultProps}
@@ -63,7 +63,7 @@ test('Aptform fallbacks to default props', () => {
   let inst;
   render(
     <AptformConfigured
-      componentRef={ref => {
+      componentRef={(ref) => {
         inst = ref;
       }}
       {...defaultProps}
@@ -105,7 +105,7 @@ test('Aptform config prop has precedence over global config', () => {
   render(
     <AptformConfigured
       {...defaultProps}
-      componentRef={ref => {
+      componentRef={(ref) => {
         inst = ref;
       }}
       config={{ typeTimeout: 555 }}
@@ -126,7 +126,7 @@ test('all cases', () => {
   render(
     <AptformConfigured
       {...defaultProps}
-      componentRef={ref => {
+      componentRef={(ref) => {
         inst = ref;
       }}
       config={{ typeTimeout: 555 }}

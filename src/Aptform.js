@@ -33,9 +33,9 @@ import {
 const NO_ERROR_TEXT = '';
 const DEFAULT_VALUE = '';
 
-const valueEmpty = value => !value && value !== 0;
+const valueEmpty = (value) => !value && value !== 0;
 
-const warnUser = msg => {
+const warnUser = (msg) => {
   console.warn(msg);
 };
 
@@ -124,11 +124,7 @@ const onErrorDefault = console.error.bind(console);
 // we set a value and react changes it to a "controlled" component, and issues the warning.
 // https://github.com/twisty/formsy-react-components/issues/66
 
-
-class Aptform extends React.Component<
-  LocalProps,
-  LocalState
-> {
+class Aptform extends React.Component<LocalProps, LocalState> {
   typingTimer: *;
   asyncTimer: *;
   validateTimer: *;
@@ -336,7 +332,7 @@ class Aptform extends React.Component<
       }
     };
 
-    const onErr = reason => {
+    const onErr = (reason) => {
       this.setState({ submitting: false, submitFailed: true, submitSucceeded: false });
       this.onUnhandledRejection(reason);
     };
@@ -495,7 +491,7 @@ class Aptform extends React.Component<
     //
 
     const { inputStates } = this.state;
-    const invalidInputExists = objValues(inputStates).some(input => input.valid !== true);
+    const invalidInputExists = objValues(inputStates).some((input) => input.valid !== true);
     if (invalidInputExists) {
       return false;
     }
@@ -506,8 +502,8 @@ class Aptform extends React.Component<
         const priorValid = input.valid;
         const inputValues = this.getAllFormValues();
         for (const validators of objValues(formValidations)) {
-          const clientErrors = mapObjVals(validators, validator => !validator(inputValues));
-          const newErrors = filterObjValues(clientErrors, v => v === true);
+          const clientErrors = mapObjVals(validators, (validator) => !validator(inputValues));
+          const newErrors = filterObjValues(clientErrors, (v) => v === true);
           const hasNewErrors = newErrors.length > 0;
           const valid = !hasNewErrors && priorValid;
           if (!valid) {
@@ -543,7 +539,7 @@ class Aptform extends React.Component<
 
   getAllFormValues() {
     // => input name to value map.
-    return mapObjVals(this.state.inputStates, is => is.value);
+    return mapObjVals(this.state.inputStates, (is) => is.value);
   }
 
   getSubmitErrorText(errorCode: string = 'unknownError'): string {
@@ -562,15 +558,12 @@ class Aptform extends React.Component<
   }
 
   setFormState(state: $Shape<LocalState>): Promise<typeof undefined> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.setState(state, resolve);
     });
   }
 
-  setInputState(
-    inputName: InputNames,
-    props: $Shape<InputState>
-  ): Promise<typeof undefined> {
+  setInputState(inputName: InputNames, props: $Shape<InputState>): Promise<typeof undefined> {
     const { inputStates } = this.state;
 
     const prevState = inputStates[inputName];
@@ -580,7 +573,7 @@ class Aptform extends React.Component<
     };
     const updatedInput = this.createInputState(newState);
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.setFormState({
         inputStates: {
           ...inputStates,
@@ -684,7 +677,7 @@ class Aptform extends React.Component<
       });
 
       const asyncValidated = this.validateInputAsync(inputState, validateAsync)
-        .then(result => {
+        .then((result) => {
           if (!result.errorCode) {
             return this.setInputState(inputName, {
               valid: true,
@@ -708,7 +701,7 @@ class Aptform extends React.Component<
             _serverErrors: { [errorCode]: true },
           });
         })
-        .catch(reason => {
+        .catch((reason) => {
           this.onUnhandledRejection(reason);
           return this.setInputState(inputName, {
             valid: true,
@@ -724,8 +717,8 @@ class Aptform extends React.Component<
 
   validateFormWide({ validations, priorValid, inputName }: *): { clientErrors: *, isOk: boolean } {
     const inputValues = this.getAllFormValues();
-    const clientErrors = mapObjVals(validations, validators =>
-      mapObjVals(validators, validator => !validator(inputValues))
+    const clientErrors = mapObjVals(validations, (validators) =>
+      mapObjVals(validators, (validator) => !validator(inputValues))
     );
 
     // for (const inputName of Object.keys(validations)) {

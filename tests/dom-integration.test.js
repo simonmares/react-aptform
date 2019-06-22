@@ -12,7 +12,7 @@ import { defaultProps, toStableJSON as toJSON, triggerBlur, triggerFocus } from 
 function localRender({ inputs }: *) {
   // $FlowFixMe
   let form;
-  const renderMock = jest.fn(renderProps => {
+  const renderMock = jest.fn((renderProps) => {
     const { password } = renderProps.inputs;
     form = renderProps.form;
     return toJSON({

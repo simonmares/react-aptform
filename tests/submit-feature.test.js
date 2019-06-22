@@ -76,7 +76,7 @@ describe('onSubmit resolved => update input values', () => {
       // it resets on submit if onSubmit promise resolves with no value
 
       let form;
-      const renderMock = jest.fn(renderProps => {
+      const renderMock = jest.fn((renderProps) => {
         form = renderProps.form;
         const { firstName, lastName } = renderProps.inputs;
         return `firstName: ${firstName.value}; lastName: ${lastName.value}`;
@@ -110,7 +110,7 @@ describe('onSubmit resolved => update input values', () => {
 
     // $FlowFixMe
     let form;
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       form = renderProps.form;
       const { firstName, lastName } = renderProps.inputs;
       return `firstName: ${firstName.value}; lastName: ${lastName.value}`;
@@ -171,7 +171,7 @@ describe('onSubmit resolved => errors', () => {
 
   test('errors', async () => {
     let form;
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       form = renderProps.form;
       const { nameHandle, username } = renderProps.inputs;
       return `nameHandle error: ${nameHandle.errorText}; username error: ${
@@ -219,7 +219,7 @@ describe('onSubmit resolved => errors', () => {
 
     for (const { submitError, submitErrorText } of edgecases) {
       let form;
-      const renderMock = jest.fn(renderProps => {
+      const renderMock = jest.fn((renderProps) => {
         form = renderProps.form;
         return `submit failed: ${String(form.submitFailed)}; error: ${form.submitErrorText}`;
       });
@@ -283,7 +283,7 @@ describe('submit render states', () => {
 
   test('submit succeeded', async () => {
     let form;
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       form = renderProps.form;
       return toJSON(form);
     });
@@ -325,7 +325,7 @@ describe('submit render states', () => {
 
   test('submit failed', async () => {
     let form;
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       form = renderProps.form;
       return toJSON(form);
     });

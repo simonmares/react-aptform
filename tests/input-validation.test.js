@@ -42,7 +42,7 @@ describe('custom errors', () => {
   test('invalid input with custom message', async () => {
     let form;
 
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       const { password } = renderProps.inputs;
       form = renderProps.form;
       return toJSON({
@@ -86,7 +86,7 @@ describe('custom errors', () => {
   test('required input with custom validation', async () => {
     let form;
 
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       const { password } = renderProps.inputs;
       form = renderProps.form;
       return toJSON({
@@ -109,7 +109,12 @@ describe('custom errors', () => {
 
     // with initial state its invalid because its required and its empty
     expect(container.textContent).toBe(
-      toJSON({ isValid: false, isValidating: false, value: '', errorText: 'This input is required.' })
+      toJSON({
+        isValid: false,
+        isValidating: false,
+        value: '',
+        errorText: 'This input is required.',
+      })
     );
 
     // trigger the validation by changing it

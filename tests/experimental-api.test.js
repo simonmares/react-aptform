@@ -32,7 +32,7 @@ describe('synchronizing', () => {
         inputs={inputs}
         initialValues={initialValues}
         onChange={onChange}
-        render={renderProps => {
+        render={(renderProps) => {
           renderCount += 1;
           form = renderProps.form;
           const { email } = renderProps.inputs;
@@ -75,7 +75,7 @@ describe('async validation', () => {
   test('shows async validation error', async () => {
     let form;
 
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       const { password } = renderProps.inputs;
       form = renderProps.form;
       return toJSON({
@@ -107,7 +107,7 @@ describe('async validation', () => {
   test('async validation rejected', async () => {
     let form;
 
-    const renderMock = jest.fn(renderProps => {
+    const renderMock = jest.fn((renderProps) => {
       const { password } = renderProps.inputs;
       form = renderProps.form;
       return toJSON({

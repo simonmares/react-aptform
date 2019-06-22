@@ -27,7 +27,7 @@ function createPerfContainer(amount) {
         <Aptform
           inputs={inputs}
           onSubmit={onSubmit}
-          render={renderProps => {
+          render={(renderProps) => {
             this.renderTimes += 1;
             return this.props.render(renderProps, this.renderTimes);
           }}

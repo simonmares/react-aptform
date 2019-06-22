@@ -54,7 +54,7 @@ test('All state transition', async () => {
       initialValues={{ email: '' }}
       inputs={{
         email: {
-          validations: { isJoe: val => /joe/.test(val), isEmail: val => /[.+@.+]/.test(val) },
+          validations: { isJoe: (val) => /joe/.test(val), isEmail: (val) => /[.+@.+]/.test(val) },
           required: true,
         },
       }}

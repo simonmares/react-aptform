@@ -15,8 +15,8 @@ function mergeWithDefaultProps(props) {
   return finalProps;
 }
 
-const waitForMilliseconds = async time => {
-  return new Promise(resolve => {
+const waitForMilliseconds = async (time) => {
+  return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
 };
@@ -66,7 +66,7 @@ describe('initial state', () => {
 });
 
 describe('form-wide validation', () => {
-  const arePasswordsSame = values => {
+  const arePasswordsSame = (values) => {
     if (values.password === '' || values.passwordAgain === '') {
       return true;
     }
