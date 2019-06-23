@@ -1,7 +1,5 @@
 // @flow
 
-import * as React from 'react';
-
 import type {
   InputState,
   FormConfig,
@@ -15,7 +13,7 @@ import type {
   LocalState,
   InputNames,
   InitialValues,
-} from './types.d';
+} from './types';
 
 import {
   sortByArray,
@@ -122,9 +120,13 @@ const onErrorDefault = console.error.bind(console);
 // we set a value and react changes it to a "controlled" component, and issues the warning.
 // https://github.com/twisty/formsy-react-components/issues/66
 
-class Aptform extends React.Component<LocalProps, LocalState> {
+type Listener = (LocalState) => void;
+
+class Aptform {
   typingTimer: *;
   validateTimer: *;
+
+  _listeners: Array<Listener>;
 
   props: LocalProps;
   state: LocalState;
@@ -147,8 +149,6 @@ class Aptform extends React.Component<LocalProps, LocalState> {
   hasFormChanged: *;
 
   constructor(props: LocalProps) {
-    super(props);
-
     // bind event handlers
     this.onSubmit = this.onSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
@@ -171,7 +171,9 @@ class Aptform extends React.Component<LocalProps, LocalState> {
       this.validateProps(props);
     }
 
-    this.state = this.getInitialState(props, this.props.initialValues);
+    this.props = props;
+    this.state = this.getInitialState(props, props.initialValues);
+    this._listeners = [];
   }
 
   componentDidMount() {
@@ -816,32 +818,39 @@ class Aptform extends React.Component<LocalProps, LocalState> {
     return this.setFormState(initialState);
   }
 
-  render() {
-    const { inputStates, submitting, submitFailed, submitErrorText, submitSucceeded } = this.state;
-    const form = {
-      // form state getters
-      isValid: this.isFormValid,
-      hasChanged: this.hasFormChanged,
-      isSubmitting: () => submitting,
+  setState(
+    update: $Shape<LocalState> | ((prevState: $Shape<LocalState>) => $Shape<LocalState>),
+    cb?: () => void
+  ): Promise<void> {
+    return Promise.resolve().then(() => {
+      const nextState = typeof update === 'function' ? update(this.state) : update;
 
-      // Event handlers
-      onSubmit: this.onSubmit,
-      onFocus: this.onFocus,
-      onBlur: this.onBlur,
+      // NoteReview(simon): null/undefined how react behaves actually?
+      // (`null` is documented here: https://reactjs.org/docs/conditional-rendering.html)
 
-      // Direct API
-      changeInput: this.onChangeInput,
-      blurInput: this.onBlurInput,
-      focusInput: this.onFocusInput,
-      getPassProps: this.onGetFormPassProps,
+      // Do not update state if called "without nextState"
+      if (nextState == null) {
+        if (cb) cb();
+        return;
+      }
 
-      // direct state
-      submitting,
-      submitFailed,
-      submitSucceeded,
-      submitErrorText,
-    };
-    return this.props.render({ inputs: inputStates, form });
+      // Update state
+      const updatedState = { ...this.state, ...nextState };
+      this.state = updatedState;
+
+      const promises = this._listeners.map((listener) => listener(updatedState));
+      return Promise.all(promises).then(() => {
+        if (cb) cb();
+      });
+    });
+  }
+
+  subscribe(fn: Listener) {
+    this._listeners.push(fn);
+  }
+
+  unsubscribe(fn: Listener) {
+    this._listeners = this._listeners.filter((f) => f !== fn);
   }
 }
 

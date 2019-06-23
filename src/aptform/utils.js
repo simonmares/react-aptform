@@ -1,6 +1,6 @@
 // @flow
 
-import type { InputValue } from './types.d';
+import type { InputValue } from './types';
 
 export function sortByArray<T: *>(arr: Array<T>, sortedArr: Array<T>): Array<T> {
   const compareFunction = (a: T, b: T) => {

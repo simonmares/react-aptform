@@ -13,7 +13,7 @@ import {
   triggerSubmit,
 } from './helpers';
 
-describe('initialValid', () => {
+describe.skip('initialValid', () => {
   beforeEach(() => {
     cleanup();
   });
@@ -52,7 +52,7 @@ describe('initialValid', () => {
   });
 });
 
-describe('validationPolicy', () => {
+describe.skip('validationPolicy', () => {
   beforeEach(() => {
     cleanup();
   });

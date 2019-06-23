@@ -3,7 +3,7 @@
 import * as React from 'react';
 
 // project
-import type { InputState } from '../src/types.d';
+import type { InputState } from '../src/aptform/types';
 
 type ScalarValue = number | string | boolean | Date;
 
