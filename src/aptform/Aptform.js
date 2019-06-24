@@ -120,7 +120,7 @@ const onErrorDefault = console.error.bind(console);
 // we set a value and react changes it to a "controlled" component, and issues the warning.
 // https://github.com/twisty/formsy-react-components/issues/66
 
-type Listener = (LocalState) => void;
+type Listener = (LocalState) => Promise<void>;
 
 class Aptform {
   typingTimer: *;
@@ -818,30 +818,22 @@ class Aptform {
     return this.setFormState(initialState);
   }
 
-  setState(
-    update: $Shape<LocalState> | ((prevState: $Shape<LocalState>) => $Shape<LocalState>),
-    cb?: () => void
-  ): Promise<void> {
-    return Promise.resolve().then(() => {
-      const nextState = typeof update === 'function' ? update(this.state) : update;
-
-      // NoteReview(simon): null/undefined how react behaves actually?
-      // (`null` is documented here: https://reactjs.org/docs/conditional-rendering.html)
-
-      // Do not update state if called "without nextState"
-      if (nextState == null) {
-        if (cb) cb();
-        return;
+  setState(update: $Shape<LocalState> | null, cb?: () => void): void {
+    // Do not update state for null
+    if (update == null) {
+      if (cb) {
+        cb();
       }
-
-      // Update state
-      const updatedState = { ...this.state, ...nextState };
-      this.state = updatedState;
-
-      const promises = this._listeners.map((listener) => listener(updatedState));
-      return Promise.all(promises).then(() => {
-        if (cb) cb();
-      });
+      return;
+    }
+    // Update state and notify
+    const updatedState = { ...this.state, ...update };
+    this.state = updatedState;
+    const promises = this._listeners.map((listener) => listener(updatedState));
+    Promise.all(promises).then(() => {
+      if (cb) {
+        cb();
+      }
     });
   }
 

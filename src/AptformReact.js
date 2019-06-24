@@ -28,9 +28,11 @@ class AptformReact extends React.Component<LocalProps, LocalState> {
     this.unsubscribe && this.unsubscribe();
   }
 
-  updateState(val: LocalState) {
+  updateState(val: LocalState): Promise<void> {
     // NotePrototype: add is mount check?
-    this.setState(val);
+    return new Promise((resolve) => {
+      this.setState(val, resolve);
+    });
   }
 
   render() {
