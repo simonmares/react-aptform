@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react';
-import { render, waitForElement, cleanup } from 'react-testing-library';
+import { render, waitForElement, cleanup } from '@testing-library/react';
 
 import { Aptform } from '../src/index';
 
@@ -66,6 +66,8 @@ describe('initial state', () => {
 });
 
 describe('form-wide validation', () => {
+  afterEach(cleanup);
+
   const arePasswordsSame = (values) => {
     if (values.password === '' || values.passwordAgain === '') {
       return true;
