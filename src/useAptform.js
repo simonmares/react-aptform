@@ -28,10 +28,14 @@ export function useAptform(props: LocalProps) {
     }
 
     inst.subscribe(onUpdate);
+    if (inst.shouldValidate('onMount')) {
+      inst.updateAllInputsValidationState();
+    }
 
     return () => {
       isActive = false;
       inst.unsubscribe(onUpdate);
+      inst.cleanup();
     };
   }, []);
 

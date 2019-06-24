@@ -149,6 +149,8 @@ class Aptform {
   hasFormChanged: *;
 
   constructor(props: LocalProps) {
+    this.props = props;
+
     // bind event handlers
     this.onSubmit = this.onSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
@@ -171,19 +173,8 @@ class Aptform {
       this.validateProps(props);
     }
 
-    this.props = props;
-    this.state = this.getInitialState(props, props.initialValues);
     this._listeners = [];
-  }
-
-  componentDidMount() {
-    if (this.shouldValidate('onMount')) {
-      this.updateAllInputsValidationState();
-    }
-  }
-
-  componentWillUnmount() {
-    this.clearAllTimers();
+    this.state = this.getInitialState(props, props.initialValues);
   }
 
   getInitialState(props: LocalProps, initialValues: ?InitialValues<InputNames>) {
@@ -679,6 +670,10 @@ class Aptform {
     return syncValidated.then(onValidated);
   }
 
+  cleanup() {
+    this.clearAllTimers();
+  }
+
   clearAllTimers() {
     this.typingTimer && clearTimeout(this.typingTimer);
     this.validateTimer && clearTimeout(this.validateTimer);
@@ -804,8 +799,8 @@ class Aptform {
     inputState.getPassProps = inputValueMethods
       .getPassProps({ onChange: onFormChange, required })
       .bind(inputState);
-    inputState.onChange = onFormChange.bind(inputState);
 
+    inputState.onChange = onFormChange.bind(inputState);
     return inputState;
   }
 
