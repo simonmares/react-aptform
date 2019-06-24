@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 
-import Aptform from './aptform/Aptform';
+import { Aptform } from './aptform/Aptform';
 import type { LocalProps } from './aptform/types';
 
 export function useAptform(props: LocalProps) {
@@ -27,7 +27,9 @@ export function useAptform(props: LocalProps) {
       }
     }
 
+    // inst.setup();
     inst.subscribe(onUpdate);
+
     if (inst.shouldValidate('onMount')) {
       inst.updateAllInputsValidationState();
     }

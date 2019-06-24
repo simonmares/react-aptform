@@ -36,6 +36,50 @@ const warnUser = (msg) => {
   console.warn(msg);
 };
 
+const validateProps =
+  process.env.NODE_ENV === 'production'
+    ? null
+    : function(props: LocalProps) {
+        if (!props.onSubmit) {
+          warnUser('You have to provide onSubmit prop.');
+        }
+        if (!props.inputs) {
+          warnUser('Prop `inputs` is missing.');
+        }
+        if ('children' in props) {
+          warnUser('Aptform does not accept children prop.');
+        }
+
+        //
+        // Checking for initialValues vs inputs mismatches
+        //
+
+        const initialKeys = new Set(Object.keys(props.initialValues || {}));
+        const inputKeys = new Set(Object.keys(props.inputs));
+
+        function isSuperset(set, subset) {
+          for (var elem of subset) {
+            if (!set.has(elem)) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        if (!isSuperset(inputKeys, initialKeys)) {
+          function difference(setA, setB) {
+            var _difference = new Set(setA);
+            for (var elem of setB) {
+              _difference.delete(elem);
+            }
+            return _difference;
+          }
+
+          const extraKeys = Array.from(difference(initialKeys, inputKeys)).join(', ');
+          warnUser(`Extra keys in \`initialValues\`: [${extraKeys}] missing in \`inputs\`.`);
+        }
+      };
+
 const inputValueMethods = {
   showError() {
     // do not show while its changing
@@ -122,7 +166,7 @@ const onErrorDefault = console.error.bind(console);
 
 type Listener = (LocalState) => void;
 
-class Aptform {
+export class Aptform {
   typingTimer: *;
   validateTimer: *;
 
@@ -130,9 +174,6 @@ class Aptform {
 
   props: LocalProps;
   state: LocalState;
-
-  // In prototype if on development
-  validateProps: *;
 
   onUnhandledRejection: *;
 
@@ -150,7 +191,15 @@ class Aptform {
 
   constructor(props: LocalProps) {
     this.props = props;
+    if (validateProps) {
+      validateProps(props);
+    }
+    this._listeners = [];
+    this.bindMethods();
+    this.state = this.getInitialState(props, props.initialValues);
+  }
 
+  bindMethods() {
     // bind event handlers
     this.onSubmit = this.onSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
@@ -168,13 +217,10 @@ class Aptform {
 
     // bind other cb
     this.onUnhandledRejection = this.onUnhandledRejection.bind(this);
+  }
 
-    if (process.env.NODE_ENV !== 'production') {
-      this.validateProps(props);
-    }
-
-    this._listeners = [];
-    this.state = this.getInitialState(props, props.initialValues);
+  cleanup() {
+    this.clearAllTimers();
   }
 
   getInitialState(props: LocalProps, initialValues: ?InitialValues<InputNames>) {
@@ -670,10 +716,6 @@ class Aptform {
     return syncValidated.then(onValidated);
   }
 
-  cleanup() {
-    this.clearAllTimers();
-  }
-
   clearAllTimers() {
     this.typingTimer && clearTimeout(this.typingTimer);
     this.validateTimer && clearTimeout(this.validateTimer);
@@ -761,7 +803,7 @@ class Aptform {
 
   createInputState(fromProps: $Shape<InputState>): InputState {
     const initialValues = this.props.initialValues || {};
-    const onFormChange = this.onChange;
+    const onFormChange = this.onChange.bind(this);
     const inputName = fromProps.name;
     const inputConfig = this.getInputConfig(inputName);
 
@@ -837,51 +879,3 @@ class Aptform {
     this._listeners = this._listeners.filter((f) => f !== fn);
   }
 }
-
-if (process.env.NODE_ENV !== 'production') {
-  Aptform.prototype.validateProps = function(props: LocalProps) {
-    if (!props.onSubmit) {
-      warnUser('You have to provide onSubmit prop.');
-    }
-    if (!props.render) {
-      warnUser('Prop `render` is missing.');
-    }
-    if (!props.inputs) {
-      warnUser('Prop `inputs` is missing.');
-    }
-    if ('children' in props) {
-      warnUser('Aptform does not accept children prop.');
-    }
-
-    //
-    // Checking for initialValues vs inputs mismatches
-    //
-
-    const initialKeys = new Set(Object.keys(props.initialValues || {}));
-    const inputKeys = new Set(Object.keys(props.inputs));
-
-    function isSuperset(set, subset) {
-      for (var elem of subset) {
-        if (!set.has(elem)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    if (!isSuperset(inputKeys, initialKeys)) {
-      function difference(setA, setB) {
-        var _difference = new Set(setA);
-        for (var elem of setB) {
-          _difference.delete(elem);
-        }
-        return _difference;
-      }
-
-      const extraKeys = Array.from(difference(initialKeys, inputKeys)).join(', ');
-      warnUser(`Extra keys in \`initialValues\`: [${extraKeys}] missing in \`inputs\`.`);
-    }
-  };
-}
-
-export default Aptform;

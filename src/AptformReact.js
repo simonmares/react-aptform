@@ -2,9 +2,9 @@
 
 import { useAptform } from './useAptform';
 
-import type { LocalProps } from './aptform/types';
+import type { LocalProps, RenderFn } from './aptform/types';
 
-function AptformReact(props: LocalProps) {
+function AptformReact(props: LocalProps & { render: RenderFn }) {
   const aptform = useAptform(props);
   return props.render(aptform);
 }

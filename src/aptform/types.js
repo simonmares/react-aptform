@@ -136,6 +136,8 @@ type RenderProps = {|
   |},
 |};
 
+export type RenderFn = (props: RenderProps) => Node;
+
 export type LocalState = {|
   inputStates: { [InputNames]: InputState },
   submitting: boolean,
@@ -152,7 +154,6 @@ export type LocalProps = {
   initialValues?: FormValuesMap<InputNames>,
 
   // can return anything
-  render: (props: RenderProps) => Node,
 
   formValidations?: {
     [inputName: string]: {
