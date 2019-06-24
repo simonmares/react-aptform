@@ -43,7 +43,8 @@
 		],
 		"projectType": "react-library",
 		"tests": [
-			"tests/**/*.test.js"
+			"tests/**/*.test.js",
+			"src/**/*.test.js"
 		],
 		"mainSource": "src/index.js"
 	}
