@@ -120,7 +120,7 @@ const onErrorDefault = console.error.bind(console);
 // we set a value and react changes it to a "controlled" component, and issues the warning.
 // https://github.com/twisty/formsy-react-components/issues/66
 
-type Listener = (LocalState) => Promise<void>;
+type Listener = (LocalState) => void;
 
 class Aptform {
   typingTimer: *;
@@ -829,12 +829,9 @@ class Aptform {
     // Update state and notify
     const updatedState = { ...this.state, ...update };
     this.state = updatedState;
-    const promises = this._listeners.map((listener) => listener(updatedState));
-    Promise.all(promises).then(() => {
-      if (cb) {
-        cb();
-      }
-    });
+    if (cb) {
+      cb();
+    }
   }
 
   subscribe(fn: Listener) {
