@@ -4,7 +4,6 @@ package-lock.json
 storybook-static
 yarn-error.log
 lib/
-.storybook
 .watchman*
 dest/
 coverage/
