@@ -37,6 +37,11 @@
 		"react": "^16"
 	},
 	"dependencies": {},
+	"jest": {
+		"setupFiles": [
+			"<rootDir>/tests/jest/setupTestFrameworkScriptFile.js"
+		]
+	},
 	"whys-scripts": {
 		"src": [
 			"src/**/*.js"
