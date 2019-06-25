@@ -167,56 +167,21 @@ const onErrorDefault = console.error.bind(console);
 type Listener = (LocalState) => void;
 
 export class Aptform {
-  typingTimer: *;
-  validateTimer: *;
+  typingTimer: TimeoutID;
+  validateTimer: TimeoutID;
 
   _listeners: Array<Listener>;
 
   props: LocalProps;
   state: LocalState;
 
-  onUnhandledRejection: *;
-
-  onSubmit: *;
-  onChange: *;
-  onBlur: *;
-  onFocus: *;
-
-  onChangeInput: *;
-  onFocusInput: *;
-  onBlurInput: *;
-
-  isFormValid: *;
-  hasFormChanged: *;
-
   constructor(props: LocalProps) {
-    this.props = props;
     if (validateProps) {
       validateProps(props);
     }
+    this.props = props;
     this._listeners = [];
-    this.bindMethods();
     this.state = this.getInitialState(props, props.initialValues);
-  }
-
-  bindMethods() {
-    // bind event handlers
-    this.onSubmit = this.onSubmit.bind(this);
-    this.onChange = this.onChange.bind(this);
-    this.onBlur = this.onBlur.bind(this);
-    this.onFocus = this.onFocus.bind(this);
-
-    // bind imperative callbacks
-    this.onChangeInput = this.onChangeInput.bind(this);
-    this.onFocusInput = this.onFocusInput.bind(this);
-    this.onBlurInput = this.onBlurInput.bind(this);
-
-    // bind form callbacks
-    this.isFormValid = this.isFormValid.bind(this);
-    this.hasFormChanged = this.hasFormChanged.bind(this);
-
-    // bind other cb
-    this.onUnhandledRejection = this.onUnhandledRejection.bind(this);
   }
 
   cleanup() {
@@ -467,18 +432,18 @@ export class Aptform {
 
   onGetFormPassProps() {
     return {
-      onSubmit: this.onSubmit,
-      onFocus: this.onFocus,
-      onBlur: this.onBlur,
+      onSubmit: this.onSubmit.bind(this),
+      onFocus: this.onFocus.bind(this),
+      onBlur: this.onBlur.bind(this),
     };
   }
 
-  onUnhandledRejection(reason: *) {
+  onUnhandledRejection = (reason: *) => {
     const onError = this.props.onError || onErrorDefault;
     onError(reason, 'promise rejection');
     const submitErrorText = this.getSubmitErrorText();
     this.setState({ submitFailed: true, submitErrorText });
-  }
+  };
 
   onValidationThrown(
     error: Error,
@@ -863,12 +828,14 @@ export class Aptform {
       }
       return;
     }
+
     // Update state and notify
     const updatedState = { ...this.state, ...update };
     this.state = updatedState;
     if (cb) {
       cb();
     }
+    this._listeners.forEach((fn) => fn(updatedState));
   }
 
   subscribe(fn: Listener) {

@@ -5,6 +5,31 @@ import { useMemo, useState, useEffect } from 'react';
 import { Aptform } from './aptform/Aptform';
 import type { LocalProps } from './aptform/types';
 
+function createLocalState(inst, newState) {
+  const { inputStates, submitting, submitFailed, submitErrorText, submitSucceeded } = newState;
+  const form = {
+    // form state getters
+    isValid: inst.isFormValid.bind(inst),
+    hasChanged: inst.hasFormChanged.bind(inst),
+    isSubmitting: () => submitting,
+    // Event handlers
+    onSubmit: inst.onSubmit.bind(inst),
+    onFocus: inst.onFocus.bind(inst),
+    onBlur: inst.onBlur.bind(inst),
+    // Direct API
+    changeInput: inst.onChangeInput.bind(inst),
+    blurInput: inst.onBlurInput.bind(inst),
+    focusInput: inst.onFocusInput.bind(inst),
+    getPassProps: inst.onGetFormPassProps.bind(inst),
+    // direct state
+    submitting,
+    submitFailed,
+    submitSucceeded,
+    submitErrorText,
+  };
+  return { inputs: inputStates, form };
+}
+
 export function useAptform(props: LocalProps) {
   //
   // Create Aptform instance (only once for now)
@@ -12,7 +37,7 @@ export function useAptform(props: LocalProps) {
 
   // NoteReview(simon): when the instance should be recreated?
   const inst: Aptform = useMemo(() => new Aptform(props), []);
-  const [state, setState] = useState(inst.state);
+  const [localState, setLocalState] = useState(() => createLocalState(inst, inst.state));
 
   //
   // Subscribe on "mount"
@@ -21,9 +46,9 @@ export function useAptform(props: LocalProps) {
   useEffect(() => {
     let isActive = true;
 
-    function onUpdate() {
+    function onUpdate(newState) {
       if (isActive) {
-        setState(inst.state);
+        setLocalState(createLocalState(inst, newState));
       }
     }
 
@@ -45,27 +70,5 @@ export function useAptform(props: LocalProps) {
   // render
   //
 
-  const { inputStates, submitting, submitFailed, submitErrorText, submitSucceeded } = state;
-  const form = {
-    // form state getters
-    isValid: inst.isFormValid,
-    hasChanged: inst.hasFormChanged,
-    isSubmitting: () => submitting,
-    // Event handlers
-    onSubmit: inst.onSubmit,
-    onFocus: inst.onFocus,
-    onBlur: inst.onBlur,
-    // Direct API
-    changeInput: inst.onChangeInput,
-    blurInput: inst.onBlurInput,
-    focusInput: inst.onFocusInput,
-    getPassProps: inst.onGetFormPassProps,
-    // direct state
-    submitting,
-    submitFailed,
-    submitSucceeded,
-    submitErrorText,
-  };
-
-  return { inputs: inputStates, form };
+  return localState;
 }
