@@ -1,11 +1,11 @@
 // @flow
 
 import React from 'react';
-import { render, waitForElement, cleanup } from '@testing-library/react';
+import { render, waitForElement, cleanup, fireEvent } from '@testing-library/react';
 
 import { Aptform } from '../src/index';
 
-import { defaultProps, changeInputValue, toStableJSON as toJSON, triggerSubmit } from './helpers';
+import { defaultProps, toStableJSON as toJSON } from './helpers';
 
 describe('form.onSubmit defensivity', () => {
   beforeEach(() => {
@@ -74,16 +74,19 @@ describe('onSubmit resolved => update input values', () => {
   test('no value or empty object => resets', async () => {
     for (const resolveValue of [undefined, {}]) {
       // it resets on submit if onSubmit promise resolves with no value
-
-      let form;
-      const renderMock = jest.fn((renderProps) => {
-        form = renderProps.form;
-        const { firstName, lastName } = renderProps.inputs;
-        return `firstName: ${firstName.value}; lastName: ${lastName.value}`;
+      const renderMock = jest.fn(({ inputs, form }) => {
+        const { firstName, lastName } = inputs;
+        return (
+          <form {...form.getPassProps()}>
+            <input {...firstName.getPassProps()} />
+            <input {...lastName.getPassProps()} />
+            <article>{`firstName: ${firstName.value}; lastName: ${lastName.value}`}</article>
+          </form>
+        );
       });
 
       const onSubmitMock = jest.fn(() => Promise.resolve(resolveValue));
-      const { getByText } = render(
+      const { getByText, container } = render(
         <Aptform
           {...defaultProps}
           render={renderMock}
@@ -94,11 +97,14 @@ describe('onSubmit resolved => update input values', () => {
         />
       );
 
-      changeInputValue(form, 'firstName', 'Karlik');
+      const formEl = container.querySelector('form');
+      const firstNameEl = container.querySelector('input[name="firstName"]');
+      fireEvent.change(firstNameEl, { target: { name: 'firstName', value: 'Karlik' } });
 
       await waitForElement(() => getByText('firstName: Karlik; lastName: Jones'));
 
-      triggerSubmit(form);
+      fireEvent.submit(formEl);
+
       expect(onSubmitMock).toHaveBeenCalled();
 
       await waitForElement(() => getByText('firstName: Charlie; lastName: Jones'));
@@ -108,18 +114,22 @@ describe('onSubmit resolved => update input values', () => {
   test('data => updates input values', async () => {
     // it resets the form with new values
 
-    // $FlowFixMe
-    let form;
-    const renderMock = jest.fn((renderProps) => {
-      form = renderProps.form;
-      const { firstName, lastName } = renderProps.inputs;
-      return `firstName: ${firstName.value}; lastName: ${lastName.value}`;
+    const renderMock = jest.fn(({ form, inputs }) => {
+      const { firstName, lastName } = inputs;
+      return (
+        <form {...form.getPassProps()}>
+          <input {...firstName.getPassProps()} />
+          <input {...lastName.getPassProps()} />
+
+          <article>{`firstName: ${firstName.value}; lastName: ${lastName.value}`}</article>
+        </form>
+      );
     });
 
     const onSubmitMock = jest.fn(() =>
       Promise.resolve({ data: { firstName: 'Zoe', lastName: 'Williams' } })
     );
-    const { getByText } = render(
+    const { getByText, container } = render(
       <Aptform
         {...defaultProps}
         render={renderMock}
@@ -130,11 +140,17 @@ describe('onSubmit resolved => update input values', () => {
       />
     );
 
-    changeInputValue(form, 'firstName', 'Karlik');
+    const formEl = container.querySelector('form');
+    const firstNameEl = container.querySelector('input[name="firstName"]');
+
+    fireEvent.change(firstNameEl, { target: { name: 'firstName', value: 'Karlik' } });
 
     await waitForElement(() => getByText('firstName: Karlik; lastName: Jones'));
 
-    triggerSubmit(form);
+    fireEvent.submit(formEl);
+
+    fireEvent.change(firstNameEl, { target: { name: 'firstName', value: 'Karlik' } });
+
     expect(onSubmitMock).toHaveBeenCalled();
 
     // - it ignores the resetOnSubmit config
@@ -170,13 +186,16 @@ describe('onSubmit resolved => errors', () => {
   };
 
   test('errors', async () => {
-    let form;
-    const renderMock = jest.fn((renderProps) => {
-      form = renderProps.form;
-      const { nameHandle, username } = renderProps.inputs;
-      return `nameHandle error: ${nameHandle.errorText}; username error: ${
-        username.errorText
-      }; submit failed: ${String(form.submitFailed)}`;
+    const renderMock = jest.fn(({ inputs, form }) => {
+      const { nameHandle, username } = inputs;
+      return (
+        <form {...form.getPassProps()}>
+          <article>
+            nameHandle error: {nameHandle.errorText}; username error: {username.errorText}; submit
+            failed: {String(form.submitFailed)}
+          </article>
+        </form>
+      );
     });
 
     const onSubmitMock = jest.fn(() =>
@@ -198,7 +217,9 @@ describe('onSubmit resolved => errors', () => {
       'nameHandle error: ; username error: ; submit failed: false'
     );
 
-    triggerSubmit(form);
+    const formEl = container.querySelector('form');
+
+    fireEvent.submit(formEl);
     expect(onSubmitMock).toHaveBeenCalled();
 
     // then: submit errors (mapped to text)
@@ -209,57 +230,50 @@ describe('onSubmit resolved => errors', () => {
     );
   });
 
-  test('submitError', async () => {
-    const edgecases = [
-      { submitError: true, submitErrorText: 'Unknown error ocurred.' },
-      { submitError: '', submitErrorText: 'Unknown error ocurred.' },
-      { submitError: 'unknownError', submitErrorText: 'Unknown error ocurred.' },
-      { submitError: 'WHAT-EVER-ERROR', submitErrorText: 'Unknown error ocurred.' },
-    ];
-
-    for (const { submitError, submitErrorText } of edgecases) {
-      let form;
-      const renderMock = jest.fn((renderProps) => {
-        form = renderProps.form;
-        return `submit failed: ${String(form.submitFailed)}; error: ${form.submitErrorText}`;
-      });
-
-      const onSubmitMock = jest.fn(() => Promise.resolve({ submitError }));
-
-      const { getByText, container } = render(
-        <Aptform
-          {...defaultProps}
-          render={renderMock}
-          onSubmit={onSubmitMock}
-          inputs={inputs}
-          initialValues={initialValues}
-        />
+  test.each([
+    ['true', true, 'Unknown error ocurred.'],
+    // ['empty', '', 'Unknown error ocurred.'],
+    ['literal code', 'unknownError', 'Unknown error ocurred.'],
+    // ['random code', 'WHAT-EVER-ERROR', 'Unknown error ocurred.'],
+  ])('submitError: %s', async (msg, submitError, submitErrorText) => {
+    const renderMock = jest.fn(({ form, inputs }) => {
+      return (
+        <form {...form.getPassProps()}>
+          {toJSON({ submitFailed: form.submitFailed, submitErrorText: form.submitErrorText })}
+        </form>
       );
+    });
 
-      // first: no error
-      expect(container.textContent).toBe('submit failed: false; error: ');
+    const onSubmitMock = jest.fn(() => Promise.resolve({ submitError }));
 
-      triggerSubmit(form);
-      expect(onSubmitMock).toHaveBeenCalled();
+    const { getByText, container } = render(
+      <Aptform
+        {...defaultProps}
+        render={renderMock}
+        onSubmit={onSubmitMock}
+        inputs={inputs}
+        initialValues={initialValues}
+      />
+    );
+    // first: no error
+    expect(container.textContent).toBe(toJSON({ submitFailed: false, submitErrorText: '' }));
 
-      // then: submit failed
-      await waitForElement(() => getByText(`submit failed: true; error: ${submitErrorText}`));
-    }
+    const formEl = container.querySelector('form');
+
+    fireEvent.submit(formEl);
+    expect(onSubmitMock).toHaveBeenCalled();
+
+    // then: submit failed
+    await waitForElement(() =>
+      getByText(toJSON({ submitFailed: true, submitErrorText: submitErrorText }))
+    );
+
+    renderMock.mockRestore();
   });
 
   test('errors w/ resetOnSubmit', async () => {});
 
   test('submitError w/ resetOnSubmit', async () => {});
-});
-
-describe('submit render states', () => {
-  test('submit failed', () => {});
-
-  test('submit succeeded', () => {});
-
-  test('submit failed w/ text', () => {});
-
-  test('is submitting', () => {});
 });
 
 describe('submit render states', () => {
@@ -282,14 +296,14 @@ describe('submit render states', () => {
   );
 
   test('submit succeeded', async () => {
-    let form;
-    const renderMock = jest.fn((renderProps) => {
-      form = renderProps.form;
-      return toJSON(form);
+    const renderMock = jest.fn(({ form }) => {
+      return <form {...form.getPassProps()}>{toJSON(form)}</form>;
     });
 
     const onSubmitMock = jest.fn(() => Promise.resolve());
-    const { getByText } = render(<AptformUnit render={renderMock} onSubmit={onSubmitMock} />);
+    const { getByText, container } = render(
+      <AptformUnit render={renderMock} onSubmit={onSubmitMock} />
+    );
 
     // initial form state
     await waitForElement(() =>
@@ -298,20 +312,15 @@ describe('submit render states', () => {
       )
     );
 
-    triggerSubmit(form);
+    const formEl = container.querySelector('form');
+    fireEvent.submit(formEl);
+
     expect(onSubmitMock).toHaveBeenCalled();
 
-    // submitting state
+    // is in submitting state
     await waitForElement(() =>
       getByText(
         '{"submitErrorText":"","submitFailed":false,"submitSucceeded":false,"submitting":true}'
-      )
-    );
-
-    // submitting resolved => not in submitting state, resets previous submit state
-    await waitForElement(() =>
-      getByText(
-        '{"submitErrorText":"","submitFailed":false,"submitSucceeded":false,"submitting":false}'
       )
     );
 
@@ -324,14 +333,14 @@ describe('submit render states', () => {
   });
 
   test('submit failed', async () => {
-    let form;
-    const renderMock = jest.fn((renderProps) => {
-      form = renderProps.form;
-      return toJSON(form);
+    const renderMock = jest.fn(({ form }) => {
+      return <form {...form.getPassProps()}>{toJSON(form)}</form>;
     });
 
     const onSubmitMock = jest.fn(() => Promise.resolve({ submitError: true }));
-    const { getByText } = render(<AptformUnit render={renderMock} onSubmit={onSubmitMock} />);
+    const { getByText, container } = render(
+      <AptformUnit render={renderMock} onSubmit={onSubmitMock} />
+    );
 
     // initial form state
     await waitForElement(() =>
@@ -340,7 +349,8 @@ describe('submit render states', () => {
       )
     );
 
-    triggerSubmit(form);
+    const formEl = container.querySelector('form');
+    fireEvent.submit(formEl);
     expect(onSubmitMock).toHaveBeenCalled();
 
     // submitting state

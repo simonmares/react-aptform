@@ -7,7 +7,7 @@ import { Aptform } from '../src/index';
 
 import { defaultProps, toStableJSON as toJSON, changeInputValue } from './helpers';
 
-jest.setTimeout(1000); // 1 second
+// jest.setTimeout(1000); // 1 second
 
 const validators = (() => {
   const coerceString = (val: any): string => {

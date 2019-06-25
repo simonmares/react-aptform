@@ -39,7 +39,8 @@ function createPerfContainer(amount) {
   return PerfContainer;
 }
 
-describe('no custom rendering', () => {
+// skip: before refactoring (also scoping tests would be nice)
+describe.skip('no custom rendering', () => {
   test('initial setup', async () => {
     const FormContainer = createPerfContainer(1000);
 

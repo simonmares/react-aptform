@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react';
+import { act } from '@testing-library/react';
 
 export const defaultProps = {
   inputs: {},
@@ -20,8 +21,9 @@ export function createChangeEvent(props: {| name: string, value: string |}) {
 }
 
 export function changeInputValue(form: *, inputName: string, value: string) {
-  // $FlowFixMe
-  form.changeInput(inputName, value);
+  act(() => {
+    form.changeInput(inputName, value);
+  });
 }
 
 export function createSubmitEvent() {
@@ -32,19 +34,23 @@ export function createSubmitEvent() {
 export function triggerSubmit(form: *) {
   const e = createSubmitEvent();
   // $FlowFixMe
-  form.onSubmit(e);
+  act(() => {
+    form.onSubmit(e);
+  });
 }
 
 export function triggerBlur(form: *, inputName: string, targetProps?: Object) {
   const e = { target: { name: inputName, ...targetProps } };
-  // $FlowFixMe
-  form.onBlur(e);
+  act(() => {
+    form.onBlur(e);
+  });
 }
 
 export function triggerFocus(form: *, inputName: string) {
   const e = { target: { name: inputName } };
-  // $FlowFixMe
-  form.onFocus(e);
+  act(() => {
+    form.onFocus(e);
+  });
 }
 
 export function toStableJSON(obj: Object): string {
@@ -53,7 +59,7 @@ export function toStableJSON(obj: Object): string {
 }
 
 export function resolveAfter<T>(value: T, time: number = 0): Promise<T> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => resolve(value), time);
   });
 }

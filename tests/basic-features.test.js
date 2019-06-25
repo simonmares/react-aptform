@@ -143,17 +143,6 @@ describe('validates props on development', () => {
     expect(console.warn).toBeCalledWith('Aptform does not accept children prop.');
   });
 
-  test('required prop `render` is passed', () => {
-    const invalidProps = { ...defaultProps };
-    delete invalidProps.render;
-    // Using it as a function should resolve with TypeError
-    expect(() => {
-      render(<Aptform {...invalidProps} />);
-    }).toThrow();
-    // Using missing prop is logged to console
-    expect(console.warn).toBeCalledWith(expect.stringMatching(/Prop `render` is missing./));
-  });
-
   test('validates required prop `inputs` is passed', () => {
     const invalidProps = { ...defaultProps };
     delete invalidProps.inputs;
