@@ -44,7 +44,8 @@
 	},
 	"whys-scripts": {
 		"src": [
-			"src/**/*.js"
+			"src/**/*.js",
+			"examples/**/*.js"
 		],
 		"projectType": "react-library",
 		"tests": [

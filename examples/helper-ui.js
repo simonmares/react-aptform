@@ -44,7 +44,7 @@ export class PrettyPrintObject extends React.Component<{ value: { [string]: Scal
     const { value } = this.props;
     return (
       <div>
-        {Object.keys(value).map(key => {
+        {Object.keys(value).map((key) => {
           const val = value[key];
           return (
             <div key={key}>

@@ -32,13 +32,13 @@ function MaterialUIBasic({ action }: *) {
         name: 'Eliana Rendón',
         email: 'eliana@example.com',
       }}
-      onSubmit={values => {
+      onSubmit={(values) => {
         action('onSubmit')(values);
         return Promise.resolve();
       }}
       inputs={{
         name: { required: true },
-        email: { validations: { isEmail: val => /@/.test(val) } },
+        email: { validations: { isEmail: (val) => /@/.test(val) } },
       }}
       render={({ inputs, form }) => {
         const { name, email } = inputs;
@@ -102,7 +102,7 @@ function MaterialUI30({ performant, action }: *) {
         return (
           <form onBlur={form.onBlur} onFocus={form.onFocus} onSubmit={form.onSubmit}>
             <div style={{ columnCount: 2 }}>
-              {Object.keys(inputs).map(key => {
+              {Object.keys(inputs).map((key) => {
                 const input = inputs[key];
                 return <TextFieldInput key={input.name} label={input.name} inputState={input} />;
               })}
@@ -146,7 +146,7 @@ function MaterialUI30Formik({ action }: *) {
       }) => (
         <form onSubmit={handleSubmit}>
           <div style={{ columnCount: 2 }}>
-            {Object.keys(initialValues).map(name => {
+            {Object.keys(initialValues).map((name) => {
               return (
                 <TextField
                   fullWidth

@@ -29,7 +29,7 @@ export const WithValidations = ({ action }: *) => {
         password: {
           required: true,
           validations: {
-            minLength: value => value.length > 5,
+            minLength: (value) => value.length > 5,
           },
         },
         name: {
@@ -71,9 +71,9 @@ export const SortedValidations = ({ action }: *) => {
       inputs={{
         superNumber: {
           validations: {
-            isPositive: val => val > 0,
-            isOver10: val => val > 10,
-            endsWith05: val => String(val).endsWith('05'),
+            isPositive: (val) => val > 0,
+            isOver10: (val) => val > 10,
+            endsWith05: (val) => String(val).endsWith('05'),
           },
           validationOrder: ['isPositive', 'isOver10', 'endsWith05'],
           errorTextMap: {
@@ -157,7 +157,7 @@ export const SyncValidationExample = ({ action }: *) => {
       inputs={{
         email: {
           required: true,
-          validations: { throwTypeError: val => !!val.path.does.not.exist, isEmail },
+          validations: { throwTypeError: (val) => !!val.path.does.not.exist, isEmail },
           validationOrder: ['throwTypeError', 'isEmail'],
         },
       }}
@@ -199,7 +199,7 @@ export const SyncValidationExample = ({ action }: *) => {
 };
 
 export const FullFormValidationExample = ({ action }: *) => {
-  const arePasswordsSame = values => {
+  const arePasswordsSame = (values) => {
     if (values.password === '' || values.passwordAgain === '') {
       return true;
     }
@@ -221,14 +221,12 @@ export const FullFormValidationExample = ({ action }: *) => {
         },
         passwordAgain: {
           required: true,
-          errorTextMap: {
-            arePasswordsSame: 'Passwords must match',
-          },
         },
       }}
       formValidations={{
         passwordAgain: { arePasswordsSame },
       }}
+      errorTextMap={{ passwordAgain: 'Passwords must match' }}
       onSubmit={action('onSubmit')}
       onError={action('onError')}
       render={({ inputs, form }) => {

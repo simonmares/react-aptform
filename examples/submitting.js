@@ -11,9 +11,9 @@ export const SubmittingWithErrorsExample = ({ action }: *) => {
       initialValues={{
         name: 'Eliana Rendón',
       }}
-      onSubmit={values => {
+      onSubmit={(values) => {
         action('onSubmit')('Submitting values: ', values);
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             if (values.name === 'Eliana Rendón') {
               resolve({ errors: { name: 'alreadyExists' } });
@@ -66,8 +66,8 @@ export const SubmittingNonFieldErrorExample = ({ action }: *) => {
       initialValues={{
         username: 'eliana',
       }}
-      onSubmit={values => {
-        return new Promise(resolve => {
+      onSubmit={(values) => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             if (values.username === 'eliana') {
               resolve({ submitError: 'tooManyReqError' });
@@ -122,8 +122,8 @@ export const SubmittingUnkownErrorExample = ({ action }: *) => {
       initialValues={{
         username: 'eliana',
       }}
-      onSubmit={values => {
-        return new Promise(resolve => {
+      onSubmit={(values) => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             if (values.username === 'eliana') {
               resolve({ submitError: true });
@@ -175,9 +175,9 @@ export const SubmittingExample = ({ action }: *) => {
   const inputs = {
     name: { required: true },
   };
-  const onSubmit = values => {
+  const onSubmit = (values) => {
     action('onSubmit')('Submitting values: ', values);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(resolve, 700);
     });
   };
@@ -252,7 +252,7 @@ export const SubmittingRejectedExample = ({ action }: *) => {
     inputs: {
       name: { required: true },
     },
-    onSubmit: values => {
+    onSubmit: (values) => {
       action('onSubmit')('Submitting values: ', values);
       return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -291,7 +291,7 @@ export const SubmittingRejectedExample = ({ action }: *) => {
         ...commonProps.inputs,
         name: {
           ...commonProps.inputs.name,
-          validations: { nameHasChanged: val => val !== commonProps.initialValues.name },
+          validations: { nameHasChanged: (val) => val !== commonProps.initialValues.name },
         },
       }}
       render={({ inputs, form }) => {
@@ -346,9 +346,9 @@ export const ResetWithNewData = ({ action }: *) => {
       surname: { required: false },
       displayName: { required: false },
     },
-    onSubmit: values => {
+    onSubmit: (values) => {
       action('onSubmit')('Submitting values: ', values);
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           const { surname, name } = values;
           let displayName = surname ? `${name} ${surname}` : name;

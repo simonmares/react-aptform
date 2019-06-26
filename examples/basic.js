@@ -63,7 +63,7 @@ export const BasicExample = ({ action }: *) => (
 );
 
 export const WithLotInputs = ({ action }: *) => {
-  const generateInputs = amount => {
+  const generateInputs = (amount) => {
     const inputs = {};
     // eslint-disable-next-line
     for (let i = 0; i < amount; i++) {
@@ -80,7 +80,7 @@ export const WithLotInputs = ({ action }: *) => {
         onSubmit={action('onSubmit')}
         inputs={generateInputs(100)}
         render={({ inputs, form }) => {
-          const renderInput = input => (
+          const renderInput = (input) => (
             <DebugStateInput
               key={input.name}
               type="text"
@@ -236,11 +236,11 @@ export const ConfigureForms = ({ action }: *) => {
           initialValues={{ email: '' }}
           inputs={{
             email: {
-              validations: { includes100: v => v.includes('100'), isEmail },
+              validations: { includes100: (v) => v.includes('100'), isEmail },
               validationOrder: ['isEmail', 'includes100'],
               errorTextMap: {
                 includes100: 'does not include 100',
-                isEmail: i => (i.value.includes('@') ? 'invalid email' : '@ char is missing'),
+                isEmail: (i) => (i.value.includes('@') ? 'invalid email' : '@ char is missing'),
               },
             },
           }}
@@ -358,13 +358,13 @@ export const GistDocsExample = ({ action }: *) => (
       name: 'Eliana Rendón',
       email: 'eliana@example.com',
     }}
-    onSubmit={values => {
+    onSubmit={(values) => {
       console.log('Name value: ', values.name);
       console.log('Email value: ', values.email);
     }}
     inputs={{
       name: { required: true },
-      email: { validations: { isEmail: val => /@/.test(val) } },
+      email: { validations: { isEmail: (val) => /@/.test(val) } },
     }}
     render={({ inputs, form }) => {
       const { name, email } = inputs;
