@@ -660,7 +660,8 @@ export class Aptform {
       failFast,
     });
     let valid = isValid;
-    // let allErrors = clientErrors;
+
+    let allErrors = clientErrors;
 
     const { formValidations } = this.props;
     if (formValidations) {
@@ -670,12 +671,12 @@ export class Aptform {
         inputName,
       });
       valid = valid && isOk;
-      // allErrors = { ...allErrors, ...clientErrors };
+      allErrors = { ...allErrors, ...clientErrors };
     }
 
     const syncValidated = this.setInputState(inputName, {
       valid,
-      clientErrors,
+      clientErrors: allErrors,
     });
 
     return syncValidated.then(onValidated);
