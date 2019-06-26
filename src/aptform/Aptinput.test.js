@@ -43,3 +43,36 @@ describe('Aptinput initiate', () => {
     expect(unit.state).toEqual(initialState);
   });
 });
+
+describe('internal', () => {
+  const createUnit = (props) => {
+    return new Aptinput({ name: 'email', ...props });
+  };
+
+  test('resolves passed props to internal', () => {
+    const unit = createUnit();
+
+    expect(unit.props).toEqual({
+      name: 'email',
+      // default value applied
+      required: false,
+    });
+  });
+});
+
+describe('experimental', () => {
+  const createUnit = (props) => {
+    return new Aptinput({ name: 'email', ...props });
+  };
+
+  test('getPassProps', () => {
+    const unit = createUnit();
+
+    expect(unit.getPassProps()).toEqual({
+      name: 'email',
+      // default
+      required: false,
+      value: '',
+    });
+  });
+});

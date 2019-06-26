@@ -18,8 +18,20 @@ const defaultValue = '';
 // Aptinput implementation
 //
 
+type InputValue = any;
+// type EventHandler = (e: Event) => any;
+
+type PassProps = {|
+  name: string,
+  value: InputValue,
+  // NoteReview(simon): PassProps could be only react-extension?
+  // onChange can be resolved in form
+  // onChange: EventHandler,
+  required: boolean,
+|};
+
 type AptinputState = {|
-  value: any,
+  value: InputValue,
   // input is currently valid or not (or its unknown)
   valid: boolean | typeof undefined,
   // input has been focused
@@ -40,8 +52,13 @@ type AptinputProps = {|
   initialState?: $Shape<AptinputState>,
 |};
 
+type InternalProps = {|
+  name: string,
+  required: boolean,
+|};
+
 export class Aptinput {
-  props: AptinputProps;
+  props: InternalProps;
   state: AptinputState;
 
   constructor(props: AptinputProps) {
@@ -56,6 +73,7 @@ export class Aptinput {
       changing: nonNil(initialState.changing, false),
       error: nonNil(initialState.error, ''),
     };
+    this.props = this._resolveProps(props);
   }
 
   //
@@ -68,7 +86,19 @@ export class Aptinput {
   // error | changed
   has() {}
 
-  getPassProps() {}
+  getPassProps = (): PassProps => {
+    const {
+      props: { name, required },
+      state: { value },
+    } = this;
+
+    return {
+      name: name,
+      value: value,
+      // onChange,
+      required,
+    };
+  };
 
   // valid | pristine | validating
   is() {}
@@ -76,4 +106,11 @@ export class Aptinput {
   //
   // Private helpers
   //
+
+  _resolveProps(props: AptinputProps): InternalProps {
+    return {
+      name: props.name,
+      required: nonNil(props.required, false),
+    };
+  }
 }
