@@ -100,4 +100,27 @@ describe('form submitting states', () => {
 
     form.setState({ errorText: 'Server error message.' });
   });
+
+  test('server errors', () => {
+    // this is result from API
+    const serverErrors = { email: { nonunique: 'This email is already used.' } };
+    const aptform: any = {};
+    const { email } = aptform.inputs;
+    // pseudo-dynamic code e.g.
+    if (serverErrors.email) {
+      const allErrors = Object.values(serverErrors);
+      const error = allErrors.join(', ');
+      email.setState({ error });
+    }
+
+    // Note: there is typically 1 error from server for a field for given field
+    // the error is also typically already translated so we can show it as is.
+
+    // Maybe there could be API that can be used on client as well:
+    const { form } = aptform;
+    form.setErrors({
+      email: 'This email is already used.',
+      username: 'This username is not unique.',
+    });
+  });
 });
