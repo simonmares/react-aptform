@@ -46,7 +46,14 @@ type AptinputState = {|
   error: string,
 |};
 
-type AptinputProps = {|
+type IsEnum = 'valid' | 'pristine' | 'validating';
+type ShowEnum = 'error' | 'success';
+
+export type AptConfig = {|
+  initiallyValid: boolean | typeof undefined,
+|};
+
+export type AptinputProps = {|
   name: string,
   required?: boolean,
   initialState?: $Shape<AptinputState>,
@@ -57,16 +64,17 @@ type InternalProps = {|
   required: boolean,
 |};
 
-export class Aptinput {
+class Aptinput {
   props: InternalProps;
+  config: AptConfig;
   state: AptinputState;
 
-  constructor(props: AptinputProps) {
+  constructor(props: AptinputProps, config: AptConfig) {
     const initialState = props.initialState || {};
 
     this.state = {
       value: nonNil(initialState.value, defaultValue),
-      valid: initialState.valid,
+      valid: nonNil(initialState.valid, config.initiallyValid),
       touch: nonNil(initialState.touch, false),
       focus: nonNil(initialState.focus, false),
       pristine: nonNil(initialState.pristine, true),
@@ -74,18 +82,29 @@ export class Aptinput {
       error: nonNil(initialState.error, ''),
     };
     this.props = this._resolveProps(props);
+    this.config = config;
   }
 
   //
   // Public API
   //
 
-  // error | success
-  show() {}
+  //
+  show(s: ShowEnum): boolean {
+    // NotePrototype(simon): implement type timeout
+    if (s === 'error') {
+      return this.state.valid === false;
+    }
+    if (s === 'success') {
+      return this.state.valid === true;
+    }
+    // This tells flow we intend to cover all possible values of s.
+    (s: empty); // eslint-disable-line no-unused-expressions
+    return false;
+  }
 
-  // error | changed
-  has() {}
-
+  // NoteReview(simon): maybe react API only?
+  // onChange should be on form as well
   getPassProps = (): PassProps => {
     const {
       props: { name, required },
@@ -100,8 +119,20 @@ export class Aptinput {
     };
   };
 
-  // valid | pristine | validating
-  is() {}
+  is(s: IsEnum): boolean {
+    if (s === 'valid') {
+      return this.state.valid === true;
+    }
+    if (s === 'pristine') {
+      return this.state.pristine === true;
+    }
+    if (s === 'validating') {
+      return this.state.valid === undefined;
+    }
+    // This tells flow we intend to cover all possible values of s.
+    (s: empty); // eslint-disable-line no-unused-expressions
+    return false;
+  }
 
   //
   // Private helpers
@@ -113,4 +144,8 @@ export class Aptinput {
       required: nonNil(props.required, false),
     };
   }
+}
+
+export function createInput(props: AptinputProps, config: AptConfig): Aptinput {
+  return new Aptinput(props, config);
 }
