@@ -1,5 +1,7 @@
 // @flow
 
+import React from 'react';
+
 /* eslint-disable no-unused-vars */
 
 describe('form submitting states', () => {
@@ -122,5 +124,95 @@ describe('form submitting states', () => {
       email: 'This email is already used.',
       username: 'This username is not unique.',
     });
+  });
+
+  test('multi form submits #1', () => {
+    const useAptform: any = () => {};
+
+    const loginForm = useAptform();
+    const detailsForm = useAptform();
+
+    const allFormsValid = !loginForm.is('valid') || !detailsForm.is('valid');
+
+    const fetchJSON = (any) => {};
+
+    const onSubmit = () => {
+      if (allFormsValid) {
+        return;
+      }
+
+      // ???
+      const loginFormValues = loginForm.getValues();
+      const detailsFormValues = detailsForm.getValues();
+
+      fetchJSON({
+        url: '/form/dfsiaj',
+        data: {
+          login: loginFormValues,
+          details: detailsFormValues,
+        },
+      });
+    };
+
+    function LoginForm(props: any) {
+      return null;
+    }
+    function DetailsForm(props: any) {
+      return null;
+    }
+
+    const renderAllForms = () => {
+      return (
+        <div>
+          <LoginForm form={loginForm} />
+          <DetailsForm from={detailsForm} />
+
+          <button type="submit" disabled={!allFormsValid} onSubmit={onSubmit}>
+            Submit
+          </button>
+        </div>
+      );
+    };
+  });
+
+  test('mutli form w/ context', () => {
+    const useMultiform = (): any => {};
+    const [multiForm, register] = useMultiform();
+    const fetchJSON = (any) => {};
+    const useAptform = (any): any => {};
+
+    const onSubmit = () => {
+      const data = multiForm.getSubmitValues();
+
+      fetchJSON({
+        url: '/form/dfsiaj',
+        data,
+      });
+    };
+
+    const allFormsValid = multiForm.is('valid');
+
+    function LoginForm({ register }) {
+      const loginForm = useAptform({ register });
+      return null;
+    }
+
+    function DetailsForm({ register }) {
+      const loginForm = useAptform({ register });
+      return null;
+    }
+
+    const renderAllForms = () => {
+      return (
+        <div>
+          <LoginForm register={register} />
+          <DetailsForm register={register} />
+
+          <button type="submit" disabled={!allFormsValid} onSubmit={onSubmit}>
+            Submit
+          </button>
+        </div>
+      );
+    };
   });
 });
