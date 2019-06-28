@@ -1,20 +1,20 @@
 // @flow
 
-import { createInput } from './Aptinput';
-import type { AptConfig, AptinputProps } from './Aptinput';
+import { createInput } from './Input';
+import type { AptConfig, InputProps } from './Input';
 
 const defaultConfig = {
   initiallyValid: undefined,
 };
 
-function createUnit(props: $Shape<AptinputProps> = {}, config: $Shape<AptConfig> = {}) {
+function createUnit(props: $Shape<InputProps> = {}, config: $Shape<AptConfig> = {}) {
   return createInput(props, {
     ...defaultConfig,
     ...config,
   });
 }
 
-describe('Aptinput initiate', () => {
+describe('Input initiate', () => {
   const createEmailInput = (props) => {
     return createUnit({ name: 'email', ...props });
   };

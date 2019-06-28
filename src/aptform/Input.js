@@ -15,7 +15,7 @@ function nonNil<T>(val: ?T, defaultVal: T): T {
 const defaultValue = '';
 
 //
-// Aptinput implementation
+// Input implementation
 //
 
 type InputValue = any;
@@ -30,7 +30,7 @@ type PassProps = {|
   required: boolean,
 |};
 
-type AptinputState = {|
+type InputState = {|
   value: InputValue,
   // input is currently valid or not (or its unknown)
   valid: boolean | typeof undefined,
@@ -54,10 +54,10 @@ export type AptConfig = {|
   initiallyValid: boolean | typeof undefined,
 |};
 
-export type AptinputProps = {|
+export type InputProps = {|
   name: string,
   required?: boolean,
-  initialState?: $Shape<AptinputState>,
+  initialState?: $Shape<InputState>,
 |};
 
 type InternalProps = {|
@@ -65,12 +65,12 @@ type InternalProps = {|
   required: boolean,
 |};
 
-class Aptinput {
+class Input {
   props: InternalProps;
   config: AptConfig;
-  state: AptinputState;
+  state: InputState;
 
-  constructor(props: AptinputProps, config: AptConfig) {
+  constructor(props: InputProps, config: AptConfig) {
     const initialState = props.initialState || {};
 
     this.state = {
@@ -161,7 +161,7 @@ class Aptinput {
   // Private helpers
   //
 
-  _resolveProps(props: AptinputProps): InternalProps {
+  _resolveProps(props: InputProps): InternalProps {
     return {
       name: props.name,
       required: nonNil(props.required, false),
@@ -169,7 +169,7 @@ class Aptinput {
   }
 
   // NotePrototype(simon): promise?
-  _updateState(state: $Shape<AptinputState>) {
+  _updateState(state: $Shape<InputState>) {
     this.state = {
       ...this.state,
       ...state,
@@ -177,6 +177,6 @@ class Aptinput {
   }
 }
 
-export function createInput(props: AptinputProps, config: AptConfig): Aptinput {
-  return new Aptinput(props, config);
+export function createInput(props: InputProps, config: AptConfig): Input {
+  return new Input(props, config);
 }
