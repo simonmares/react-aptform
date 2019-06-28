@@ -230,6 +230,7 @@ describe('onSubmit resolved => errors', () => {
     );
   });
 
+  // $FlowFixMe (each)
   test.each([
     ['true', true, 'Unknown error ocurred.'],
     // ['empty', '', 'Unknown error ocurred.'],
