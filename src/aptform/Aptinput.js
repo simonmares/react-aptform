@@ -48,6 +48,7 @@ type AptinputState = {|
 
 type IsEnum = 'valid' | 'pristine' | 'validating';
 type ShowEnum = 'error' | 'success';
+type SetEnum = 'value' | 'error';
 
 export type AptConfig = {|
   initiallyValid: boolean | typeof undefined,
@@ -134,6 +135,28 @@ class Aptinput {
     return false;
   }
 
+  set(k: SetEnum, opts: any): void {
+    if (k === 'value') {
+      this._updateState({ value: opts, pristine: false, valid: undefined, error: '' });
+      return;
+    }
+    if (k === 'error') {
+      this._updateState({ error: opts, pristine: false, valid: false });
+      return;
+    }
+    // This tells flow we intend to cover all possible values of k.
+    (k: empty); // eslint-disable-line no-unused-expressions
+  }
+
+  //
+  // For tests only
+  //
+
+  // NotePrototype(simon): ...
+  dumpState() {
+    return { ...this.state };
+  }
+
   //
   // Private helpers
   //
@@ -142,6 +165,14 @@ class Aptinput {
     return {
       name: props.name,
       required: nonNil(props.required, false),
+    };
+  }
+
+  // NotePrototype(simon): promise?
+  _updateState(state: $Shape<AptinputState>) {
+    this.state = {
+      ...this.state,
+      ...state,
     };
   }
 }

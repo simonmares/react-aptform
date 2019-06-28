@@ -124,3 +124,59 @@ describe('show API', () => {
     expect(unit.show('error')).toEqual(false);
   });
 });
+
+describe('set API', () => {
+  const createEmailInput = (props) => {
+    return createUnit({ name: 'email', ...props });
+  };
+
+  const filterKeys = <TObj: {}>(obj: TObj, keys: $Keys<TObj>[]) => {
+    let newObj = {};
+    for (const k of keys) {
+      newObj[k] = obj[k];
+    }
+    return newObj;
+  };
+
+  test('set: value', () => {
+    const initialState = {
+      pristine: true,
+      value: 'nonsense@example.com',
+      valid: false,
+      error: 'This is nonsense',
+    };
+    const unit = createEmailInput({ initialState });
+    expect(filterKeys(unit.dumpState(), ['pristine', 'value', 'valid', 'error'])).toEqual(
+      initialState
+    );
+
+    unit.set('value', 'me@example.com');
+
+    // test it resets other relevant state as well
+    expect(filterKeys(unit.dumpState(), ['pristine', 'value', 'valid', 'error'])).toEqual({
+      pristine: false,
+      value: 'me@example.com',
+      valid: undefined,
+      error: '',
+    });
+  });
+
+  test('set: error', () => {
+    const initialState = {
+      pristine: true,
+      valid: true,
+      error: 'This is old error',
+    };
+    const unit = createEmailInput({ initialState });
+    expect(filterKeys(unit.dumpState(), ['pristine', 'valid', 'error'])).toEqual(initialState);
+
+    unit.set('error', 'Server fresh error!');
+
+    // test it resets other relevant state as well
+    expect(filterKeys(unit.dumpState(), ['pristine', 'valid', 'error'])).toEqual({
+      pristine: false,
+      valid: false,
+      error: 'Server fresh error!',
+    });
+  });
+});
