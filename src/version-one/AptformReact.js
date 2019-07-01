@@ -1,8 +1,8 @@
 // @flow
 
-import { useAptform } from './useAptform';
+import { useAptform } from '../version-one/useAptform';
 
-import type { LocalProps, RenderFn } from './aptform/types';
+import type { LocalProps, RenderFn } from '../version-one/types';
 
 function AptformReact(props: LocalProps & { render: RenderFn }) {
   const aptform = useAptform(props);

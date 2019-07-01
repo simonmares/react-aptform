@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useEffect } from 'react';
 
-import { Aptform } from './aptform/Aptform';
-import type { LocalProps } from './aptform/types';
+import { Aptform } from '../version-one/Aptform';
+import type { LocalProps } from '../version-one/types';
 
 function createLocalState(inst, newState) {
   const { inputStates, submitting, submitFailed, submitErrorText, submitSucceeded } = newState;

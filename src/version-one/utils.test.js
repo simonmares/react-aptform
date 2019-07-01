@@ -1,6 +1,6 @@
 // @flow
 
-import * as utils from '../../src/aptform/utils';
+import * as utils from './utils';
 
 describe('getInputValue', () => {
   test('reads .value prop', () => {

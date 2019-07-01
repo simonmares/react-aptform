@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 
-import Aptform from './AptformReact';
+import Aptform from './version-one/AptformReact';
 
-import type { FormConfig } from './aptform/types';
+import type { FormConfig } from './version-one/types';
 
 export function preconfigure(
   preConfig: $Shape<FormConfig>

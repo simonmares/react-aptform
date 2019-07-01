@@ -7,7 +7,7 @@ import { preconfigure, Aptform } from '../src/index';
 
 import { defaultProps } from './helpers';
 
-import type { FormConfig } from '../src/aptform/types';
+import type { FormConfig } from '../src/version-one/types';
 
 const defaultConfig = {
   typeTimeout: 650,
