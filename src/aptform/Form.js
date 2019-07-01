@@ -48,6 +48,7 @@ export type AptConfig = {|
 |};
 
 type FormBaseProps = {|
+  config: AptConfig,
   inputs: { [string]: InputConfig },
   initialValues?: InitialValues,
 |};
@@ -56,7 +57,12 @@ type InternalProps = {|
   ...FormBaseProps,
 |};
 
+// Naming types
+// type NotifyState = {};
 type DeclaredInputs = { [InputNames]: InputConfig };
+type UnsubscribeFunction = () => void;
+// type ListenerFunction = (NotifyState) => void;
+type ListenerFunction = () => void;
 
 // const warnOnDev = (msg) => {
 //   if (process.env.NODE_ENV !== 'production') {
@@ -70,11 +76,11 @@ export type FormProps = {|
 
 class Form {
   props: InternalProps;
-  config: AptConfig;
   state: FormState;
   inputInstances: { [InputNames]: Input };
+  listeners: Array<ListenerFunction>;
 
-  constructor(props: FormProps, config: AptConfig) {
+  constructor(props: FormProps) {
     this.state = {
       // own state
       valid: undefined,
@@ -87,7 +93,6 @@ class Form {
       changing: false,
     };
     this.props = props;
-    this.config = config;
     this.inputInstances = this._createInputInstances(props.inputs);
   }
 
@@ -109,6 +114,17 @@ class Form {
     (s: empty); // eslint-disable-line no-unused-expressions
     return false;
   }
+
+  subscribe(fn: ListenerFunction): UnsubscribeFunction {
+    this.listeners.push(fn);
+
+    return () => {
+      this.listeners = this.listeners.filter((f) => f !== fn);
+    };
+  }
+
+  cleanup() {}
+  setup() {}
 
   //
   // For tests only
@@ -132,7 +148,7 @@ class Form {
   }
 
   _createInputInstances(inputs: DeclaredInputs): { [InputNames]: Input } {
-    const { config } = this;
+    const { config } = this.props;
     let result = {};
     for (const inputName of Object.keys(inputs)) {
       const inputConfig = inputs[inputName];
@@ -143,6 +159,8 @@ class Form {
   }
 }
 
-export function createForm(props: FormProps, config: AptConfig): Form {
-  return new Form(props, config);
+export function createForm(props: FormProps): Form {
+  return new Form(props);
 }
+
+export type { Form };

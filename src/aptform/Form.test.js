@@ -2,22 +2,23 @@
 
 import { createForm } from './Form';
 import type { FormProps } from './Form';
-import type { AptConfig } from './types';
+// import type { AptConfig } from './types';
 
-function createUnit(props: $Shape<FormProps> = {}, config: $Shape<AptConfig> = {}) {
+function createUnit(props: $Shape<FormProps> = {}) {
   const defaultConfig = {
     initiallyValid: undefined,
   };
   const defaultProps = {
     inputs: {},
   };
-  return createForm(
-    { ...defaultProps, ...props },
-    {
+  return createForm({
+    ...defaultProps,
+    ...props,
+    config: {
       ...defaultConfig,
-      ...config,
-    }
-  );
+      ...props.config,
+    },
+  });
 }
 
 describe('Form (internal)', () => {
