@@ -1,7 +1,8 @@
 // @flow
 
 import { createInput } from './Input';
-import type { AptConfig, InputProps } from './Input';
+import type { AptConfig } from './types';
+import type { InputProps } from './Input';
 
 const defaultConfig = {
   initiallyValid: undefined,

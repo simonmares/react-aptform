@@ -1,12 +1,17 @@
 // @flow
 
+// NoteReview(simon): coupling concerns?
+import { createInput } from './Input';
+
+import type { InputConfig, InputNames, Input, InputValue } from './types';
+
 //
 // Helpers
 //
 
-function nonNil<T>(val: ?T, defaultVal: T): T {
-  return val !== undefined && val !== null ? val : defaultVal;
-}
+// function nonNil<T>(val: ?T, defaultVal: T): T {
+//   return val !== undefined && val !== null ? val : defaultVal;
+// }
 
 //
 // Form implementation
@@ -34,35 +39,76 @@ type FormState = {|
   error: string,
 |};
 
+type IsEnum = 'valid' | 'pristine' | 'validating';
+
+type InitialValues = { [InputNames]: InputValue };
+
 export type AptConfig = {|
   initiallyValid: boolean | typeof undefined,
 |};
 
-export type FormProps = {||};
+type FormBaseProps = {|
+  inputs: { [string]: InputConfig },
+  initialValues?: InitialValues,
+|};
 
-type InternalProps = {||};
+type InternalProps = {|
+  ...FormBaseProps,
+|};
+
+type DeclaredInputs = { [InputNames]: InputConfig };
+
+// const warnOnDev = (msg) => {
+//   if (process.env.NODE_ENV !== 'production') {
+//     console.warn(msg);
+//   }
+// };
+
+export type FormProps = {|
+  ...FormBaseProps,
+|};
 
 class Form {
   props: InternalProps;
   config: AptConfig;
   state: FormState;
+  inputInstances: { [InputNames]: Input };
 
   constructor(props: FormProps, config: AptConfig) {
     this.state = {
+      // own state
       valid: undefined,
-      changing: false,
-
-      pristine: true,
       submit: 'idle',
+      // submit or form-wide validation error
       error: '',
+      // based on inputs
+      pristine: true,
+      // review: ....
+      changing: false,
     };
     this.props = props;
     this.config = config;
+    this.inputInstances = this._createInputInstances(props.inputs);
   }
 
   //
   // Public API
   //
+
+  is(s: IsEnum): boolean {
+    if (s === 'valid') {
+      return this.state.valid === true;
+    }
+    if (s === 'pristine') {
+      return this.state.pristine === true;
+    }
+    if (s === 'validating') {
+      return this.state.valid === undefined;
+    }
+    // This tells flow we intend to cover all possible values of s.
+    (s: empty); // eslint-disable-line no-unused-expressions
+    return false;
+  }
 
   //
   // For tests only
@@ -83,6 +129,17 @@ class Form {
       ...this.state,
       ...state,
     };
+  }
+
+  _createInputInstances(inputs: DeclaredInputs): { [InputNames]: Input } {
+    const { config } = this;
+    let result = {};
+    for (const inputName of Object.keys(inputs)) {
+      const inputConfig = inputs[inputName];
+      const inputProps = { ...inputConfig, name: inputName };
+      result[inputName] = createInput(inputProps, config);
+    }
+    return result;
   }
 }
 

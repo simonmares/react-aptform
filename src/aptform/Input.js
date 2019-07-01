@@ -1,5 +1,7 @@
 // @flow
 
+import type { AptConfig, InputConfig } from './types';
+
 //
 // Helpers
 //
@@ -50,14 +52,11 @@ type IsEnum = 'valid' | 'pristine' | 'validating';
 type ShowEnum = 'error' | 'success';
 type SetEnum = 'value' | 'error';
 
-export type AptConfig = {|
-  initiallyValid: boolean | typeof undefined,
-|};
-
 export type InputProps = {|
   name: string,
   required?: boolean,
   initialState?: $Shape<InputState>,
+  ...InputConfig,
 |};
 
 type InternalProps = {|
@@ -180,3 +179,5 @@ class Input {
 export function createInput(props: InputProps, config: AptConfig): Input {
   return new Input(props, config);
 }
+
+export type { Input };

@@ -1,10 +1,49 @@
 // @flow
 
 import { createForm } from './Form';
+import type { FormProps } from './Form';
+import type { AptConfig } from './types';
 
-describe('Form', () => {
+function createUnit(props: $Shape<FormProps> = {}, config: $Shape<AptConfig> = {}) {
+  const defaultConfig = {
+    initiallyValid: undefined,
+  };
+  const defaultProps = {
+    inputs: {},
+  };
+  return createForm(
+    { ...defaultProps, ...props },
+    {
+      ...defaultConfig,
+      ...config,
+    }
+  );
+}
+
+describe('Form (internal)', () => {
   test('can be initiated', () => {
-    const inst = createForm({}, { initiallyValid: true });
-    expect(inst).toBeDefined();
+    const unit = createUnit();
+    expect(unit).toBeDefined();
+  });
+});
+
+describe('Form initial state', () => {
+  test('form state', () => {
+    const unit = createUnit();
+    expect(unit.is('valid')).toEqual(false);
+    expect(unit.is('pristine')).toEqual(true);
+    // NoteReview(simon): ...
+    expect(unit.is('validating')).toEqual(true);
+  });
+
+  test('form inputs instances', () => {
+    const unit = createUnit({
+      inputs: {
+        name: { required: true },
+      },
+    });
+    const nameInput = unit.inputInstances.name;
+    expect(nameInput).toBeDefined();
+    expect(nameInput.props.required).toEqual(true);
   });
 });
