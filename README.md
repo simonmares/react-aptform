@@ -153,6 +153,7 @@ Notes:
 
 This library was inherently inspired by following react form solutions:
 
+- https://github.com/jamiebuilds/react-jeff (input states)
 - https://github.com/jaredpalmer/formik (declarative configuration, input states)
 - https://github.com/final-form/react-final-form (input states, use cases in examples)
 - https://github.com/vacuumlabs/react-custom-validation (show validation recommendation)
