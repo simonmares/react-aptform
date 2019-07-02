@@ -2,6 +2,8 @@
 
 import type { AptConfig, InputConfig } from './types';
 
+import { resolveConfig } from './helpers';
+
 //
 // Helpers
 //
@@ -176,8 +178,8 @@ class Input {
   }
 }
 
-export function createInput(props: InputProps, config: AptConfig): Input {
-  return new Input(props, config);
+export function createInput(props: InputProps, config?: AptConfig): Input {
+  return new Input(props, resolveConfig(config));
 }
 
 export type { Input };

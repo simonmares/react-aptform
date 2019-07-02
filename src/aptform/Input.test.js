@@ -5,7 +5,7 @@ import type { AptConfig } from './types';
 import type { InputProps } from './Input';
 
 const defaultConfig = {
-  initiallyValid: undefined,
+  initiallyValid: true,
 };
 
 function createUnit(props: $Shape<InputProps> = {}, config: $Shape<AptConfig> = {}) {
@@ -29,7 +29,7 @@ describe('Input initiate', () => {
     const unit = createEmailInput();
     expect(unit.state).toEqual({
       value: '',
-      valid: undefined,
+      valid: true,
       touch: false,
       focus: false,
       pristine: true,
@@ -97,9 +97,9 @@ describe('is API', () => {
 
   test('w/ all defaults', () => {
     const unit = createEmailInput();
-    expect(unit.is('valid')).toEqual(false);
+    expect(unit.is('valid')).toEqual(true);
     expect(unit.is('pristine')).toEqual(true);
-    expect(unit.is('validating')).toEqual(true);
+    expect(unit.is('validating')).toEqual(false);
   });
 
   // test('is valid => undefined', () => {
@@ -121,7 +121,7 @@ describe('show API', () => {
 
   test('w/ all defaults', () => {
     const unit = createEmailInput();
-    expect(unit.show('success')).toEqual(false);
+    expect(unit.show('success')).toEqual(true);
     expect(unit.show('error')).toEqual(false);
   });
 });
