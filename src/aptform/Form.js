@@ -2,16 +2,13 @@
 
 // NoteReview(simon): coupling concerns?
 import { createInput } from './Input';
+import { isButton } from './utils';
 
-import type { InputConfig, InputNames, Input, InputValue } from './types';
+import type { InputConfig, InputNames, Input, InputValue, EventType } from './types';
 
 //
 // Helpers
 //
-
-// function nonNil<T>(val: ?T, defaultVal: T): T {
-//   return val !== undefined && val !== null ? val : defaultVal;
-// }
 
 //
 // Form implementation
@@ -48,8 +45,8 @@ export type AptConfig = {|
 |};
 
 type FormBaseProps = {|
-  config: AptConfig,
   inputs: { [string]: InputConfig },
+  config?: AptConfig,
   initialValues?: InitialValues,
 |};
 
@@ -80,6 +77,9 @@ class Form {
   inputInstances: { [InputNames]: Input };
   listeners: Array<ListenerFunction>;
 
+  isSetup: boolean;
+  cleanupFn: () => void;
+
   constructor(props: FormProps) {
     this.state = {
       // own state
@@ -92,6 +92,7 @@ class Form {
       // review: ....
       changing: false,
     };
+    this.listeners = [];
     this.props = props;
     this.inputInstances = this._createInputInstances(props.inputs);
   }
@@ -99,6 +100,51 @@ class Form {
   //
   // Public API
   //
+
+  // event handlers
+
+  onSubmit(e: Event) {
+    // Do not submit the form
+    e.preventDefault();
+
+    this.submit();
+  }
+
+  onBlur(e: EventType) {
+    const target = e.target;
+    if (isButton(target)) {
+      return;
+    }
+
+    // const inputName = target.name;
+    // this.onBlurInput(inputName);
+  }
+
+  onBlurInput(inputName: InputNames) {
+    const changes = {
+      focused: false,
+      changing: false,
+      touched: true,
+    };
+
+    // this.setInputState(inputName, changes);
+    // if (this.shouldValidate('onBlur')) {
+    //   this.runInputValidation(inputName);
+    // }
+  }
+
+  onFocus(e: EventType) {
+    const target = e.target;
+    if (isButton(target)) {
+      return;
+    }
+
+    // // We have to update `focused` only once so it makes sense to ask if its necessary
+    // const inputName = target.name;
+    // this.onFocusInput(inputName);
+  }
+
+  // Query API...
 
   is(s: IsEnum): boolean {
     if (s === 'valid') {
@@ -115,16 +161,45 @@ class Form {
     return false;
   }
 
+  // Imperative API...
+  submit() {
+    console.log('Form submitted');
+  }
+
   subscribe(fn: ListenerFunction): UnsubscribeFunction {
     this.listeners.push(fn);
-
+    // <= unsubscribe
     return () => {
       this.listeners = this.listeners.filter((f) => f !== fn);
     };
   }
 
-  cleanup() {}
-  setup() {}
+  setup() {
+    if (this.isSetup) {
+      return this.cleanupFn;
+    }
+
+    let unsubFunctions = [];
+    for (const key of Object.keys(this.inputInstances)) {
+      const input = this.inputInstances[key];
+      unsubFunctions.push(
+        input.subscribe(() => {
+          this._onInputChange(input);
+        })
+      );
+    }
+
+    const cleanupFn = () => {
+      const hasListeners = this.listeners.length > 0;
+      if (hasListeners) {
+        return;
+      }
+      unsubFunctions.forEach((fn) => fn());
+    };
+
+    this.cleanupFn = cleanupFn;
+    return cleanupFn;
+  }
 
   //
   // For tests only
@@ -145,6 +220,17 @@ class Form {
       ...this.state,
       ...state,
     };
+    // NoteReview(simon): pass an actual state?
+    this._notifyListeners();
+  }
+
+  _onInputChange(inst: Input) {
+    // NotePrototype(simon): dump input states?
+    this._updateState({});
+  }
+
+  _notifyListeners() {
+    this.listeners.forEach((fn) => fn());
   }
 
   _createInputInstances(inputs: DeclaredInputs): { [InputNames]: Input } {

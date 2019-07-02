@@ -2,6 +2,8 @@
 
 import type { InputValue } from './types';
 
+import { isButton, nonNil as nonNilOrDefault } from '../aptform/utils';
+
 export function sortByArray<T: *>(arr: Array<T>, sortedArr: Array<T>): Array<T> {
   const compareFunction = (a: T, b: T) => {
     return sortedArr.indexOf(a) - sortedArr.indexOf(b);
@@ -60,9 +62,4 @@ export function getInputValue(element: HTMLInputElement): ?InputValue {
   return element.value;
 }
 
-export const isButton = (element: HTMLInputElement) =>
-  arrayIncludes(['submit', 'reset', 'button', 'menu'], element.type);
-
-export function nonNilOrDefault<T>(val: ?T, defaultVal: T): T {
-  return val !== undefined && val !== null ? val : defaultVal;
-}
+export { isButton, nonNilOrDefault };

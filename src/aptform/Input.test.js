@@ -81,12 +81,13 @@ describe('experimental', () => {
   test('getPassProps', () => {
     const unit = createEmailInput();
 
-    expect(unit.getPassProps()).toEqual({
-      name: 'email',
-      // default
-      required: false,
-      value: '',
-    });
+    const passProps = unit.getPassProps();
+
+    // based on unit values
+    expect(passProps.name).toEqual('email');
+    // defaults
+    expect(passProps.required).toEqual(false);
+    expect(passProps.value).toEqual('');
   });
 });
 

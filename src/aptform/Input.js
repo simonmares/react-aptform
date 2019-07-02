@@ -1,16 +1,9 @@
 // @flow
 
-import type { AptConfig, InputConfig } from './types';
+import type { AptConfig, InputConfig, EventType } from './types';
 
 import { resolveConfig } from './helpers';
-
-//
-// Helpers
-//
-
-function nonNil<T>(val: ?T, defaultVal: T): T {
-  return val !== undefined && val !== null ? val : defaultVal;
-}
+import { nonNil } from './utils';
 
 //
 // Constants
@@ -23,14 +16,14 @@ const defaultValue = '';
 //
 
 type InputValue = any;
-// type EventHandler = (e: Event) => any;
+type EventHandler = (e: EventType) => any;
 
 type PassProps = {|
   name: string,
   value: InputValue,
   // NoteReview(simon): PassProps could be only react-extension?
   // onChange can be resolved in form
-  // onChange: EventHandler,
+  onChange: EventHandler,
   required: boolean,
 |};
 
@@ -53,6 +46,8 @@ type InputState = {|
 type IsEnum = 'valid' | 'pristine' | 'validating';
 type ShowEnum = 'error' | 'success';
 type SetEnum = 'value' | 'error';
+type ListenerFunction = () => void;
+type UnsubscribeFunction = () => void;
 
 export type InputProps = {|
   name: string,
@@ -70,6 +65,7 @@ class Input {
   props: InternalProps;
   config: AptConfig;
   state: InputState;
+  listeners: Array<ListenerFunction>;
 
   constructor(props: InputProps, config: AptConfig) {
     const initialState = props.initialState || {};
@@ -85,6 +81,7 @@ class Input {
     };
     this.props = this._resolveProps(props);
     this.config = config;
+    this.listeners = [];
   }
 
   //
@@ -116,7 +113,10 @@ class Input {
     return {
       name: name,
       value: value,
-      // onChange,
+      onChange: (e) => {
+        const value = e.currentTarget.value;
+        this.set('value', value);
+      },
       required,
     };
   };
@@ -149,6 +149,14 @@ class Input {
     (k: empty); // eslint-disable-line no-unused-expressions
   }
 
+  subscribe(fn: ListenerFunction): UnsubscribeFunction {
+    this.listeners.push(fn);
+    // <= unsubscribe
+    return () => {
+      this.listeners = this.listeners.filter((f) => f !== fn);
+    };
+  }
+
   //
   // For tests only
   //
@@ -175,6 +183,14 @@ class Input {
       ...this.state,
       ...state,
     };
+    // NoteReview(simon): pass an actual state?
+    this._notifyListeners();
+  }
+
+  _notifyListeners() {
+    for (const fn of this.listeners) {
+      fn();
+    }
   }
 }
 

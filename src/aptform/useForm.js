@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 
 import { createForm } from './Form';
 import type { Form, FormProps } from './Form';
+// import type { AptConfig } from './types';
 // import type { Input } from './Input';
 
 // NOTE: just a mock implementation for development
@@ -22,22 +23,44 @@ type useFormType = {|
 
 type LocalState = useFormType;
 
+export function mapObjVals(obj: *, mapFunc: *) {
+  const mappedObj = {};
+  for (const key of Object.keys(obj)) {
+    mappedObj[key] = mapFunc(obj[key]);
+  }
+  return mappedObj;
+}
+
 function createLocalState(form: Form): LocalState {
   return {
-    form: form,
-    inputs: {},
+    form: {
+      getPassProps: () => {
+        return {
+          onSubmit: form.onSubmit.bind(form),
+          onFocus: form.onFocus.bind(form),
+          onBlur: form.onBlur.bind(form),
+        };
+      },
+    },
+    inputs: mapObjVals(form.inputInstances, (input) => {
+      return {
+        // NotePrototype(simon): should be resolved here
+        getPassProps: input.getPassProps,
+      };
+    }),
     aptform: {},
   };
 }
 
 export function useForm(props: useFormProps): useFormType {
   //
-  // Create Aptform instance (only once for now)
+  // Create form instance (only once for now)
   //
 
   // NoteReview(simon): when the instance should be recreated?
   const inst: Form = useMemo(() => createForm(props), []);
-  const [localState, setLocalState] = useState(() => createLocalState(inst));
+
+  const [localState, setLocalState] = useState(createLocalState(inst));
 
   //
   // Subscribe on "mount"
@@ -52,7 +75,8 @@ export function useForm(props: useFormProps): useFormType {
       }
     }
 
-    // inst.setup();
+    // ???
+    const cleanup = inst.setup();
     const unsubscribe = inst.subscribe(onUpdate);
 
     // if (inst.shouldValidate('onMount')) {
@@ -62,7 +86,7 @@ export function useForm(props: useFormProps): useFormType {
     return () => {
       isActive = false;
       unsubscribe();
-      inst.cleanup();
+      cleanup();
     };
   }, []);
 

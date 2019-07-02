@@ -21,6 +21,9 @@ export type InputConfig = {|
   errorTextMap?: { [string]: string | ((value: InputValue, i: InputInstance) => string) },
 |};
 
+// DOM
+export type EventType = SyntheticInputEvent<HTMLInputElement>;
+
 // declaredValidationErrors: {
 //   invalid: i18n.t`This is invalid`
 // },
