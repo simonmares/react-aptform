@@ -2,8 +2,8 @@
 
 import { useMemo, useState, useEffect } from 'react';
 
-import { createForm } from './Form';
-import type { Form, FormProps } from './Form';
+import { createForm } from '../aptform/Form';
+import type { Form, FormProps } from '../aptform/Form';
 // import type { AptConfig } from './types';
 // import type { Input } from './Input';
 

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { useForm } from '../src/aptform/useForm';
+import { useForm } from '../src/react-aptform';
 
 const staticProps = {
   inputs: {
