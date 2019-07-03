@@ -15,16 +15,6 @@ h2 {
   font-size: 1.3rem;
 }
 
-input, button {
-  line-height: 1.2rem;
-  margin: 4px 4px;
-  padding: 0.2px 4px;
-}
-
-button {
-  padding: 2px 10px;
-}
-
 /* example UI */
 
 header {
@@ -62,5 +52,5 @@ article p {
 }
 
 .help:before {
-  content: "INFO: ";
+  content: 'INFO: ';
 }
