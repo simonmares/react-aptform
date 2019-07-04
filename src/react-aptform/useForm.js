@@ -41,6 +41,8 @@ function createLocalState(form: Form): LocalState {
           onBlur: form.onBlur.bind(form),
         };
       },
+      is: form.is.bind(form),
+      reset: form.reset.bind(form),
     },
     inputs: mapObjVals(form.inputInstances, (input) => {
       return {

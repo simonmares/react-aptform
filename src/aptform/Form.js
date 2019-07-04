@@ -37,6 +37,7 @@ type FormState = {|
 |};
 
 type IsEnum = 'valid' | 'pristine' | 'validating';
+type SetEnum = 'submit';
 
 type InitialValues = { [InputNames]: InputValue };
 
@@ -48,6 +49,8 @@ type FormBaseProps = {|
   inputs: { [string]: InputConfig },
   config?: AptConfig,
   initialValues?: InitialValues,
+  // NoteTypeLater: Object
+  onSubmit?: (Object) => Promise<boolean>,
 |};
 
 type InternalProps = {|
@@ -81,17 +84,7 @@ class Form {
   cleanupFn: () => void;
 
   constructor(props: FormProps) {
-    this.state = {
-      // own state
-      valid: undefined,
-      submit: 'idle',
-      // submit or form-wide validation error
-      error: '',
-      // based on inputs
-      pristine: true,
-      // review: ....
-      changing: false,
-    };
+    this.state = this._getInitialState();
     this.listeners = [];
     this.props = props;
     this.inputInstances = this._createInputInstances(props.inputs);
@@ -103,7 +96,7 @@ class Form {
 
   // event handlers
 
-  onSubmit(e: Event) {
+  onSubmit(e: Event): void {
     // Do not submit the form
     e.preventDefault();
 
@@ -148,7 +141,7 @@ class Form {
 
   is(s: IsEnum): boolean {
     if (s === 'valid') {
-      return this.state.valid === true;
+      return this.state.valid === true && this._iterInputs().some((_) => !_.is('valid'));
     }
     if (s === 'pristine') {
       return this.state.pristine === true;
@@ -162,8 +155,26 @@ class Form {
   }
 
   // Imperative API...
-  submit() {
-    console.log('Form submitted');
+  submit(): void {
+    this._updateState({ submit: 'pending' });
+
+    let values = {};
+    for (const input of this._iterInputs()) {
+      values[input.props.name] = input.state.value;
+    }
+
+    const { onSubmit } = this.props;
+    if (onSubmit) {
+      onSubmit(values).then((result: boolean) => {
+        this._updateState({ submit: result ? 'done' : 'failed' });
+      });
+    }
+  }
+
+  reset() {
+    // console.log('reset!');
+    // const { inputs } = this.props;
+    this.state = this._getInitialState();
   }
 
   subscribe(fn: ListenerFunction): UnsubscribeFunction {
@@ -173,6 +184,15 @@ class Form {
       this.listeners = this.listeners.filter((f) => f !== fn);
     };
   }
+
+  // set(k: SetEnum, opts: any): void {
+  //   // if (k === 'submit') {
+  //   //   this._updateState({ submit: opts });
+  //   //   return;
+  //   // }
+  //   // This tells flow we intend to cover all possible values of k.
+  //   (k: empty); // eslint-disable-line no-unused-expressions
+  // }
 
   setup() {
     if (this.isSetup) {
@@ -213,6 +233,24 @@ class Form {
   //
   // Private helpers
   //
+
+  _iterInputs(): Input[] {
+    return Object.keys(this.inputInstances).map((_) => this.inputInstances[_]);
+  }
+
+  _getInitialState() {
+    return {
+      // own state
+      valid: undefined,
+      submit: 'idle',
+      // submit or form-wide validation error
+      error: '',
+      // based on inputs
+      pristine: true,
+      // review: ....
+      changing: false,
+    };
+  }
 
   // NotePrototype(simon): promise?
   _updateState(state: $Shape<FormState>) {
