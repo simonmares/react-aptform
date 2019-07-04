@@ -156,5 +156,24 @@ describe('reset', () => {
     expect(unit.state).toEqual(initialState);
   });
 
-  test('reset => inputs state', () => {});
+  test.skip('reset => inputs state', () => {});
+});
+
+describe('registerForm', () => {
+  test('registerForm => submit values are nested', () => {
+    const rootForm = createUnit({ name: 'landing', inputs: { notes: {} } });
+    const loginForm = createUnit({ name: 'login', inputs: { username: {}, password: {} } });
+    const addressForm = createUnit({ name: 'address', inputs: { address: {} } });
+
+    rootForm.registerForm(loginForm);
+    rootForm.registerForm(addressForm);
+
+    const submitValues = rootForm.submit();
+
+    expect(submitValues).toEqual({
+      login: { username: '', password: '' },
+      address: { address: '' },
+      notes: '',
+    });
+  });
 });

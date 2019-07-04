@@ -40,17 +40,19 @@ type IsEnum = 'valid' | 'pristine' | 'validating';
 type SetEnum = 'submit';
 
 type InitialValues = { [InputNames]: InputValue };
+type SubmitValues = Object;
 
 export type AptConfig = {|
   initiallyValid: boolean | typeof undefined,
 |};
 
 type FormBaseProps = {|
+  name: string,
   inputs: { [string]: InputConfig },
   config?: AptConfig,
   initialValues?: InitialValues,
   // NoteTypeLater: Object
-  onSubmit?: (Object) => Promise<boolean>,
+  onSubmit?: (SubmitValues) => Promise<boolean>,
 |};
 
 type InternalProps = {|
@@ -79,6 +81,7 @@ class Form {
   state: FormState;
   inputInstances: { [InputNames]: Input };
   listeners: Array<ListenerFunction>;
+  subforms: Array<Form>;
 
   isSetup: boolean;
   cleanupFn: () => void;
@@ -86,6 +89,7 @@ class Form {
   constructor(props: FormProps) {
     this.state = this._getInitialState();
     this.listeners = [];
+    this.subforms = [];
     this.props = props;
     this.inputInstances = this._createInputInstances(props.inputs);
   }
@@ -155,12 +159,13 @@ class Form {
   }
 
   // Imperative API...
-  submit(): void {
+  submit(): SubmitValues {
     this._updateState({ submit: 'pending' });
 
-    let values = {};
-    for (const input of this._iterInputs()) {
-      values[input.props.name] = input.state.value;
+    let values = this._dumpSubmitValues();
+
+    for (const subform of this.subforms) {
+      values[subform.props.name] = subform._dumpSubmitValues();
     }
 
     const { onSubmit } = this.props;
@@ -169,6 +174,8 @@ class Form {
         this._updateState({ submit: result ? 'done' : 'failed' });
       });
     }
+
+    return values;
   }
 
   reset() {
@@ -221,6 +228,13 @@ class Form {
     return cleanupFn;
   }
 
+  registerForm = (f: Form) => {
+    this.subforms.push(f);
+    return () => {
+      this.subforms = this.subforms.filter((_) => _ === f);
+    };
+  };
+
   //
   // For tests only
   //
@@ -233,6 +247,14 @@ class Form {
   //
   // Private helpers
   //
+
+  _dumpSubmitValues() {
+    let res = {};
+    for (const input of this._iterInputs()) {
+      res[input.props.name] = input.state.value;
+    }
+    return res;
+  }
 
   _iterInputs(): Input[] {
     return Object.keys(this.inputInstances).map((_) => this.inputInstances[_]);

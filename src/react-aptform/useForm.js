@@ -18,7 +18,7 @@ type useFormType = {|
   form: any,
   inputs: any,
   // alternatives: API, methods, apt (imperative API)
-  aptform: any,
+  aptform: Form,
 |};
 
 type LocalState = useFormType;
@@ -50,7 +50,7 @@ function createLocalState(form: Form): LocalState {
         getPassProps: input.getPassProps,
       };
     }),
-    aptform: {},
+    aptform: form,
   };
 }
 
