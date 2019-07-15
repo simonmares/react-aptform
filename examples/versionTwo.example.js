@@ -185,4 +185,5 @@ export default {
   basic: () => <BasicExample />,
   nested: () => <NestedExample />,
   style: () => <StyleExample />,
+  gist: () => <GistExample />,
 };
