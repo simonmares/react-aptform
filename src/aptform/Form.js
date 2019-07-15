@@ -231,7 +231,7 @@ class Form {
   registerForm = (f: Form) => {
     this.subforms.push(f);
     return () => {
-      this.subforms = this.subforms.filter((_) => _ === f);
+      this.subforms = this.subforms.filter((_) => _ !== f);
     };
   };
 

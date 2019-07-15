@@ -176,4 +176,15 @@ describe('registerForm', () => {
       notes: '',
     });
   });
+
+  test('registerForm: register => unregister', () => {
+    const rootForm = createUnit();
+    const loginForm = createUnit({ name: 'login', inputs: { username: {}, password: {} } });
+    const unregisterFn = rootForm.registerForm(loginForm);
+
+    expect(rootForm.subforms).toContain(loginForm);
+    expect(typeof unregisterFn).toEqual('function');
+    unregisterFn();
+    expect(rootForm.subforms).not.toContain(loginForm);
+  });
 });
