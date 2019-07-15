@@ -160,7 +160,7 @@ class Form {
 
   // Imperative API...
   submit(): SubmitValues {
-    this._updateState({ submit: 'pending' });
+    this._setState({ submit: 'pending' });
 
     let values = this._dumpSubmitValues();
 
@@ -171,7 +171,7 @@ class Form {
     const { onSubmit } = this.props;
     if (onSubmit) {
       onSubmit(values).then((result: boolean) => {
-        this._updateState({ submit: result ? 'done' : 'failed' });
+        this._setState({ submit: result ? 'done' : 'failed' });
       });
     }
 
@@ -180,8 +180,7 @@ class Form {
 
   reset() {
     // console.log('reset!');
-    // const { inputs } = this.props;
-    this.state = this._getInitialState();
+    this._setState(this._getInitialState());
   }
 
   subscribe(fn: ListenerFunction): UnsubscribeFunction {
@@ -194,7 +193,7 @@ class Form {
 
   // set(k: SetEnum, opts: any): void {
   //   // if (k === 'submit') {
-  //   //   this._updateState({ submit: opts });
+  //   //   this._setState({ submit: opts });
   //   //   return;
   //   // }
   //   // This tells flow we intend to cover all possible values of k.
@@ -275,7 +274,7 @@ class Form {
   }
 
   // NotePrototype(simon): promise?
-  _updateState(state: $Shape<FormState>) {
+  _setState(state: $Shape<FormState>) {
     this.state = {
       ...this.state,
       ...state,
@@ -286,7 +285,7 @@ class Form {
 
   _onInputChange(inst: Input) {
     // NotePrototype(simon): dump input states?
-    this._updateState({});
+    this._setState({});
   }
 
   _notifyListeners() {

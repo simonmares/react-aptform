@@ -145,7 +145,7 @@ describe('reset', () => {
       expect(val).not.toEqual(initialState[key]);
     }
 
-    unit._updateState(changedState);
+    unit._setState(changedState);
 
     // verify changes set
     expect(unit.state).toEqual(changedState);
