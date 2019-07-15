@@ -110,6 +110,50 @@ function NestedExample() {
 // <span>{form.isValid() ? '' : 'Please fill all fields'}</span>
 // {form.submitFailed ? form.submitErrorText : ''}
 
+function GistExample() {
+  const onSubmit = (values) => {
+    console.log('values', values);
+    return Promise.resolve(true);
+  };
+  const { inputs, form } = useForm({
+    name: 'user',
+    inputs: {
+      name: { required: true },
+      surname: { required: true },
+    },
+    onSubmit,
+  });
+  const { name, surname } = inputs;
+  const formInvalid = !form.is('valid');
+  return (
+    <form onBlur={form.onBlur} onFocus={form.onFocus} onSubmit={form.onSubmit}>
+      <fieldset>
+        <label htmlFor="name_id">Name</label>
+        <input
+          type="text"
+          id="name_id"
+          value={name.value}
+          name={name.name}
+          onChange={name.onChange}
+        />
+      </fieldset>
+      <fieldset>
+        <label htmlFor="surname_id">Surname</label>
+        <input
+          type="text"
+          id="surname_id"
+          value={surname.value}
+          name={surname.name}
+          onChange={surname.onChange}
+        />
+      </fieldset>
+      <button type="submit" disable={String(formInvalid)}>
+        Submit
+      </button>
+    </form>
+  );
+}
+
 function BasicExample() {
   const submitValues = useRef({});
 
