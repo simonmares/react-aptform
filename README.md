@@ -118,7 +118,7 @@ function GistExample() {
           onChange={surname.onChange}
         />
       </fieldset>
-      <button type="submit" disable={String(formInvalid)}>
+      <button type="submit" disabled={formInvalid}>
         Submit
       </button>
     </form>

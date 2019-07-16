@@ -147,7 +147,7 @@ function GistExample() {
           onChange={surname.onChange}
         />
       </fieldset>
-      <button type="submit" disable={String(formInvalid)}>
+      <button type="submit" disabled={formInvalid}>
         Submit
       </button>
     </form>
@@ -187,7 +187,7 @@ function BasicExample() {
           <label htmlFor="surname_id">Surname</label>
           <input type="text" id="surname_id" {...surname.getPassProps()} />
         </fieldset>
-        <button type="submit" disable={String(formInvalid)}>
+        <button type="submit" disabled={formInvalid}>
           Submit
         </button>
       </form>
